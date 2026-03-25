@@ -293,6 +293,13 @@
       margin-bottom: 12px;
     }
 
+    .results-best {
+      font-size: calc(var(--base-font) * 0.88);
+      color: rgba(31, 62, 119, 0.55);
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
     .results-message {
       color: var(--bm-blue);
       margin-bottom: 24px;
@@ -445,11 +452,29 @@
 
     const BADGES = ['A', 'B', 'C'];
     const BADGE_CLASSES = ['badge-a', 'badge-b', 'badge-c'];
+    const BEST_SCORE_KEY = 'fishQuizBestScore';
 
     let currentQuestion = 0;
     let score = 0;
     let answered = false;
-    let answerLog = []; // { correct: bool } per question
+    let answerLog = [];
+    let activeQuizData = [];
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildActiveQuiz() {
+      activeQuizData = quizData.map(q => ({
+        ...q,
+        answers: shuffle(q.answers)
+      }));
+    }
 
     function updateProgress() {
       const pct = (currentQuestion / quizData.length) * 100;
@@ -464,7 +489,7 @@
       updateProgress();
 
       const content = document.getElementById('quiz-content');
-      const q = quizData[currentQuestion];
+      const q = activeQuizData[currentQuestion];
 
       // Build card using DOM to avoid innerHTML XSS risks
       const card = document.createElement('div');
@@ -571,7 +596,7 @@
         resultMsg.textContent = '✗ Incorrect. The correct answer is highlighted.';
       }
 
-      answerLog.push({ correct: isCorrect, question: quizData[currentQuestion].question });
+      answerLog.push({ correct: isCorrect, question: activeQuizData[currentQuestion].question });
       nextBtn.disabled = false;
 
       // Update live score in progress bar
@@ -608,6 +633,12 @@
         message = 'Nice try! Review the topics and give it another go.';
       }
 
+      // Update best score in localStorage
+      const prevBest = parseInt(localStorage.getItem(BEST_SCORE_KEY) ?? '0', 10);
+      const newBest = Math.max(prevBest, score);
+      localStorage.setItem(BEST_SCORE_KEY, newBest);
+      const isNewBest = score > prevBest;
+
       const content = document.getElementById('quiz-content');
       content.innerHTML = '';
 
@@ -623,6 +654,7 @@
 
       const pctEl = document.createElement('div');
       pctEl.className = 'results-percent';
+      pctEl.style.color = percentage < 50 ? '#dd6928' : '#0471ad';
       pctEl.textContent = `${percentage}%`;
       card.appendChild(pctEl);
 
@@ -630,6 +662,14 @@
       msgEl.className = 'results-message';
       msgEl.textContent = message;
       card.appendChild(msgEl);
+
+      const bestEl = document.createElement('div');
+      bestEl.className = 'results-best';
+      bestEl.textContent = isNewBest && newBest > 0
+        ? `New best score: ${newBest}/${quizData.length}`
+        : `Best score: ${newBest}/${quizData.length}`;
+      if (isNewBest && newBest > 0) bestEl.style.color = '#97d130';
+      card.appendChild(bestEl);
 
       // Per-question breakdown
       const breakdown = document.createElement('div');
@@ -668,6 +708,7 @@
       score = 0;
       answered = false;
       answerLog = [];
+      buildActiveQuiz();
       renderQuestion();
     }
 
@@ -682,6 +723,7 @@
     });
 
     // Initialize
+    buildActiveQuiz();
     renderQuestion();
   </script>
 </body>
