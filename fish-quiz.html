@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fish Health Quiz</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bm-blue: #1f3e77;
+      --ocean: #0471ad;
+      --sky: #92cee8;
+      --crisp: #c3e4ef;
+      --leaf: #97d130;
+      --wheat: #eab318;
+      --shrimp: #dd6928;
+      --card-shadow: 0 20px 40px rgba(31, 62, 119, 0.15);
+      --hover-shadow: 0 14px 26px rgba(4, 113, 173, 0.14);
+      --radius: 24px;
+      --base-font: 16px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--crisp);
+    }
+
+    .quiz-wrapper {
+      width: 100vw;
+      max-width: none;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+      margin: 0;
+      margin-left: calc(-50vw + 50%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: var(--base-font);
+      background: var(--crisp);
+    }
+
+    .quiz-header {
+      text-align: center;
+    }
+
+    .quiz-title {
+      font-size: calc(var(--base-font) * 2);
+      font-weight: 700;
+      color: var(--bm-blue);
+      margin: 0 0 8px 0;
+    }
+
+    .quiz-subtitle {
+      font-size: calc(var(--base-font) * 0.95);
+      color: rgba(31, 62, 119, 0.7);
+      margin: 0;
+    }
+
+    /* Progress bar */
+    .progress-container {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: calc(var(--base-font) * 0.8);
+      color: var(--bm-blue);
+      font-weight: 600;
+      margin-bottom: 6px;
+      opacity: 0.75;
+    }
+
+    .progress-track {
+      height: 6px;
+      background: rgba(31, 62, 119, 0.15);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--ocean);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* Question card */
+    .question-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: var(--card-shadow);
+      animation: slideIn 0.4s ease-out;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .question-number {
+      font-size: calc(var(--base-font) * 0.85);
+      color: var(--ocean);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .question-text {
+      font-size: calc(var(--base-font) * 1.25);
+      font-weight: 700;
+      color: var(--bm-blue);
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+
+    .answers-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Answer options — keyboard-navigable buttons */
+    .answer-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #f8f9fa;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+      text-align: left;
+      width: 100%;
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    .answer-option:hover:not(:disabled) {
+      background: #f0f4f8;
+      border-color: var(--sky);
+      transform: translateX(4px);
+    }
+
+    .answer-option:focus-visible {
+      outline: 3px solid var(--ocean);
+      outline-offset: 2px;
+    }
+
+    .answer-option:disabled {
+      cursor: not-allowed;
+      opacity: 0.85;
+    }
+
+    .answer-option.correct {
+      background: rgba(151, 209, 48, 0.12);
+      border-color: var(--leaf);
+    }
+
+    .answer-option.incorrect {
+      background: rgba(221, 105, 40, 0.1);
+      border-color: var(--shrimp);
+    }
+
+    .answer-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-weight: 700;
+      color: white;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .badge-a { background: var(--leaf); }
+    .badge-b { background: var(--ocean); }
+    .badge-c { background: var(--shrimp); }
+
+    .answer-text {
+      flex: 1;
+      color: var(--bm-blue);
+      font-weight: 500;
+    }
+
+    .feedback-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Keyboard hint */
+    .keyboard-hint {
+      font-size: calc(var(--base-font) * 0.75);
+      color: rgba(31, 62, 119, 0.45);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    /* Result message */
+    .result-message {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: calc(var(--base-font) * 0.95);
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .result-message.correct {
+      background: rgba(151, 209, 48, 0.15);
+      color: #4a6800;
+    }
+
+    .result-message.incorrect {
+      background: rgba(221, 105, 40, 0.15);
+      color: #8b4000;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* Next button */
+    .next-button {
+      background: var(--ocean);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: calc(var(--base-font) * 0.95);
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      margin-top: 16px;
+      align-self: center;
+      font-family: inherit;
+    }
+
+    .next-button:hover:not(:disabled) {
+      background: var(--bm-blue);
+      transform: translateY(-2px);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .next-button:focus-visible {
+      outline: 3px solid var(--ocean);
+      outline-offset: 2px;
+    }
+
+    .next-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Results screen */
+    .results-screen {
+      text-align: center;
+    }
+
+    .results-score {
+      font-size: calc(var(--base-font) * 3.5);
+      font-weight: 700;
+      color: var(--leaf);
+      margin-bottom: 4px;
+      line-height: 1;
+    }
+
+    .results-percent {
+      font-size: calc(var(--base-font) * 1.4);
+      color: var(--ocean);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .results-message {
+      color: var(--bm-blue);
+      margin-bottom: 24px;
+      font-size: calc(var(--base-font) * 1.05);
+      line-height: 1.5;
+    }
+
+    /* Per-question result summary */
+    .results-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+
+    .breakdown-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: calc(var(--base-font) * 0.88);
+      font-weight: 500;
+    }
+
+    .breakdown-item.correct {
+      background: rgba(151, 209, 48, 0.1);
+      color: #4a6800;
+    }
+
+    .breakdown-item.incorrect {
+      background: rgba(221, 105, 40, 0.1);
+      color: #8b4000;
+    }
+
+    .breakdown-icon {
+      flex-shrink: 0;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    .restart-button {
+      background: var(--leaf);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: calc(var(--base-font) * 1);
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      font-family: inherit;
+    }
+
+    .restart-button:hover {
+      background: #7fbf00;
+      transform: translateY(-2px);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .restart-button:focus-visible {
+      outline: 3px solid var(--leaf);
+      outline-offset: 2px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .quiz-wrapper { padding: 16px; }
+      .question-card { padding: 20px; }
+      .quiz-title { font-size: calc(var(--base-font) * 1.6); }
+      .question-text { font-size: calc(var(--base-font) * 1.1); }
+      .keyboard-hint { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+</head>
+<body>
+  <div class="quiz-wrapper">
+    <header class="quiz-header">
+      <h1 class="quiz-title">Fish Health Quiz</h1>
+      <p class="quiz-subtitle">Test your knowledge about fish health and nutrition</p>
+    </header>
+
+    <div class="progress-container" id="progress-container" aria-hidden="true">
+      <div class="progress-label">
+        <span id="progress-text">Question 1 of 5</span>
+        <span id="progress-score">Score: 0</span>
+      </div>
+      <div class="progress-track" role="progressbar" aria-label="Quiz progress">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <main id="quiz-content" aria-live="polite" aria-atomic="true">
+      <!-- Rendered by JS -->
+    </main>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "What is the most common sign of poor water quality in fish tanks?",
+        answers: [
+          { text: "Fish gasping at the surface", correct: true },
+          { text: "Fish swimming too fast", correct: false },
+          { text: "Fish staying in one spot", correct: false }
+        ]
+      },
+      {
+        question: "Which nutrient is essential for fish bone development?",
+        answers: [
+          { text: "Vitamin A", correct: false },
+          { text: "Calcium and Phosphorus", correct: true },
+          { text: "Beta-carotene", correct: false }
+        ]
+      },
+      {
+        question: "What water temperature range is ideal for most tropical fish?",
+        answers: [
+          { text: "15–20\u00b0C (59–68\u00b0F)", correct: false },
+          { text: "24–28\u00b0C (75–82\u00b0F)", correct: true },
+          { text: "30–35\u00b0C (86–95\u00b0F)", correct: false }
+        ]
+      },
+      {
+        question: "Which disease is caused by parasites on fish skin?",
+        answers: [
+          { text: "Ich (White spot disease)", correct: true },
+          { text: "Fin rot", correct: false },
+          { text: "Dropsy", correct: false }
+        ]
+      },
+      {
+        question: "What is the optimal pH range for freshwater fish?",
+        answers: [
+          { text: "4.0–5.0", correct: false },
+          { text: "6.5–7.5", correct: true },
+          { text: "8.5–9.0", correct: false }
+        ]
+      }
+    ];
+
+    const BADGES = ['A', 'B', 'C'];
+    const BADGE_CLASSES = ['badge-a', 'badge-b', 'badge-c'];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+    let answerLog = []; // { correct: bool } per question
+
+    function updateProgress() {
+      const pct = (currentQuestion / quizData.length) * 100;
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('progress-text').textContent =
+        `Question ${currentQuestion + 1} of ${quizData.length}`;
+      document.getElementById('progress-score').textContent = `Score: ${score}`;
+    }
+
+    function renderQuestion() {
+      answered = false;
+      updateProgress();
+
+      const content = document.getElementById('quiz-content');
+      const q = quizData[currentQuestion];
+
+      // Build card using DOM to avoid innerHTML XSS risks
+      const card = document.createElement('div');
+      card.className = 'question-card';
+
+      const qNum = document.createElement('div');
+      qNum.className = 'question-number';
+      qNum.textContent = `Question ${currentQuestion + 1} of ${quizData.length}`;
+      card.appendChild(qNum);
+
+      const qText = document.createElement('div');
+      qText.className = 'question-text';
+      qText.textContent = q.question;
+      card.appendChild(qText);
+
+      const answersEl = document.createElement('div');
+      answersEl.className = 'answers-container';
+      answersEl.setAttribute('role', 'group');
+      answersEl.setAttribute('aria-label', 'Answer choices');
+
+      q.answers.forEach((answer, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'answer-option';
+        btn.dataset.index = i;
+        btn.dataset.correct = answer.correct;
+        btn.setAttribute('aria-label', `${BADGES[i]}: ${answer.text}`);
+
+        const badge = document.createElement('div');
+        badge.className = `answer-badge ${BADGE_CLASSES[i]}`;
+        badge.textContent = BADGES[i];
+        badge.setAttribute('aria-hidden', 'true');
+
+        const text = document.createElement('div');
+        text.className = 'answer-text';
+        text.textContent = answer.text;
+
+        const icon = document.createElement('div');
+        icon.className = 'feedback-icon';
+        icon.setAttribute('aria-hidden', 'true');
+
+        btn.appendChild(badge);
+        btn.appendChild(text);
+        btn.appendChild(icon);
+        btn.addEventListener('click', () => handleAnswer(btn));
+        answersEl.appendChild(btn);
+      });
+
+      card.appendChild(answersEl);
+
+      const hint = document.createElement('div');
+      hint.className = 'keyboard-hint';
+      hint.setAttribute('aria-hidden', 'true');
+      hint.textContent = 'Press A, B, or C to answer \u2022 Enter to continue';
+      card.appendChild(hint);
+
+      const resultMsg = document.createElement('div');
+      resultMsg.id = 'result-message';
+      card.appendChild(resultMsg);
+
+      const nextBtn = document.createElement('button');
+      nextBtn.type = 'button';
+      nextBtn.id = 'next-btn';
+      nextBtn.className = 'next-button';
+      nextBtn.textContent = currentQuestion < quizData.length - 1
+        ? 'Next Question'
+        : 'See Results';
+      nextBtn.disabled = true;
+      nextBtn.addEventListener('click', nextQuestion);
+      card.appendChild(nextBtn);
+
+      content.innerHTML = '';
+      content.appendChild(card);
+
+      // Focus first answer for keyboard users
+      answersEl.querySelector('.answer-option')?.focus();
+    }
+
+    function handleAnswer(selectedBtn) {
+      if (answered) return;
+      answered = true;
+
+      const isCorrect = selectedBtn.dataset.correct === 'true';
+      const allOptions = document.querySelectorAll('.answer-option');
+      const resultMsg = document.getElementById('result-message');
+      const nextBtn = document.getElementById('next-btn');
+
+      allOptions.forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.correct === 'true') {
+          btn.classList.add('correct');
+          btn.querySelector('.feedback-icon').textContent = '✓';
+        }
+      });
+
+      if (isCorrect) {
+        score++;
+        resultMsg.className = 'result-message correct';
+        resultMsg.textContent = '✓ Correct! Great job!';
+      } else {
+        selectedBtn.classList.add('incorrect');
+        selectedBtn.querySelector('.feedback-icon').textContent = '✗';
+        resultMsg.className = 'result-message incorrect';
+        resultMsg.textContent = '✗ Incorrect. The correct answer is highlighted.';
+      }
+
+      answerLog.push({ correct: isCorrect, question: quizData[currentQuestion].question });
+      nextBtn.disabled = false;
+
+      // Update live score in progress bar
+      document.getElementById('progress-score').textContent = `Score: ${score}`;
+
+      // Move focus to next button so Enter key continues the quiz
+      nextBtn.focus();
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      // Fill progress bar to 100% on completion
+      document.getElementById('progress-fill').style.width = '100%';
+      document.getElementById('progress-text').textContent = 'Quiz complete!';
+
+      const percentage = Math.round((score / quizData.length) * 100);
+
+      let message;
+      if (percentage === 100) {
+        message = "Perfect score! You're a fish health expert! 🎉";
+      } else if (percentage >= 80) {
+        message = 'Excellent! You really know your stuff!';
+      } else if (percentage >= 60) {
+        message = 'Good effort! A little more study and you\'ll ace it.';
+      } else {
+        message = 'Nice try! Review the topics and give it another go.';
+      }
+
+      const content = document.getElementById('quiz-content');
+      content.innerHTML = '';
+
+      const card = document.createElement('div');
+      card.className = 'question-card results-screen';
+
+      const scoreEl = document.createElement('div');
+      scoreEl.className = 'results-score';
+      scoreEl.setAttribute('aria-label', `Score: ${score} out of ${quizData.length}`);
+      scoreEl.textContent = `${score}/${quizData.length}`;
+      card.appendChild(scoreEl);
+
+      const pctEl = document.createElement('div');
+      pctEl.className = 'results-percent';
+      pctEl.textContent = `${percentage}%`;
+      card.appendChild(pctEl);
+
+      const msgEl = document.createElement('div');
+      msgEl.className = 'results-message';
+      msgEl.textContent = message;
+      card.appendChild(msgEl);
+
+      // Per-question breakdown
+      const breakdown = document.createElement('div');
+      breakdown.className = 'results-breakdown';
+      answerLog.forEach((entry, i) => {
+        const item = document.createElement('div');
+        item.className = `breakdown-item ${entry.correct ? 'correct' : 'incorrect'}`;
+
+        const icon = document.createElement('span');
+        icon.className = 'breakdown-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = entry.correct ? '✓' : '✗';
+
+        const text = document.createElement('span');
+        text.textContent = `Q${i + 1}: ${entry.question}`;
+
+        item.appendChild(icon);
+        item.appendChild(text);
+        breakdown.appendChild(item);
+      });
+      card.appendChild(breakdown);
+
+      const restartBtn = document.createElement('button');
+      restartBtn.type = 'button';
+      restartBtn.className = 'restart-button';
+      restartBtn.textContent = 'Restart Quiz';
+      restartBtn.addEventListener('click', restartQuiz);
+      card.appendChild(restartBtn);
+
+      content.appendChild(card);
+      restartBtn.focus();
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      answered = false;
+      answerLog = [];
+      renderQuestion();
+    }
+
+    // Keyboard shortcuts: A/B/C selects an answer, Enter submits
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.toUpperCase();
+      if (['A', 'B', 'C'].includes(key) && !answered) {
+        const index = key.charCodeAt(0) - 65; // A=0, B=1, C=2
+        const option = document.querySelectorAll('.answer-option')[index];
+        if (option && !option.disabled) option.click();
+      }
+    });
+
+    // Initialize
+    renderQuestion();
+  </script>
+</body>
+</html>
