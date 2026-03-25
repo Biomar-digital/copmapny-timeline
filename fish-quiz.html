@@ -288,6 +288,10 @@
       line-height: 1;
     }
 
+    .results-score.poor {
+      color: var(--shrimp);
+    }
+
     .results-percent {
       font-size: calc(var(--base-font) * 1.4);
       color: var(--ocean);
@@ -617,7 +621,7 @@
       card.className = 'question-card results-screen';
 
       const scoreEl = document.createElement('div');
-      scoreEl.className = 'results-score';
+      scoreEl.className = 'results-score' + (percentage < 50 ? ' poor' : '');
       scoreEl.setAttribute('aria-label', `Score: ${score} out of ${quizData.length}`);
       scoreEl.textContent = `${score}/${quizData.length}`;
       card.appendChild(scoreEl);
