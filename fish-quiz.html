@@ -616,7 +616,7 @@
 
       const scoreEl = document.createElement('div');
       scoreEl.className = 'results-score';
-      scoreEl.style.color = percentage < 50 ? 'var(--shrimp)' : 'var(--leaf)';
+      scoreEl.style.color = percentage < 50 ? '#dd6928' : '#97d130';
       scoreEl.setAttribute('aria-label', `Score: ${score} out of ${quizData.length}`);
       scoreEl.textContent = `${score}/${quizData.length}`;
       card.appendChild(scoreEl);
