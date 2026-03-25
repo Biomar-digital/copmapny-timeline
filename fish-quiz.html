@@ -24,12 +24,8 @@
       --base-font: 16px;
     }
 
-    *, *::before, *::after {
+    .quiz-wrapper, .quiz-wrapper *, .quiz-wrapper *::before, .quiz-wrapper *::after {
       box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
     }
 
     .quiz-wrapper {
@@ -712,8 +708,8 @@
       renderQuestion();
     }
 
-    // Keyboard shortcuts: A/B/C selects an answer, Enter submits
-    document.addEventListener('keydown', (e) => {
+    // Keyboard shortcuts: A/B/C selects an answer — only when focus is inside the quiz
+    document.getElementById('quiz-content').closest('.quiz-wrapper').addEventListener('keydown', (e) => {
       const key = e.key.toUpperCase();
       if (['A', 'B', 'C'].includes(key) && !answered) {
         const index = key.charCodeAt(0) - 65; // A=0, B=1, C=2
