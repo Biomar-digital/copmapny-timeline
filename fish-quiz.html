@@ -30,22 +30,20 @@
 
     body {
       margin: 0;
-      background: var(--crisp);
     }
 
     .quiz-wrapper {
-      width: 100vw;
-      max-width: none;
-      padding: 24px;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 24px;
       display: flex;
       flex-direction: column;
       gap: 24px;
       align-items: center;
-      margin: 0;
-      margin-left: calc(-50vw + 50%);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: var(--base-font);
       background: var(--crisp);
+      border-radius: var(--radius);
     }
 
     .quiz-header {
@@ -286,10 +284,6 @@
       color: var(--leaf);
       margin-bottom: 4px;
       line-height: 1;
-    }
-
-    .results-score.poor {
-      color: var(--shrimp);
     }
 
     .results-percent {
@@ -621,7 +615,8 @@
       card.className = 'question-card results-screen';
 
       const scoreEl = document.createElement('div');
-      scoreEl.className = 'results-score' + (percentage < 50 ? ' poor' : '');
+      scoreEl.className = 'results-score';
+      scoreEl.style.color = percentage < 50 ? 'var(--shrimp)' : 'var(--leaf)';
       scoreEl.setAttribute('aria-label', `Score: ${score} out of ${quizData.length}`);
       scoreEl.textContent = `${score}/${quizData.length}`;
       card.appendChild(scoreEl);
