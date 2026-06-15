@@ -90,20 +90,20 @@ def _draw_cover(c, doc):
     avail = B.PAGE_W - B.MARGIN_L - 30
     size, lines = _fit_title(c, policy.title, avail, 70)
     n = len(lines)
-    last_baseline = B.COVER_RULE_Y + 60      # bottom title line, above the rule
-    c.setFillColor(B.CRISP_BLUE)
+    last_baseline = B.COVER_RULE_Y + 65.6    # bottom title line, matches template
+    c.setFillColor(B.COVER_TITLE)
     c.setFont(B.F_BOLD, size)
     for i, ln in enumerate(lines):
         c.drawString(B.MARGIN_L, last_baseline + (n - 1 - i) * size * 1.02, ln)
     top_title = last_baseline + (n - 1) * size * 1.02
 
     # Year sits above the title block.
-    c.setFillColor(B.SKY_BLUE)
+    c.setFillColor(B.COVER_YEAR)
     c.setFont(B.F_BOLD, 60)
-    c.drawString(B.MARGIN_L, top_title + 78, policy.year)
+    c.drawString(B.MARGIN_L, top_title + 84.3, policy.year)
 
     # Address block (bottom-left, below the rule)
-    c.setFillColor(B.CRISP_BLUE)
+    c.setFillColor(B.COVER_ADDR)
     ay = 205
     c.setFont(B.F_BOLD, 10)
     c.drawString(B.MARGIN_L, ay, B.ADDRESS_LINES[0])
@@ -144,11 +144,11 @@ def _draw_logo(c, path=B.LOGO):
 
 def _draw_content_furniture(c, doc):
     policy = doc._policy
-    # Running header (top-left)
+    # Running header (top-left) - line gap 13 pt to match the template
     c.setFillColor(B.BIOMAR_BLUE)
     c.setFont(B.F_REGULAR, 8)
-    c.drawString(B.MARGIN_L, B.PAGE_H - 49, B.COMPANY)
-    c.drawString(B.MARGIN_L, B.PAGE_H - 49 - 11, policy.title)
+    c.drawString(B.MARGIN_L, B.PAGE_H - 47, B.COMPANY)
+    c.drawString(B.MARGIN_L, B.PAGE_H - 47 - 13, policy.title)
     _draw_logo(c)
     # Footer (centred)
     c.setFont(B.F_REGULAR, 8)
@@ -157,10 +157,17 @@ def _draw_content_furniture(c, doc):
 
 def _draw_back_cover(c, doc):
     policy = doc._policy
+    # The official empty back cover already has the pellet artwork, the logo,
+    # the tagline and the URL baked in; we only overlay the optional card.
     c.drawImage(ImageReader(B.COVER_BG_BACK), 0, 0, B.PAGE_W, B.PAGE_H,
                 preserveAspectRatio=False, mask=None)
+    if any([policy.approval_date, policy.owner, policy.approver]):
+        _draw_version_card(c, policy)
 
-    # White "Version history / Owner and approver" card near the top.
+
+def _draw_version_card(c, policy):
+    # White "Version history / Owner and approver" card near the top, drawn on
+    # top of the back cover only when approval data is supplied.
     cw, ch = 404.0, 104.0
     cx = (B.PAGE_W - cw) / 2.0
     cy = B.PAGE_H - 150 - ch
@@ -178,10 +185,10 @@ def _draw_back_cover(c, doc):
     c.line(cx + 12, head_y - 9, cx + cw - 12, head_y - 9)   # under headers
     c.line(col2, cy + 10, col2, head_y - 9)                 # column divider
 
-    rows_l = [(policy.version, policy.year if not policy.approval_date else policy.approval_date),
+    rows_l = [(policy.version, policy.approval_date or "—"),
               ("Approval date:", policy.approval_date or "—")]
     rows_r = [("Owner:", policy.owner or "—"),
-              ("Approver:", policy.approver or "—")]
+              ("Approver:", policy.approver or "Executive Committee")]
     c.setFont(B.F_REGULAR, 8)
     ry = head_y - 26
     for (la, va), (lb, vb) in zip(rows_l, rows_r):
@@ -191,18 +198,63 @@ def _draw_back_cover(c, doc):
         c.line(cx + 12, ry - 8, cx + cw - 12, ry - 8)
         ry -= 26
 
-    # Logo + tagline + url, centred in the lower half (logo art on navy).
-    lw, lh = 150.0, 78.0
-    c.drawImage(ImageReader(B.LOGO_ART), (B.PAGE_W - lw) / 2.0, 250, lw, lh,
-                preserveAspectRatio=True, mask="auto")
-    c.setFillColor(B.WHITE)
-    c.setFont(B.F_BOLD, 17)
-    ty = 232
-    for line in B.TAGLINE:
-        c.drawCentredString(B.PAGE_W / 2.0, ty, line)
-        ty -= 21
-    c.setFont(B.F_BOLD, 13)
-    c.drawCentredString(B.PAGE_W / 2.0, 120, B.WEBSITE)
+
+def _draw_signatures(c, doc):
+    policy = doc._policy
+    _draw_content_furniture(c, doc)            # header + logo + footer
+
+    # Adoption statement (centred, below the logo).
+    if policy.adopted_on and policy.effective_on:
+        text = (f"As adopted by the Board of Directors of BioMar Group "
+                f"on {policy.adopted_on} to take effect from {policy.effective_on}.")
+    else:
+        text = "As adopted by the Board of Directors of BioMar Group."
+    c.setFillColor(B.BIOMAR_BLUE)
+    c.setFont(B.F_REGULAR, 11)
+    cx = B.PAGE_W / 2.0
+    _centred_wrapped(c, text, cx, B.PAGE_H - 175, B.PAGE_W - 230, 16)
+
+    # Signature blocks: chair centred on top, then a two-column grid.
+    def sig(x, y, name):
+        c.setStrokeColor(B.BIOMAR_BLUE)
+        c.setLineWidth(0.8)
+        c.line(x - 95, y, x + 95, y)
+        c.setFillColor(B.BIOMAR_BLUE)
+        c.setFont(B.F_REGULAR, 11)
+        c.drawCentredString(x, y - 22, name)
+
+    left, right = B.MARGIN_L + 130, B.PAGE_W - B.MARGIN_R - 130
+    sig(cx, B.PAGE_H - 365, B.BOARD_CHAIR)
+    rows = [B.BOARD_MEMBERS[i:i + 2] for i in range(0, len(B.BOARD_MEMBERS), 2)]
+    y = B.PAGE_H - 475
+    for row in rows:
+        xs = [left, right] if len(row) == 2 else [cx]
+        for x, name in zip(xs, row):
+            sig(x, y, name)
+        y -= 110
+
+
+def _centred_wrapped(c, text, cx, y, max_w, leading):
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    words, line, lines = text.split(), "", []
+    for w in words:
+        t = (line + " " + w).strip()
+        if stringWidth(t, c._fontname, c._fontsize) <= max_w:
+            line = t
+        else:
+            lines.append(line); line = w
+    if line:
+        lines.append(line)
+    for ln in lines:
+        c.drawCentredString(cx, y, ln)
+        y -= leading
+
+
+def _frame(top):
+    return Frame(B.MARGIN_L, B.MARGIN_BOTTOM,
+                 B.PAGE_W - B.MARGIN_L - B.MARGIN_R,
+                 B.PAGE_H - top - B.MARGIN_BOTTOM,
+                 leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
 
 
 def build_pdf(policy, out_path):
@@ -213,20 +265,23 @@ def build_pdf(policy, out_path):
         title=policy.title, author=B.COMPANY)
     doc._policy = policy
 
-    frame = Frame(B.MARGIN_L, B.MARGIN_BOTTOM,
-                  B.PAGE_W - B.MARGIN_L - B.MARGIN_R,
-                  B.PAGE_H - B.MARGIN_TOP - B.MARGIN_BOTTOM,
-                  leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
-
     doc.addPageTemplates([
-        PageTemplate(id="cover", frames=[frame], onPage=_draw_cover),
-        PageTemplate(id="content", frames=[frame], onPage=_draw_content_furniture),
-        PageTemplate(id="back", frames=[frame], onPage=_draw_back_cover),
+        PageTemplate(id="cover", frames=[_frame(B.MARGIN_TOP)], onPage=_draw_cover),
+        PageTemplate(id="content_first", frames=[_frame(B.MARGIN_TOP)],
+                     onPage=_draw_content_furniture),
+        PageTemplate(id="content", frames=[_frame(B.MARGIN_TOP_CONT)],
+                     onPage=_draw_content_furniture),
+        PageTemplate(id="signatures", frames=[_frame(B.MARGIN_TOP)],
+                     onPage=_draw_signatures),
+        PageTemplate(id="back", frames=[_frame(B.MARGIN_TOP)], onPage=_draw_back_cover),
     ])
 
-    # Page 1 = cover; content pages; final = back cover (drawn by onPage hooks).
-    # The trailing Spacer forces the back-cover page to be emitted.
-    story = ([NextPageTemplate("content"), PageBreak()] + _story(policy)
-             + [NextPageTemplate("back"), PageBreak(), Spacer(1, 0.1)])
+    # cover | content (first page starts high so the H1 matches the template,
+    # later pages start below the logo) | signatures | back cover.
+    story = ([NextPageTemplate("content_first"), PageBreak(),
+              NextPageTemplate("content")]
+             + _story(policy)
+             + [NextPageTemplate("signatures"), PageBreak(), Spacer(1, 0.1),
+                NextPageTemplate("back"), PageBreak(), Spacer(1, 0.1)])
     doc.build(story)
     return out_path

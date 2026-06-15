@@ -41,11 +41,15 @@ class Policy:
     title: str
     year: str
     blocks: list = field(default_factory=list)
-    # Back-cover "Version history / Owner and approver" card.
+    # Back-cover "Version history / Owner and approver" card (optional: the card
+    # is only drawn when at least one of the fields below is supplied).
     version: str = "Version 1:"
     approval_date: str = ""
     owner: str = ""
-    approver: str = "Executive Committee"
+    approver: str = ""
+    # Signatures page (penultimate) adoption statement.
+    adopted_on: str = ""
+    effective_on: str = ""
 
 
 def _iter_block_items(parent):

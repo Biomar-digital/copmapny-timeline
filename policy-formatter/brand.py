@@ -16,7 +16,6 @@ ASSETS = os.path.join(HERE, "assets")
 FONT_DIR = os.path.join(ASSETS, "fonts")
 
 LOGO = os.path.join(ASSETS, "logo.png")              # dark square (content pages)
-LOGO_ART = os.path.join(ASSETS, "logo_art.png")      # art only (back cover, on navy)
 COVER_BG = os.path.join(ASSETS, "cover_bg.png")      # front: logo + rule baked in
 COVER_BG_BACK = os.path.join(ASSETS, "cover_bg_back.png")  # back: no logo / rule
 COVER_RULE_Y = 252.0                                 # baked rule, pt from bottom
@@ -27,9 +26,16 @@ COVER_RULE_Y = 252.0                                 # baked rule, pt from botto
 def _rgb(r, g, b):
     return Color(r / 255.0, g / 255.0, b / 255.0)
 
-BIOMAR_BLUE   = _rgb(31, 62, 119)    # primary - body text & headings
-CRISP_BLUE    = _rgb(195, 228, 239)  # cover title
-SKY_BLUE      = _rgb(146, 206, 232)  # cover year
+# Text/heading colour: the brand swatch is RGB 31/62/119, but the template is
+# printed from the CMYK BioMar Blue and renders as #1c4076 - we match the
+# template's rendered colour so output is visually identical.
+BIOMAR_BLUE   = _rgb(28, 64, 118)    # primary - body text & headings (#1c4076)
+# Cover text colours, taken from the template's rendered cover.
+COVER_TITLE   = _rgb(186, 229, 244)  # #bae5f4
+COVER_YEAR    = _rgb(114, 207, 233)  # #72cfe9
+COVER_ADDR    = _rgb(186, 229, 244)  # #bae5f4
+CRISP_BLUE    = _rgb(195, 228, 239)
+SKY_BLUE      = _rgb(146, 206, 232)
 OCEAN_BLUE    = _rgb(4, 113, 173)    # cover blobs / accent boxes
 LEAFY_GREEN   = _rgb(151, 209, 48)
 SHRIMP_ORANGE = _rgb(221, 105, 40)
@@ -44,7 +50,11 @@ PAGE_W = 595.276
 PAGE_H = 841.890
 MARGIN_L = 42.52      # 15 mm
 MARGIN_R = 42.52
-MARGIN_TOP = 121.89   # content frame top
+# First content page starts high (so the H1 lands at the template's 119 pt);
+# continuation pages start lower so full-width body text clears the logo,
+# matching the template (body resumes ~137 pt from the top there).
+MARGIN_TOP = 115.7         # first content page
+MARGIN_TOP_CONT = 134.0    # continuation pages (below the logo)
 MARGIN_BOTTOM = 56.69
 
 # Logo box (top-right), matches the InDesign placement incl. soft shadow.
@@ -60,6 +70,12 @@ WEBSITE = "www.biomar.com"
 FOOTER = ("BioMar Group A/S · Kalkværksvej 16, 15. · 8000 Aarhus C · "
           "Denmark · Tel +45 86 20 49 70 · www.biomar.com")
 TAGLINE = ["Powered by Partnership", "Driven by Innovation"]
+
+# Board of Directors - signatures page (penultimate). Chair signs centred on
+# top, the remaining members in a two-column grid below.
+BOARD_CHAIR = "Jens Bjerg Sørensen"
+BOARD_MEMBERS = ["Asbjørn Reinkind", "Marianne Kirkegaard",
+                 "Jørgen Wisborg", "Anders Wilhjelm"]
 
 # ---------------------------------------------------------------------------
 # Fonts

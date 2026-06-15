@@ -29,6 +29,9 @@ def main(argv=None):
     ap.add_argument("--approver", help="Policy approver")
     ap.add_argument("--approval-date", dest="approval_date", help="Approval date")
     ap.add_argument("--version", help="Version label (e.g. 'Version 1:')")
+    # Signatures page (penultimate) adoption statement.
+    ap.add_argument("--adopted-on", dest="adopted_on", help="Board adoption date")
+    ap.add_argument("--effective-on", dest="effective_on", help="Effective date")
     args = ap.parse_args(argv)
 
     if not os.path.exists(args.input):
@@ -37,7 +40,8 @@ def main(argv=None):
     out = args.output or os.path.splitext(args.input)[0] + "_BioMar.pdf"
     policy = parse_docx(args.input, title=args.title, year=args.year,
                         owner=args.owner, approver=args.approver,
-                        approval_date=args.approval_date, version=args.version)
+                        approval_date=args.approval_date, version=args.version,
+                        adopted_on=args.adopted_on, effective_on=args.effective_on)
     build_pdf(policy, out)
 
     using_avenir = B.register_fonts()

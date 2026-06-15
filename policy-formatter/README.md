@@ -28,8 +28,15 @@ first heading; year defaults to the current year).
    (colours, A4 geometry, margins, logo placement, fonts, footer text) was
    reverse-engineered from the official **IDML / InDesign source** so the
    output is a faithful reconstruction, not an approximation.
-3. **`generator.py`** lays the content into a cover page + flowing content
-   pages + a back cover, with ReportLab.
+3. **`generator.py`** lays the content into: front cover → flowing content
+   pages → a board **signatures page** → back cover, with ReportLab. The front
+   and back covers reuse the official empty template pages (artwork, logo,
+   tagline baked in); only the variable text is drawn on top. Continuation
+   content pages start below the logo so body text never collides with it.
+
+CLI flags (all optional): `--title`, `--year`, `--owner`, `--approver`,
+`--approval-date`, `--version` (back-cover card), `--adopted-on`,
+`--effective-on` (signatures page statement).
 
 | Element        | Spec (from IDML / template)                             |
 |----------------|---------------------------------------------------------|
@@ -39,11 +46,13 @@ first heading; year defaults to the current year).
 | Title (H1)     | Avenir Next LT Pro Demi 14 pt                           |
 | Subtitle (H2)  | Avenir Next LT Pro Demi 12 pt                           |
 | Body           | Avenir Next LT Pro Regular 11 pt, justified, 16 pt lead |
+| Text colour    | `#1c4076` (template's rendered CMYK BioMar Blue)        |
 | Table header   | Navy background, white Demi text                        |
-| Back cover     | Version/owner card + logo + "Powered by Partnership"    |
+| Signatures     | Adoption statement + Board of Directors signature lines |
+| Back cover     | Optional version/owner card (on the official back page) |
 
-The back-cover card is filled from the optional `--owner`, `--approver`,
-`--approval-date` and `--version` flags.
+Verified against the source templates: cover (year 394.5 pt / title 471.2 pt),
+header (41 pt), H1 (119.1 pt), body (149.4 pt) and colours all match.
 
 ## Fonts
 
