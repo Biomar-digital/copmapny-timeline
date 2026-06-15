@@ -42,7 +42,8 @@ def _gen(source, title, year, date, tag, extra):
 def main():
     os.makedirs(FILES, exist_ok=True)
     reg = json.load(open(REGISTRY, encoding="utf-8"))
-    today = datetime.date.today().isoformat()
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    today = now
     out_policies = []
 
     for p in reg["policies"]:

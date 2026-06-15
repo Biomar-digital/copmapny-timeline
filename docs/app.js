@@ -68,7 +68,7 @@ async function init() {
     POLICIES = (data.policies || []).slice()
       .sort((a, b) => a.title.localeCompare(b.title));
     document.getElementById("meta").textContent =
-      `${POLICIES.length} policies · updated ${data.updated || ""}`;
+      `${POLICIES.length} policies · Last update: ${data.updated || ""}`;
     render();
     document.getElementById("search").addEventListener("input", e => render(e.target.value));
   } catch (err) {
