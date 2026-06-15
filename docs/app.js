@@ -61,8 +61,10 @@ function render(filter = "") {
 
 async function init() {
   try {
-    const res = await fetch("library.json", { cache: "no-store" });
-    const data = await res.json();
+    // Use embedded data when present (works from file:// with no server),
+    // otherwise fetch library.json (served over HTTP / GitHub Pages).
+    const data = window.LIBRARY ||
+      await (await fetch("library.json", { cache: "no-store" })).json();
     POLICIES = (data.policies || []).slice()
       .sort((a, b) => a.title.localeCompare(b.title));
     document.getElementById("meta").textContent =

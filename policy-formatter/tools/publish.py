@@ -74,8 +74,12 @@ def main():
         })
         print(f"  published {p['title']}")
 
-    json.dump({"brand": "BioMar Group", "updated": today, "policies": out_policies},
-              open(LIBRARY, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+    data = {"brand": "BioMar Group", "updated": today, "policies": out_policies}
+    json.dump(data, open(LIBRARY, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+    # Also embed the data as JS so the page works when opened directly from disk
+    # (file://), where fetch() is blocked - no server or GitHub Pages needed.
+    with open(os.path.join(REPO, "docs", "library-data.js"), "w", encoding="utf-8") as f:
+        f.write("window.LIBRARY = " + json.dumps(data, ensure_ascii=False) + ";\n")
     print(f"\nwrote {os.path.relpath(LIBRARY, REPO)}  ({len(out_policies)} policies)")
 
 
