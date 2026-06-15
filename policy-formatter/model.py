@@ -41,6 +41,11 @@ class Policy:
     title: str
     year: str
     blocks: list = field(default_factory=list)
+    # Back-cover "Version history / Owner and approver" card.
+    version: str = "Version 1:"
+    approval_date: str = ""
+    owner: str = ""
+    approver: str = "Executive Committee"
 
 
 def _iter_block_items(parent):
@@ -69,7 +74,7 @@ def _heading_level(style_name: str) -> Optional[int]:
 
 
 def parse_docx(path: str, title: Optional[str] = None,
-               year: Optional[str] = None) -> Policy:
+               year: Optional[str] = None, **meta) -> Policy:
     doc = docx.Document(path)
     blocks = []
     lead_lines = []          # text seen before the first real heading
@@ -109,4 +114,5 @@ def parse_docx(path: str, title: Optional[str] = None,
         import datetime
         year = str(datetime.date.today().year)
 
-    return Policy(title=title, year=year, blocks=blocks)
+    meta = {k: v for k, v in meta.items() if v is not None}
+    return Policy(title=title, year=year, blocks=blocks, **meta)

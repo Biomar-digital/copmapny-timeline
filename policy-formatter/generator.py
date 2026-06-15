@@ -22,12 +22,14 @@ B.register_fonts()
 # --------------------------------------------------------------------------
 # Paragraph stylesheet (mirrors the IDML "Title / Subtitle / Body / Bullets")
 # --------------------------------------------------------------------------
-H1 = ParagraphStyle("H1", fontName=B.F_DEMI, fontSize=14, leading=17,
-                    textColor=B.BIOMAR_BLUE, spaceBefore=14, spaceAfter=8)
-H2 = ParagraphStyle("H2", fontName=B.F_DEMI, fontSize=12, leading=15,
-                    textColor=B.BIOMAR_BLUE, spaceBefore=9, spaceAfter=3)
-BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=15.5,
-                      textColor=B.BIOMAR_BLUE, alignment=TA_JUSTIFY, spaceAfter=9)
+# Spacing values mirror the measured template grid (body leading 16, paragraph
+# gap 11.4, and the heading spacing reproduced from the IDML Title/Subtitle).
+H1 = ParagraphStyle("H1", fontName=B.F_DEMI, fontSize=14, leading=16,
+                    textColor=B.BIOMAR_BLUE, spaceBefore=14.5, spaceAfter=15)
+H2 = ParagraphStyle("H2", fontName=B.F_DEMI, fontSize=12, leading=14,
+                    textColor=B.BIOMAR_BLUE, spaceBefore=5.3, spaceAfter=6.2)
+BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
+                      textColor=B.BIOMAR_BLUE, alignment=TA_JUSTIFY, spaceAfter=11.4)
 BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
                         leftIndent=16, bulletIndent=2, spaceAfter=6)
 CELL = ParagraphStyle("Cell", fontName=B.F_REGULAR, fontSize=8.5, leading=11,
@@ -78,16 +80,17 @@ def _story(policy):
 # --------------------------------------------------------------------------
 def _draw_cover(c, doc):
     policy = doc._policy
+    # The official empty cover already has the navy pellet artwork, the logo
+    # and the decorative rule baked in; we only add the year, title and address.
     c.drawImage(ImageReader(B.COVER_BG), 0, 0, B.PAGE_W, B.PAGE_H,
                 preserveAspectRatio=False, mask=None)
-    _draw_logo(c)
 
-    # Title - auto-fit width, wrap; anchored so the last line sits just above
-    # the decorative rule regardless of how many lines it needs.
+    # Title - auto-fit width, wrap; anchored so the bottom line sits just above
+    # the baked rule, with the year stacked above it.
     avail = B.PAGE_W - B.MARGIN_L - 30
     size, lines = _fit_title(c, policy.title, avail, 70)
     n = len(lines)
-    last_baseline = 318          # baseline of the bottom title line
+    last_baseline = B.COVER_RULE_Y + 60      # bottom title line, above the rule
     c.setFillColor(B.CRISP_BLUE)
     c.setFont(B.F_BOLD, size)
     for i, ln in enumerate(lines):
@@ -99,15 +102,7 @@ def _draw_cover(c, doc):
     c.setFont(B.F_BOLD, 60)
     c.drawString(B.MARGIN_L, top_title + 78, policy.year)
 
-    # Decorative tick rule, just under the title
-    rule_y = last_baseline - size * 0.42
-    c.setStrokeColor(B.CRISP_BLUE)
-    c.setLineWidth(0.6)
-    c.setDash(1, 3)
-    c.line(B.MARGIN_L, rule_y, B.PAGE_W - B.MARGIN_L, rule_y)
-    c.setDash()
-
-    # Address block (bottom-left)
+    # Address block (bottom-left, below the rule)
     c.setFillColor(B.CRISP_BLUE)
     ay = 205
     c.setFont(B.F_BOLD, 10)
@@ -142,8 +137,8 @@ def _fit_title(c, title, avail, start):
     return 24, [title]
 
 
-def _draw_logo(c):
-    c.drawImage(ImageReader(B.LOGO), B.LOGO_X, B.PAGE_H - B.LOGO_TOP - B.LOGO_H,
+def _draw_logo(c, path=B.LOGO):
+    c.drawImage(ImageReader(path), B.LOGO_X, B.PAGE_H - B.LOGO_TOP - B.LOGO_H,
                 B.LOGO_W, B.LOGO_H, preserveAspectRatio=True, mask="auto")
 
 
@@ -158,6 +153,56 @@ def _draw_content_furniture(c, doc):
     # Footer (centred)
     c.setFont(B.F_REGULAR, 8)
     c.drawCentredString(B.PAGE_W / 2.0, 25, B.FOOTER)
+
+
+def _draw_back_cover(c, doc):
+    policy = doc._policy
+    c.drawImage(ImageReader(B.COVER_BG_BACK), 0, 0, B.PAGE_W, B.PAGE_H,
+                preserveAspectRatio=False, mask=None)
+
+    # White "Version history / Owner and approver" card near the top.
+    cw, ch = 404.0, 104.0
+    cx = (B.PAGE_W - cw) / 2.0
+    cy = B.PAGE_H - 150 - ch
+    c.setFillColor(B.WHITE)
+    c.roundRect(cx, cy, cw, ch, 10, stroke=0, fill=1)
+
+    col2 = cx + cw / 2.0
+    head_y = cy + ch - 22
+    c.setFillColor(B.BIOMAR_BLUE)
+    c.setFont(B.F_DEMI, 10)
+    c.drawCentredString(cx + cw / 4.0, head_y, "Version history")
+    c.drawCentredString(cx + 3 * cw / 4.0, head_y, "Owner and approver")
+    c.setStrokeColor(B.LIGHT_RULE)
+    c.setLineWidth(0.5)
+    c.line(cx + 12, head_y - 9, cx + cw - 12, head_y - 9)   # under headers
+    c.line(col2, cy + 10, col2, head_y - 9)                 # column divider
+
+    rows_l = [(policy.version, policy.year if not policy.approval_date else policy.approval_date),
+              ("Approval date:", policy.approval_date or "—")]
+    rows_r = [("Owner:", policy.owner or "—"),
+              ("Approver:", policy.approver or "—")]
+    c.setFont(B.F_REGULAR, 8)
+    ry = head_y - 26
+    for (la, va), (lb, vb) in zip(rows_l, rows_r):
+        c.setFillColor(B.BIOMAR_BLUE)
+        c.drawString(cx + 16, ry, la); c.drawString(cx + 96, ry, va)
+        c.drawString(col2 + 16, ry, lb); c.drawString(col2 + 86, ry, vb)
+        c.line(cx + 12, ry - 8, cx + cw - 12, ry - 8)
+        ry -= 26
+
+    # Logo + tagline + url, centred in the lower half (logo art on navy).
+    lw, lh = 150.0, 78.0
+    c.drawImage(ImageReader(B.LOGO_ART), (B.PAGE_W - lw) / 2.0, 250, lw, lh,
+                preserveAspectRatio=True, mask="auto")
+    c.setFillColor(B.WHITE)
+    c.setFont(B.F_BOLD, 17)
+    ty = 232
+    for line in B.TAGLINE:
+        c.drawCentredString(B.PAGE_W / 2.0, ty, line)
+        ty -= 21
+    c.setFont(B.F_BOLD, 13)
+    c.drawCentredString(B.PAGE_W / 2.0, 120, B.WEBSITE)
 
 
 def build_pdf(policy, out_path):
@@ -176,9 +221,12 @@ def build_pdf(policy, out_path):
     doc.addPageTemplates([
         PageTemplate(id="cover", frames=[frame], onPage=_draw_cover),
         PageTemplate(id="content", frames=[frame], onPage=_draw_content_furniture),
+        PageTemplate(id="back", frames=[frame], onPage=_draw_back_cover),
     ])
 
-    # Page 1 = cover (drawn by the onPage hook, no flowables); content from p2.
-    story = [NextPageTemplate("content"), PageBreak()] + _story(policy)
+    # Page 1 = cover; content pages; final = back cover (drawn by onPage hooks).
+    # The trailing Spacer forces the back-cover page to be emitted.
+    story = ([NextPageTemplate("content"), PageBreak()] + _story(policy)
+             + [NextPageTemplate("back"), PageBreak(), Spacer(1, 0.1)])
     doc.build(story)
     return out_path

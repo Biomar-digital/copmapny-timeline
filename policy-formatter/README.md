@@ -29,43 +29,51 @@ first heading; year defaults to the current year).
    reverse-engineered from the official **IDML / InDesign source** so the
    output is a faithful reconstruction, not an approximation.
 3. **`generator.py`** lays the content into a cover page + flowing content
-   pages with ReportLab.
+   pages + a back cover, with ReportLab.
 
-| Element        | Spec (from IDML)                                        |
+| Element        | Spec (from IDML / template)                             |
 |----------------|---------------------------------------------------------|
 | Page           | A4, margins L/R 15 mm, top 43 mm, bottom 20 mm          |
 | Primary colour | BioMar Blue `RGB 31 62 119`                             |
-| Cover          | Navy + Ocean-Blue `RGB 4 113 173` pellet artwork        |
+| Cover          | Official empty cover (navy + Ocean-Blue pellet artwork) |
 | Title (H1)     | Avenir Next LT Pro Demi 14 pt                           |
 | Subtitle (H2)  | Avenir Next LT Pro Demi 12 pt                           |
-| Body           | Avenir Next LT Pro Regular 11 pt, justified             |
+| Body           | Avenir Next LT Pro Regular 11 pt, justified, 16 pt lead |
 | Table header   | Navy background, white Demi text                        |
+| Back cover     | Version/owner card + logo + "Powered by Partnership"    |
+
+The back-cover card is filled from the optional `--owner`, `--approver`,
+`--approval-date` and `--version` flags.
 
 ## Fonts
 
-The template uses the licensed **Avenir Next LT Pro** family. The converted
-TrueType files live in `assets/fonts/` and are used automatically, so the
-output matches the official template typography.
+The template uses the licensed **Avenir Next LT Pro** family. The exact
+weights — Light, Regular, **Demi** (headings) and Bold — are converted to
+TrueType in `assets/fonts/` and used automatically, so the typography matches
+the official template.
 
-* The licensed family ships no *Demi* weight, so the template's Demi headings
-  are rendered with **Medium** (the closest available weight).
 * The source fonts are OpenType (`.otf`). ReportLab cannot embed CFF/OpenType
   outlines, so they were converted to `.ttf` with `tools/otf2ttf.py`:
 
   ```
-  python tools/otf2ttf.py AvenirNextLTProRegular.otf assets/fonts/AvenirNextLTPro-Regular.ttf
+  python tools/otf2ttf.py AvenirNextLTProDemi.otf assets/fonts/AvenirNextLTPro-Demi.ttf
   ```
 
-  Expected filenames: `AvenirNextLTPro-Light.ttf`, `-Regular.ttf`,
-  `-Demi.ttf` (from Medium), `-Bold.ttf`. If they are ever removed, the code
-  falls back to the bundled open **Outfit** font.
+  Expected filenames: `AvenirNextLTPro-Light.ttf`, `-Regular.ttf`, `-Demi.ttf`,
+  `-Bold.ttf`. If they are ever removed, the code falls back to the bundled
+  open **Outfit** font.
 
 ## Assets
 
-* `assets/logo.png` — BioMar icon logo, transparent background.
-* `assets/cover_bg.png` — navy cover with the Ocean-Blue pellet artwork,
-  derived from the official cover (variable text removed).
-* `assets/fonts/` — brand fonts (Avenir if provided, else Outfit fallback).
+Regenerate from the source template files with `python tools/build_assets.py`:
+
+* `assets/cover_bg.png` — the official empty cover (navy pellet artwork with the
+  logo and decorative rule baked in); the formatter only adds year/title/address.
+* `assets/cover_bg_back.png` — same artwork with the logo box and rule removed,
+  for the back cover.
+* `assets/logo.png` — dark rounded-square logo (white content pages).
+* `assets/logo_art.png` — logo art only, transparent (back-cover centre logo).
+* `assets/fonts/` — brand fonts (Avenir; Outfit as fallback).
 
 ## Turning this into an automatic agent
 

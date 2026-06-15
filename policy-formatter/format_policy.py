@@ -24,13 +24,20 @@ def main(argv=None):
     ap.add_argument("-o", "--output", help="Output .pdf (default: alongside input)")
     ap.add_argument("--title", help="Cover / header title (default: inferred)")
     ap.add_argument("--year", help="Cover year (default: current year)")
+    # Back-cover "Version history / Owner and approver" card.
+    ap.add_argument("--owner", help="Policy owner")
+    ap.add_argument("--approver", help="Policy approver")
+    ap.add_argument("--approval-date", dest="approval_date", help="Approval date")
+    ap.add_argument("--version", help="Version label (e.g. 'Version 1:')")
     args = ap.parse_args(argv)
 
     if not os.path.exists(args.input):
         ap.error(f"input not found: {args.input}")
 
     out = args.output or os.path.splitext(args.input)[0] + "_BioMar.pdf"
-    policy = parse_docx(args.input, title=args.title, year=args.year)
+    policy = parse_docx(args.input, title=args.title, year=args.year,
+                        owner=args.owner, approver=args.approver,
+                        approval_date=args.approval_date, version=args.version)
     build_pdf(policy, out)
 
     using_avenir = B.register_fonts()

@@ -15,8 +15,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(HERE, "assets")
 FONT_DIR = os.path.join(ASSETS, "fonts")
 
-LOGO = os.path.join(ASSETS, "logo.png")
-COVER_BG = os.path.join(ASSETS, "cover_bg.png")
+LOGO = os.path.join(ASSETS, "logo.png")              # dark square (content pages)
+LOGO_ART = os.path.join(ASSETS, "logo_art.png")      # art only (back cover, on navy)
+COVER_BG = os.path.join(ASSETS, "cover_bg.png")      # front: logo + rule baked in
+COVER_BG_BACK = os.path.join(ASSETS, "cover_bg_back.png")  # back: no logo / rule
+COVER_RULE_Y = 252.0                                 # baked rule, pt from bottom
 
 # ---------------------------------------------------------------------------
 # Colours  (RGB swatches taken verbatim from the IDML "BioMar" swatch book)
@@ -56,6 +59,7 @@ ADDRESS_LINES = ["BioMar Group", "Kalkværksvej 16, 15.", "8000 Aarhus C", "Denm
 WEBSITE = "www.biomar.com"
 FOOTER = ("BioMar Group A/S · Kalkværksvej 16, 15. · 8000 Aarhus C · "
           "Denmark · Tel +45 86 20 49 70 · www.biomar.com")
+TAGLINE = ["Powered by Partnership", "Driven by Innovation"]
 
 # ---------------------------------------------------------------------------
 # Fonts
