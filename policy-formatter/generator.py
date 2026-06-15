@@ -13,6 +13,7 @@ from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame,
                                 NextPageTemplate, PageBreak)
 from reportlab.platypus.flowables import HRFlowable
 from xml.sax.saxutils import escape
+import re
 
 import brand as B
 from model import Heading, Body, Bullet, TableBlock
@@ -34,16 +35,37 @@ H2 = ParagraphStyle("H2", fontName=B.F_DEMI, fontSize=12, leading=14,
                     textColor=B.BIOMAR_BLUE, spaceBefore=5.3, spaceAfter=6.2,
                     keepWithNext=1)
 BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
-                      textColor=B.BIOMAR_BLUE, alignment=TA_JUSTIFY, spaceAfter=11.4)
+                      textColor=B.BIOMAR_BLUE, alignment=TA_JUSTIFY, spaceAfter=11.4,
+                      splitLongWords=0, hyphenationLang="")
 BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
                         leftIndent=16, bulletIndent=2, spaceAfter=6)
 CELL = ParagraphStyle("Cell", fontName=B.F_REGULAR, fontSize=8.5, leading=11,
-                      textColor=B.BIOMAR_BLUE)
+                      textColor=B.BIOMAR_BLUE, splitLongWords=0, hyphenationLang="")
 CELL_H = ParagraphStyle("CellH", parent=CELL, fontName=B.F_DEMI,
                         textColor=B.WHITE, alignment=TA_CENTER)        # column header
 CELL_SEC = ParagraphStyle("CellSec", parent=CELL, fontName=B.F_DEMI,
                           textColor=B.WHITE)                            # section band row
 CELL_C = ParagraphStyle("CellC", parent=CELL, alignment=TA_CENTER)     # short marks (√, —)
+
+
+_NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
+
+
+def _fmt(text, number=True, widow=True):
+    """Format clause text: (1) keep the last two words together so a paragraph
+    never ends with a single orphaned word; (2) render a leading clause number
+    (e.g. '2.3.2') in Demi. Headings are already fully Demi, so this is used
+    for body/bullets/cells only."""
+    t = text.strip()
+    if widow:
+        parts = t.rsplit(" ", 1)
+        if len(parts) == 2:
+            t = parts[0] + " " + parts[1]   # glue last two words (no widow)
+    m = _NUM.match(t) if number else None
+    if m:
+        return (f'<font name="{B.F_DEMI}">{escape(m.group(1))}</font>'
+                f'{m.group(2)}{escape(m.group(3))}')
+    return escape(t)
 
 
 def _band(r):
@@ -131,7 +153,8 @@ def _body_cells(r, ncols):
     if _band(r):
         txt = [c for c in r if c.strip()][0]
         return [Paragraph(escape(txt), CELL_SEC)] + [""] * (ncols - 1), True
-    return [Paragraph(escape(c), CELL_C if len(c.strip()) <= 2 else CELL)
+    return [Paragraph(escape(c) if len(c.strip()) <= 2 else _fmt(c, widow=False),
+                      CELL_C if len(c.strip()) <= 2 else CELL)
             for c in r], False
 
 
@@ -238,9 +261,9 @@ def _story(policy):
         if isinstance(b, Heading):
             flow.append(Paragraph(escape(b.text), H1 if b.level == 1 else H2))
         elif isinstance(b, Body):
-            flow.append(Paragraph(escape(b.text), BODY))
+            flow.append(Paragraph(_fmt(b.text), BODY))
         elif isinstance(b, Bullet):
-            flow.append(Paragraph(escape(b.text), BULLET, bulletText="•"))
+            flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):
             flow.append(Spacer(1, 4))
             flow.extend(_table_flowables(b))
