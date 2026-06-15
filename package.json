@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "publish-policies": "python3 policy-formatter/tools/publish.py",
+    "deploy": "wrangler pages deploy docs --project-name=biomar-policy-library"
   },
   "dependencies": {
     "react": "^18.3.1",
