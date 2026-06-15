@@ -34,17 +34,28 @@ def main(argv=None):
     ap.add_argument("--effective-on", dest="effective_on", help="Effective date")
     ap.add_argument("--no-signatures", dest="signatures", action="store_false",
                     help="Omit the board signatures page")
+    ap.add_argument("--date", help="Date tag in the file name (default: current YYYY-MM)")
     args = ap.parse_args(argv)
 
     if not os.path.exists(args.input):
         ap.error(f"input not found: {args.input}")
 
-    out = args.output or os.path.splitext(args.input)[0] + "_BioMar.pdf"
     policy = parse_docx(args.input, title=args.title, year=args.year,
                         owner=args.owner, approver=args.approver,
                         approval_date=args.approval_date, version=args.version,
                         adopted_on=args.adopted_on, effective_on=args.effective_on,
                         signatures=args.signatures)
+
+    # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
+    import datetime
+    if args.output:
+        out = args.output
+    else:
+        date = args.date or datetime.date.today().strftime("%Y-%m")
+        tag = "approval" if policy.signatures else "non-approval"
+        slug = "_".join(policy.title.split())
+        out = os.path.join(os.path.dirname(args.input) or ".",
+                           f"{slug}_{date}_{tag}.pdf")
     build_pdf(policy, out)
 
     using_avenir = B.register_fonts()
