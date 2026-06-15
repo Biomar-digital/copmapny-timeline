@@ -41,25 +41,24 @@ first heading; year defaults to the current year).
 | Body           | Avenir Next LT Pro Regular 11 pt, justified             |
 | Table header   | Navy background, white Demi text                        |
 
-## Fonts (important for a pixel-true match)
+## Fonts
 
-The template uses the licensed **Avenir Next LT Pro** family. It is not
-redistributable, so this repo ships an open geometric fallback (**Outfit**)
-and the output is rendered with it by default.
+The template uses the licensed **Avenir Next LT Pro** family. The converted
+TrueType files live in `assets/fonts/` and are used automatically, so the
+output matches the official template typography.
 
-To get an identical match, drop the Avenir TrueType files into
-`assets/fonts/` with these names:
+* The licensed family ships no *Demi* weight, so the template's Demi headings
+  are rendered with **Medium** (the closest available weight).
+* The source fonts are OpenType (`.otf`). ReportLab cannot embed CFF/OpenType
+  outlines, so they were converted to `.ttf` with `tools/otf2ttf.py`:
 
-```
-AvenirNextLTPro-Light.ttf
-AvenirNextLTPro-Regular.ttf
-AvenirNextLTPro-Demi.ttf
-AvenirNextLTPro-Bold.ttf
-```
+  ```
+  python tools/otf2ttf.py AvenirNextLTProRegular.otf assets/fonts/AvenirNextLTPro-Regular.ttf
+  ```
 
-They are picked up automatically (no code change). If you only have the
-OpenType (`.otf`) versions, convert them to `.ttf` first (ReportLab cannot
-embed CFF/OpenType outlines).
+  Expected filenames: `AvenirNextLTPro-Light.ttf`, `-Regular.ttf`,
+  `-Demi.ttf` (from Medium), `-Bold.ttf`. If they are ever removed, the code
+  falls back to the bundled open **Outfit** font.
 
 ## Assets
 
