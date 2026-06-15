@@ -49,16 +49,21 @@ def _band(r):
     return len(set(f)) == 1 and len(f) > 1
 
 
-def _table(block):
-    ncols = max(len(r) for r in block.rows)
-    rows = [list(r) + [""] * (ncols - len(r)) for r in block.rows]
-    avail = B.PAGE_W - B.MARGIN_L - B.MARGIN_R
+_BASE_TSTYLE = [
+    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ("LEFTPADDING", (0, 0), (-1, -1), 7),
+    ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+    ("TOPPADDING", (0, 0), (-1, -1), 6),
+    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+]
 
-    # Column widths: proportional to content, but never narrower than the
-    # column's longest single word (so headers like "Complies" don't wrap).
-    # Any excess is taken from the columns that have slack (the text-heavy ones).
+
+def _column_widths(rows, ncols, hdr):
+    """Proportional to content, never narrower than a column's longest word
+    (so 'Complies' never wraps), and with columns under a 2-level header span
+    made equal width (so 'Why' and 'How' match)."""
     from reportlab.pdfbase.pdfmetrics import stringWidth
-    PAD = 16
+    avail, PAD = B.PAGE_W - B.MARGIN_L - B.MARGIN_R, 16
     body = [r for r in rows if not _band(r)] or rows
     colmax = [max(max((len(r[c]) for r in body), default=1), 5) for c in range(ncols)]
     tot = sum(colmax)
@@ -70,14 +75,100 @@ def _table(block):
     if over > 0:
         slack = [colw[c] - minw[c] for c in range(ncols)]
         ts = sum(slack)
-        if ts > 0:
-            colw = [colw[c] - over * slack[c] / ts for c in range(ncols)]
-        else:
-            colw = [w * avail / sum(colw) for w in colw]
+        colw = ([colw[c] - over * slack[c] / ts for c in range(ncols)] if ts > 0
+                else [w * avail / sum(colw) for w in colw])
+    if hdr == 2:                                  # equalise sub-columns of a span
+        h0 = rows[0]
+        c = 0
+        while c < ncols:
+            j = c
+            while j + 1 < ncols and h0[j + 1] and h0[j + 1] == h0[c]:
+                j += 1
+            if j > c:
+                eq = sum(colw[c:j + 1]) / (j - c + 1)
+                for k in range(c, j + 1):
+                    colw[k] = eq
+            c = j + 1
+    return colw
 
-    # Detect a 2-level header (e.g. "Explains" spanning "Why"/"How"): row 0 has
-    # adjacent duplicate labels (horizontal merge) or shares labels with row 1
-    # (vertical merge), and row 1 is not itself a band.
+
+def _header_rows(rows, ncols, hdr):
+    """Build the (1- or 2-row) header cell data and its span/background style
+    commands (row-relative)."""
+    if hdr == 0:
+        return [], []
+    style = []
+    if hdr == 1:
+        style.append(("BACKGROUND", (0, 0), (-1, 0), B.BIOMAR_BLUE))
+        return [[Paragraph(escape(c), CELL_H) for c in rows[0]]], style
+    h0, h1 = list(rows[0]), list(rows[1])
+    for c in range(ncols):                            # vertical spans
+        if h0[c] and h0[c] == h1[c]:
+            style.append(("SPAN", (c, 0), (c, 1)))
+            h1[c] = ""
+    c = 0
+    while c < ncols:                                  # horizontal spans in row 0
+        j = c
+        while j + 1 < ncols and h0[j + 1] and h0[j + 1] == h0[c]:
+            j += 1
+        if j > c:
+            style.append(("SPAN", (c, 0), (j, 0)))
+            for k in range(c + 1, j + 1):
+                h0[k] = ""
+        c = j + 1
+    style += [("BACKGROUND", (0, 0), (-1, 1), B.BIOMAR_BLUE),
+              ("VALIGN", (0, 0), (-1, 1), "MIDDLE")]
+    return ([[Paragraph(escape(x), CELL_H) if x else "" for x in h0],
+             [Paragraph(escape(x), CELL_H) if x else "" for x in h1]], style)
+
+
+def _body_cells(r, ncols):
+    """Return (cells, is_band) for one body row."""
+    if _band(r):
+        txt = [c for c in r if c.strip()][0]
+        return [Paragraph(escape(txt), CELL_SEC)] + [""] * (ncols - 1), True
+    return [Paragraph(escape(c), CELL_C if len(c.strip()) <= 2 else CELL)
+            for c in r], False
+
+
+def _assemble(head_data, head_style, body_rows, colw, ncols, repeat):
+    """Build one Table from the header + a set of body rows, with bands, zebra
+    striping and a full grid."""
+    data = list(head_data)
+    style = list(_BASE_TSTYLE) + list(head_style)
+    hdr = len(head_data)
+    zebra = 0
+    for r in body_rows:
+        i = len(data)
+        cells, band = _body_cells(r, ncols)
+        data.append(cells)
+        if band:
+            style += [("SPAN", (0, i), (-1, i)),
+                      ("BACKGROUND", (0, i), (-1, i), B.OCEAN_BLUE)]
+            zebra = 0
+        else:
+            if zebra % 2:
+                style.append(("BACKGROUND", (0, i), (-1, i), B.TABLE_STRIPE))
+            zebra += 1
+    style += [("INNERGRID", (0, 0), (-1, -1), 0.5, B.TABLE_GRID),
+              ("BOX", (0, 0), (-1, -1), 0.7, B.TABLE_GRID)]
+    t = Table(data, colWidths=colw, repeatRows=hdr if repeat else 0)
+    t.setStyle(TableStyle(style))
+    return t
+
+
+def _row_height(cells, colw):
+    t = Table([cells], colWidths=colw)
+    t.setStyle(TableStyle(_BASE_TSTYLE))
+    return t.wrap(sum(colw), 100000)[1]
+
+
+def _table_flowables(block):
+    """Return the flowables for a table. Small tables are a single Table; large
+    tables are paginated manually so the header repeats and a page never ends
+    on a section band (which would orphan it from its rows)."""
+    ncols = max(len(r) for r in block.rows)
+    rows = [list(r) + [""] * (ncols - len(r)) for r in block.rows]
     hdr = 0
     if block.header and rows and not _band(rows[0]):
         hdr = 1
@@ -85,66 +176,37 @@ def _table(block):
                 (any(rows[0][c] and rows[0][c] == rows[0][c + 1] for c in range(ncols - 1))
                  or any(rows[0][c] and rows[0][c] == rows[1][c] for c in range(ncols)))):
             hdr = 2
+    colw = _column_widths(rows, ncols, hdr)
+    head_data, head_style = _header_rows(rows, ncols, hdr)
+    body = rows[hdr:]
 
-    style = [
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 7),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 7),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-    ]
-    data = []
+    if len(body) <= 12:                                # fits a page -> one table
+        return [_assemble(head_data, head_style, body, colw, ncols, block.header)]
 
+    # Manual pagination on its own pages.
+    head_h = _row_height([c if c else "" for c in (head_data[0] if head_data else [])],
+                         colw) if head_data else 0
     if hdr == 2:
-        h0, h1 = list(rows[0]), list(rows[1])
-        for c in range(ncols):                       # vertical spans
-            if h0[c] and h0[c] == h1[c]:
-                style.append(("SPAN", (c, 0), (c, 1)))
-                h1[c] = ""
-        c = 0
-        while c < ncols:                             # horizontal spans in row 0
-            j = c
-            while j + 1 < ncols and h0[j + 1] and h0[j + 1] == h0[c]:
-                j += 1
-            if j > c:
-                style.append(("SPAN", (c, 0), (j, 0)))
-                for k in range(c + 1, j + 1):
-                    h0[k] = ""
-            c = j + 1
-        data.append([Paragraph(escape(x), CELL_H) if x else "" for x in h0])
-        data.append([Paragraph(escape(x), CELL_H) if x else "" for x in h1])
-        style += [("BACKGROUND", (0, 0), (-1, 1), B.BIOMAR_BLUE),
-                  ("VALIGN", (0, 0), (-1, 1), "MIDDLE")]
-    elif hdr == 1:
-        data.append([Paragraph(escape(c), CELL_H) for c in rows[0]])
-        style.append(("BACKGROUND", (0, 0), (-1, 0), B.BIOMAR_BLUE))
+        head_h += _row_height([c if c else "" for c in head_data[1]], colw)
+    page_h = B.PAGE_H - B.MARGIN_TOP_CONT - B.MARGIN_BOTTOM - head_h - 18
+    heights = [_row_height(_body_cells(r, ncols)[0], colw) for r in body]
 
-    zebra = 0
-    for r in rows[hdr:]:
-        i = len(data)
-        if _band(r):
-            # Section band: Ocean Blue + white Demi (one hierarchy level below
-            # the navy header).
-            txt = [c for c in r if c.strip()][0]
-            data.append([Paragraph(escape(txt), CELL_SEC)] + [""] * (ncols - 1))
-            style += [("SPAN", (0, i), (-1, i)),
-                      ("BACKGROUND", (0, i), (-1, i), B.OCEAN_BLUE)]
-            zebra = 0
-        else:
-            data.append([Paragraph(escape(c), CELL_C if len(c.strip()) <= 2 else CELL)
-                         for c in r])
-            if zebra % 2:                       # subtle zebra striping
-                style.append(("BACKGROUND", (0, i), (-1, i), B.TABLE_STRIPE))
-            zebra += 1
+    chunks, i = [], 0
+    while i < len(body):
+        cur, h = [], 0.0
+        while i < len(body) and (not cur or h + heights[i] <= page_h):
+            cur.append(i); h += heights[i]; i += 1
+        while len(cur) > 1 and _band(body[cur[-1]]):   # don't orphan trailing bands
+            i = cur.pop()
+        chunks.append(cur)
 
-    # Full grid + outer box so columns and rows read clearly (the soft blue
-    # line is visible on both the white body and the navy header). SPANs keep
-    # merged header/band cells free of internal lines automatically.
-    style += [("INNERGRID", (0, 0), (-1, -1), 0.5, B.TABLE_GRID),
-              ("BOX", (0, 0), (-1, -1), 0.7, B.TABLE_GRID)]
-    t = Table(data, colWidths=colw, repeatRows=hdr if block.header else 0)
-    t.setStyle(TableStyle(style))
-    return t
+    flow = [PageBreak()]
+    for ci, ch in enumerate(chunks):
+        flow.append(_assemble(head_data, head_style, [body[j] for j in ch],
+                              colw, ncols, block.header))
+        if ci < len(chunks) - 1:
+            flow.append(PageBreak())
+    return flow
 
 
 def _story(policy):
@@ -158,7 +220,7 @@ def _story(policy):
             flow.append(Paragraph(escape(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):
             flow.append(Spacer(1, 4))
-            flow.append(_table(b))
+            flow.extend(_table_flowables(b))
             flow.append(Spacer(1, 8))
     return flow
 
