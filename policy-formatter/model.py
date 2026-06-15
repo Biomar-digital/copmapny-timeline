@@ -50,6 +50,7 @@ class Policy:
     # Signatures page (penultimate) adoption statement.
     adopted_on: str = ""
     effective_on: str = ""
+    signatures: bool = True   # include the board signatures page
 
 
 def _iter_block_items(parent):
@@ -68,21 +69,30 @@ def _clean(text: str) -> str:
     return text.replace("\t", " ").replace("​", "").strip()
 
 
-def _heading_level(style_name: str) -> Optional[int]:
-    s = (style_name or "").lower()
-    if "heading 1" in s or s == "title":
-        return 1
-    if "heading 2" in s:
-        return 2
-    return None
+def _heading_like(text: str) -> bool:
+    # A heading is short and does not end like a running sentence. Incoming
+    # Word files are often mis-styled (whole paragraphs tagged Heading 1, or
+    # body sentences tagged Heading 2), so we confirm headings by shape too.
+    return len(text.split()) <= 14 and not text.rstrip().endswith((".", ":", ";"))
+
+
+def _classify(text: str, style: str):
+    """Return ('heading', level) | ('bullet', 0) | ('body', 0)."""
+    s = (style or "").lower()
+    if "list" in s:
+        return "bullet", 0
+    if "heading 2" in s or s == "subtitle":
+        return ("heading", 2) if _heading_like(text) else ("body", 0)
+    if "heading 1" in s or s in ("heading", "title"):
+        return ("heading", 1) if _heading_like(text) else ("body", 0)
+    return "body", 0
 
 
 def parse_docx(path: str, title: Optional[str] = None,
                year: Optional[str] = None, **meta) -> Policy:
     doc = docx.Document(path)
     blocks = []
-    lead_lines = []          # text seen before the first real heading
-    seen_heading = False
+    doc_title = None
 
     for item in _iter_block_items(doc):
         if isinstance(item, _Table):
@@ -93,27 +103,30 @@ def parse_docx(path: str, title: Optional[str] = None,
             continue
 
         text = _clean(item.text)
+        if not text:
+            continue
         style = item.style.name if item.style else "Normal"
-        lvl = _heading_level(style)
-        is_bullet = "list" in (style or "").lower()
 
-        if lvl:
-            seen_heading = True
-            if text:
-                blocks.append(Heading(level=lvl, text=text))
-        elif is_bullet:
-            if text:
-                blocks.append(Bullet(text=text))
+        # The document's own title line: capture it, keep it out of the body.
+        if (style or "").lower() == "title":
+            if doc_title is None:
+                doc_title = text
+            continue
+        if title and text.strip().lower() == title.strip().lower():
+            continue
+        if len(text) < 4 and not text[0].isdigit():   # stray fragments ("Com")
+            continue
+
+        kind, level = _classify(text, style)
+        if kind == "heading":
+            blocks.append(Heading(level=level, text=text))
+        elif kind == "bullet":
+            blocks.append(Bullet(text=text))
         else:
-            if not text:
-                continue
-            if not seen_heading:
-                lead_lines.append(text)   # part of the document title block
-            else:
-                blocks.append(Body(text=text))
+            blocks.append(Body(text=text))
 
     if title is None:
-        title = " ".join(lead_lines).strip() or "Policy"
+        title = doc_title or "Policy"
     if year is None:
         import datetime
         year = str(datetime.date.today().year)

@@ -32,6 +32,8 @@ def main(argv=None):
     # Signatures page (penultimate) adoption statement.
     ap.add_argument("--adopted-on", dest="adopted_on", help="Board adoption date")
     ap.add_argument("--effective-on", dest="effective_on", help="Effective date")
+    ap.add_argument("--no-signatures", dest="signatures", action="store_false",
+                    help="Omit the board signatures page")
     args = ap.parse_args(argv)
 
     if not os.path.exists(args.input):
@@ -41,7 +43,8 @@ def main(argv=None):
     policy = parse_docx(args.input, title=args.title, year=args.year,
                         owner=args.owner, approver=args.approver,
                         approval_date=args.approval_date, version=args.version,
-                        adopted_on=args.adopted_on, effective_on=args.effective_on)
+                        adopted_on=args.adopted_on, effective_on=args.effective_on,
+                        signatures=args.signatures)
     build_pdf(policy, out)
 
     using_avenir = B.register_fonts()

@@ -36,12 +36,29 @@ CELL = ParagraphStyle("Cell", fontName=B.F_REGULAR, fontSize=8.5, leading=11,
                       textColor=B.BIOMAR_BLUE)
 CELL_H = ParagraphStyle("CellH", parent=CELL, fontName=B.F_DEMI,
                         textColor=B.WHITE)
+CELL_SEC = ParagraphStyle("CellSec", parent=CELL, fontName=B.F_DEMI)  # section row
 
 
 def _table(block):
-    data = [[Paragraph(escape(c), CELL_H if (block.header and i == 0) else CELL)
-             for c in row] for i, row in enumerate(block.rows)]
-    t = Table(data, repeatRows=1 if block.header else 0)
+    ncols = max(len(r) for r in block.rows)
+    rows = [list(r) + [""] * (ncols - len(r)) for r in block.rows]
+    avail = B.PAGE_W - B.MARGIN_L - B.MARGIN_R
+
+    def _is_merged(r):
+        f = [c for c in r if c.strip()]
+        return len(set(f)) == 1 and len(f) > 1
+
+    # Size columns proportionally to their content length (ignoring merged
+    # section rows) with a floor, so text-heavy columns get the width they
+    # need and no single row overflows the page.
+    body = [r for r in rows if not _is_merged(r)] or rows
+    colmax = [max((len(r[c]) for r in body), default=1) for c in range(ncols)]
+    colmax = [max(m, 6) for m in colmax]
+    tot = sum(colmax)
+    colw = [max(avail * m / tot, 34) for m in colmax]
+    scale = avail / sum(colw)
+    colw = [w * scale for w in colw]
+
     style = [
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 7),
@@ -51,9 +68,20 @@ def _table(block):
         ("LINEBELOW", (0, 0), (-1, -1), 0.5, B.LIGHT_RULE),
         ("LINEAFTER", (0, 0), (-2, -1), 0.5, B.LIGHT_RULE),
     ]
-    if block.header:
-        style += [("BACKGROUND", (0, 0), (-1, 0), B.BIOMAR_BLUE),
-                  ("LINEBELOW", (0, 0), (-1, 0), 0, B.BIOMAR_BLUE)]
+    data = []
+    for ri, r in enumerate(rows):
+        filled = [c for c in r if c.strip()]
+        merged = len(set(filled)) == 1 and len(filled) > 1   # section row
+        is_head = block.header and ri == 0
+        if merged:
+            data.append([Paragraph(escape(filled[0]), CELL_SEC)] + [""] * (ncols - 1))
+            style += [("SPAN", (0, ri), (-1, ri)),
+                      ("BACKGROUND", (0, ri), (-1, ri), B.LIGHT_RULE)]
+        else:
+            data.append([Paragraph(escape(c), CELL_H if is_head else CELL) for c in r])
+    style.append(("BACKGROUND", (0, 0), (-1, 0), B.BIOMAR_BLUE) if block.header
+                  else ("LINEBELOW", (0, 0), (-1, 0), 0.5, B.LIGHT_RULE))
+    t = Table(data, colWidths=colw, repeatRows=1 if block.header else 0)
     t.setStyle(TableStyle(style))
     return t
 
@@ -277,11 +305,11 @@ def build_pdf(policy, out_path):
     ])
 
     # cover | content (first page starts high so the H1 matches the template,
-    # later pages start below the logo) | signatures | back cover.
+    # later pages start below the logo) | [signatures] | back cover.
     story = ([NextPageTemplate("content_first"), PageBreak(),
-              NextPageTemplate("content")]
-             + _story(policy)
-             + [NextPageTemplate("signatures"), PageBreak(), Spacer(1, 0.1),
-                NextPageTemplate("back"), PageBreak(), Spacer(1, 0.1)])
+              NextPageTemplate("content")] + _story(policy))
+    if policy.signatures:
+        story += [NextPageTemplate("signatures"), PageBreak(), Spacer(1, 0.1)]
+    story += [NextPageTemplate("back"), PageBreak(), Spacer(1, 0.1)]
     doc.build(story)
     return out_path
