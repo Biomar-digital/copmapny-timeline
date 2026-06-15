@@ -162,6 +162,10 @@ def _assemble(head_data, head_style, body_rows, colw, ncols, repeat,
     for c in range(ncols - 1):
         r0 = 1 if c in span_cols else 0
         style.append(("LINEAFTER", (c, r0), (c, -1), 0.5, B.TABLE_GRID))
+    # Horizontal line under a row-0 span header (e.g. under "Explains",
+    # separating it from "Why"/"How").
+    for c in span_cols:
+        style.append(("LINEBELOW", (c, 0), (c + 1, 0), 0.5, B.TABLE_GRID))
     style += [("LINEBELOW", (0, hdr - 1), (-1, -1), 0.5, B.TABLE_GRID),
               ("BOX", (0, 0), (-1, -1), 0.7, B.TABLE_GRID)]
     t = Table(data, colWidths=colw, repeatRows=hdr if repeat else 0)
