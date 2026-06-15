@@ -135,9 +135,12 @@ def _body_cells(r, ncols):
             for c in r], False
 
 
-def _assemble(head_data, head_style, body_rows, colw, ncols, repeat):
+def _assemble(head_data, head_style, body_rows, colw, ncols, repeat,
+              span_cols=frozenset()):
     """Build one Table from the header + a set of body rows, with bands, zebra
-    striping and a full grid."""
+    striping and a grid. Column separators are drawn continuously (top to
+    bottom, through the full-width section bands too) so the column structure
+    stays readable; horizontal separators are drawn per row."""
     data = list(head_data)
     style = list(_BASE_TSTYLE) + list(head_style)
     hdr = len(head_data)
@@ -154,7 +157,12 @@ def _assemble(head_data, head_style, body_rows, colw, ncols, repeat):
             if zebra % 2:
                 style.append(("BACKGROUND", (0, i), (-1, i), B.TABLE_STRIPE))
             zebra += 1
-    style += [("INNERGRID", (0, 0), (-1, -1), 0.5, B.TABLE_GRID),
+    # Vertical separators: continuous over the whole height. A boundary that
+    # sits under a header span (e.g. Why|How under "Explains") starts at row 1.
+    for c in range(ncols - 1):
+        r0 = 1 if c in span_cols else 0
+        style.append(("LINEAFTER", (c, r0), (c, -1), 0.5, B.TABLE_GRID))
+    style += [("LINEBELOW", (0, hdr - 1), (-1, -1), 0.5, B.TABLE_GRID),
               ("BOX", (0, 0), (-1, -1), 0.7, B.TABLE_GRID)]
     t = Table(data, colWidths=colw, repeatRows=hdr if repeat else 0)
     t.setStyle(TableStyle(style))
@@ -182,10 +190,17 @@ def _table_flowables(block):
             hdr = 2
     colw = _column_widths(rows, ncols, hdr)
     head_data, head_style = _header_rows(rows, ncols, hdr)
+    # Column boundaries that sit under a row-0 horizontal span (e.g. Why|How
+    # under "Explains"): their vertical separator must start below the span.
+    span_cols = set()
+    if hdr == 2:
+        h0 = rows[0]
+        span_cols = {c for c in range(ncols - 1) if h0[c] and h0[c] == h0[c + 1]}
     body = rows[hdr:]
 
     if len(body) <= 12:                                # fits a page -> one table
-        return [_assemble(head_data, head_style, body, colw, ncols, block.header)]
+        return [_assemble(head_data, head_style, body, colw, ncols, block.header,
+                          span_cols)]
 
     # Manual pagination on its own pages.
     head_h = _row_height([c if c else "" for c in (head_data[0] if head_data else [])],
@@ -207,7 +222,7 @@ def _table_flowables(block):
     flow = [PageBreak()]
     for ci, ch in enumerate(chunks):
         flow.append(_assemble(head_data, head_style, [body[j] for j in ch],
-                              colw, ncols, block.header))
+                              colw, ncols, block.header, span_cols))
         if ci < len(chunks) - 1:
             flow.append(PageBreak())
     return flow
