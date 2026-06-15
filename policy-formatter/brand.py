@@ -42,6 +42,7 @@ SHRIMP_ORANGE = _rgb(221, 105, 40)
 WHEAT_YELLOW  = _rgb(234, 179, 24)
 WHITE         = _rgb(255, 255, 255)
 LIGHT_RULE    = _rgb(195, 228, 239)  # thin separators in tables
+TABLE_STRIPE  = _rgb(238, 245, 250)  # zebra striping for table body rows
 
 # ---------------------------------------------------------------------------
 # Page geometry (points) - A4, from the IDML master spread

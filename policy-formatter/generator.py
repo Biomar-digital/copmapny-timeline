@@ -5,7 +5,7 @@ Layout (cover + flowing content pages with running header/footer/logo) is a
 faithful reconstruction of the InDesign template. Type scale, colours,
 margins and the cover artwork all come from `brand.py` / `assets/`.
 """
-from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT
+from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.utils import ImageReader
 from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame,
@@ -15,6 +15,7 @@ from reportlab.platypus.flowables import HRFlowable
 from xml.sax.saxutils import escape
 
 import brand as B
+from model import Heading, Body, Bullet, TableBlock
 
 B.register_fonts()
 
@@ -35,8 +36,17 @@ BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
 CELL = ParagraphStyle("Cell", fontName=B.F_REGULAR, fontSize=8.5, leading=11,
                       textColor=B.BIOMAR_BLUE)
 CELL_H = ParagraphStyle("CellH", parent=CELL, fontName=B.F_DEMI,
-                        textColor=B.WHITE)
-CELL_SEC = ParagraphStyle("CellSec", parent=CELL, fontName=B.F_DEMI)  # section row
+                        textColor=B.WHITE, alignment=TA_CENTER)        # column header
+CELL_SEC = ParagraphStyle("CellSec", parent=CELL, fontName=B.F_DEMI,
+                          textColor=B.WHITE)                            # section band row
+CELL_C = ParagraphStyle("CellC", parent=CELL, alignment=TA_CENTER)     # short marks (√, —)
+
+
+def _band(r):
+    """A full-width row whose non-empty cells are all identical (a merged
+    title/section row), e.g. 'Table 1: ...' or '2. The general meeting'."""
+    f = [c for c in r if c.strip()]
+    return len(set(f)) == 1 and len(f) > 1
 
 
 def _table(block):
@@ -44,20 +54,37 @@ def _table(block):
     rows = [list(r) + [""] * (ncols - len(r)) for r in block.rows]
     avail = B.PAGE_W - B.MARGIN_L - B.MARGIN_R
 
-    def _is_merged(r):
-        f = [c for c in r if c.strip()]
-        return len(set(f)) == 1 and len(f) > 1
-
-    # Size columns proportionally to their content length (ignoring merged
-    # section rows) with a floor, so text-heavy columns get the width they
-    # need and no single row overflows the page.
-    body = [r for r in rows if not _is_merged(r)] or rows
-    colmax = [max((len(r[c]) for r in body), default=1) for c in range(ncols)]
-    colmax = [max(m, 6) for m in colmax]
+    # Column widths: proportional to content, but never narrower than the
+    # column's longest single word (so headers like "Complies" don't wrap).
+    # Any excess is taken from the columns that have slack (the text-heavy ones).
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    PAD = 16
+    body = [r for r in rows if not _band(r)] or rows
+    colmax = [max(max((len(r[c]) for r in body), default=1), 5) for c in range(ncols)]
     tot = sum(colmax)
-    colw = [max(avail * m / tot, 34) for m in colmax]
-    scale = avail / sum(colw)
-    colw = [w * scale for w in colw]
+    minw = [PAD + max((stringWidth(w, B.F_DEMI, 8.5)
+                       for r in rows for w in r[c].split()), default=10)
+            for c in range(ncols)]
+    colw = [max(avail * colmax[c] / tot, minw[c]) for c in range(ncols)]
+    over = sum(colw) - avail
+    if over > 0:
+        slack = [colw[c] - minw[c] for c in range(ncols)]
+        ts = sum(slack)
+        if ts > 0:
+            colw = [colw[c] - over * slack[c] / ts for c in range(ncols)]
+        else:
+            colw = [w * avail / sum(colw) for w in colw]
+
+    # Detect a 2-level header (e.g. "Explains" spanning "Why"/"How"): row 0 has
+    # adjacent duplicate labels (horizontal merge) or shares labels with row 1
+    # (vertical merge), and row 1 is not itself a band.
+    hdr = 0
+    if block.header and rows and not _band(rows[0]):
+        hdr = 1
+        if (len(rows) > 1 and not _band(rows[1]) and
+                (any(rows[0][c] and rows[0][c] == rows[0][c + 1] for c in range(ncols - 1))
+                 or any(rows[0][c] and rows[0][c] == rows[1][c] for c in range(ncols)))):
+            hdr = 2
 
     style = [
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
@@ -65,29 +92,60 @@ def _table(block):
         ("RIGHTPADDING", (0, 0), (-1, -1), 7),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-        ("LINEBELOW", (0, 0), (-1, -1), 0.5, B.LIGHT_RULE),
-        ("LINEAFTER", (0, 0), (-2, -1), 0.5, B.LIGHT_RULE),
     ]
     data = []
-    for ri, r in enumerate(rows):
-        filled = [c for c in r if c.strip()]
-        merged = len(set(filled)) == 1 and len(filled) > 1   # section row
-        is_head = block.header and ri == 0
-        if merged:
-            data.append([Paragraph(escape(filled[0]), CELL_SEC)] + [""] * (ncols - 1))
-            style += [("SPAN", (0, ri), (-1, ri)),
-                      ("BACKGROUND", (0, ri), (-1, ri), B.LIGHT_RULE)]
+
+    if hdr == 2:
+        h0, h1 = list(rows[0]), list(rows[1])
+        for c in range(ncols):                       # vertical spans
+            if h0[c] and h0[c] == h1[c]:
+                style.append(("SPAN", (c, 0), (c, 1)))
+                h1[c] = ""
+        c = 0
+        while c < ncols:                             # horizontal spans in row 0
+            j = c
+            while j + 1 < ncols and h0[j + 1] and h0[j + 1] == h0[c]:
+                j += 1
+            if j > c:
+                style.append(("SPAN", (c, 0), (j, 0)))
+                for k in range(c + 1, j + 1):
+                    h0[k] = ""
+            c = j + 1
+        data.append([Paragraph(escape(x), CELL_H) if x else "" for x in h0])
+        data.append([Paragraph(escape(x), CELL_H) if x else "" for x in h1])
+        style += [("BACKGROUND", (0, 0), (-1, 1), B.BIOMAR_BLUE),
+                  ("VALIGN", (0, 0), (-1, 1), "MIDDLE")]
+    elif hdr == 1:
+        data.append([Paragraph(escape(c), CELL_H) for c in rows[0]])
+        style.append(("BACKGROUND", (0, 0), (-1, 0), B.BIOMAR_BLUE))
+
+    zebra = 0
+    for r in rows[hdr:]:
+        i = len(data)
+        if _band(r):
+            # Section band: Ocean Blue + white Demi (one hierarchy level below
+            # the navy header).
+            txt = [c for c in r if c.strip()][0]
+            data.append([Paragraph(escape(txt), CELL_SEC)] + [""] * (ncols - 1))
+            style += [("SPAN", (0, i), (-1, i)),
+                      ("BACKGROUND", (0, i), (-1, i), B.OCEAN_BLUE)]
+            zebra = 0
         else:
-            data.append([Paragraph(escape(c), CELL_H if is_head else CELL) for c in r])
-    style.append(("BACKGROUND", (0, 0), (-1, 0), B.BIOMAR_BLUE) if block.header
-                  else ("LINEBELOW", (0, 0), (-1, 0), 0.5, B.LIGHT_RULE))
-    t = Table(data, colWidths=colw, repeatRows=1 if block.header else 0)
+            data.append([Paragraph(escape(c), CELL_C if len(c.strip()) <= 2 else CELL)
+                         for c in r])
+            if zebra % 2:                       # subtle zebra striping
+                style.append(("BACKGROUND", (0, i), (-1, i), B.TABLE_STRIPE))
+            zebra += 1
+
+    # Light separators on the body rows only (header/bands stay solid).
+    style += [("LINEBELOW", (0, hdr), (-1, -1), 0.4, B.LIGHT_RULE),
+              ("LINEAFTER", (0, hdr), (-2, -1), 0.4, B.LIGHT_RULE)]
+    t = Table(data, colWidths=colw, repeatRows=hdr if block.header else 0)
     t.setStyle(TableStyle(style))
     return t
 
 
 def _story(policy):
-    from model import Heading, Body, Bullet, TableBlock
     flow = []
     for b in policy.blocks:
         if isinstance(b, Heading):
@@ -194,37 +252,51 @@ def _draw_back_cover(c, doc):
 
 
 def _draw_version_card(c, policy):
-    # White "Version history / Owner and approver" card near the top, drawn on
-    # top of the back cover only when approval data is supplied.
-    cw, ch = 404.0, 104.0
-    cx = (B.PAGE_W - cw) / 2.0
+    # White "Version history / Owner and approver" card, drawn on the back
+    # cover only when approval data is supplied. Layout (column x-positions,
+    # Light 8 pt labels/values, Demi 10 pt headers) matches the template card.
+    cw, ch = 380.0, 100.0
+    cx = (B.PAGE_W - cw) / 2.0          # page-centred, like the template
     cy = B.PAGE_H - 150 - ch
+    right = cx + cw
     c.setFillColor(B.WHITE)
     c.roundRect(cx, cy, cw, ch, 10, stroke=0, fill=1)
 
-    col2 = cx + cw / 2.0
-    head_y = cy + ch - 22
+    # Absolute column geometry from the template card.
+    L_LABEL_R, L_VALUE = 199.0, 201.5   # left column: label right-edge, value
+    R_LABEL, R_VALUE = 266.8, 326.3     # right column: label, value
+    DIVIDER = 255.0
+
+    head_y = cy + ch - 24
     c.setFillColor(B.BIOMAR_BLUE)
     c.setFont(B.F_DEMI, 10)
-    c.drawCentredString(cx + cw / 4.0, head_y, "Version history")
-    c.drawCentredString(cx + 3 * cw / 4.0, head_y, "Owner and approver")
+    c.drawCentredString(193, head_y, "Version history")
+    c.drawCentredString(364, head_y, "Owner and approver")
     c.setStrokeColor(B.LIGHT_RULE)
     c.setLineWidth(0.5)
-    c.line(cx + 12, head_y - 9, cx + cw - 12, head_y - 9)   # under headers
-    c.line(col2, cy + 10, col2, head_y - 9)                 # column divider
+    c.line(cx + 14, head_y - 10, right - 14, head_y - 10)   # under headers
+    c.line(DIVIDER, cy + 10, DIVIDER, head_y - 10)          # column divider
 
     rows_l = [(policy.version, policy.approval_date or "—"),
               ("Approval date:", policy.approval_date or "—")]
     rows_r = [("Owner:", policy.owner or "—"),
               ("Approver:", policy.approver or "Executive Committee")]
-    c.setFont(B.F_REGULAR, 8)
-    ry = head_y - 26
+    ry = head_y - 27
     for (la, va), (lb, vb) in zip(rows_l, rows_r):
         c.setFillColor(B.BIOMAR_BLUE)
-        c.drawString(cx + 16, ry, la); c.drawString(cx + 96, ry, va)
-        c.drawString(col2 + 16, ry, lb); c.drawString(col2 + 86, ry, vb)
-        c.line(cx + 12, ry - 8, cx + cw - 12, ry - 8)
-        ry -= 26
+        c.setFont(B.F_LIGHT, 8)
+        c.drawRightString(L_LABEL_R, ry, la)
+        c.drawString(L_VALUE, ry, va)
+        c.drawString(R_LABEL, ry, lb)
+        # Shrink the owner/approver value if it would overflow the card.
+        size, avail = 8.0, right - R_VALUE - 8
+        while size > 6 and c.stringWidth(vb, B.F_LIGHT, size) > avail:
+            size -= 0.5
+        c.setFont(B.F_LIGHT, size)
+        c.drawString(R_VALUE, ry, vb)
+        c.setStrokeColor(B.LIGHT_RULE)
+        c.line(cx + 14, ry - 9, right - 14, ry - 9)
+        ry -= 25
 
 
 def _draw_signatures(c, doc):
@@ -293,9 +365,15 @@ def build_pdf(policy, out_path):
         title=policy.title, author=B.COMPANY)
     doc._policy = policy
 
+    # The first content page starts high (H1 at the template's 119 pt) only
+    # when it begins with a short heading; if it begins with full-width body
+    # text, start below the logo so text never runs under it.
+    first_top = (B.MARGIN_TOP if (policy.blocks and isinstance(policy.blocks[0], Heading))
+                 else B.MARGIN_TOP_CONT)
+
     doc.addPageTemplates([
         PageTemplate(id="cover", frames=[_frame(B.MARGIN_TOP)], onPage=_draw_cover),
-        PageTemplate(id="content_first", frames=[_frame(B.MARGIN_TOP)],
+        PageTemplate(id="content_first", frames=[_frame(first_top)],
                      onPage=_draw_content_furniture),
         PageTemplate(id="content", frames=[_frame(B.MARGIN_TOP_CONT)],
                      onPage=_draw_content_furniture),
