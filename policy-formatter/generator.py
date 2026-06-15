@@ -25,10 +25,14 @@ B.register_fonts()
 # --------------------------------------------------------------------------
 # Spacing values mirror the measured template grid (body leading 16, paragraph
 # gap 11.4, and the heading spacing reproduced from the IDML Title/Subtitle).
+# keepWithNext keeps a heading on the same page as the text that follows it,
+# so a heading is never left orphaned at the bottom of a page.
 H1 = ParagraphStyle("H1", fontName=B.F_DEMI, fontSize=14, leading=16,
-                    textColor=B.BIOMAR_BLUE, spaceBefore=14.5, spaceAfter=15)
+                    textColor=B.BIOMAR_BLUE, spaceBefore=14.5, spaceAfter=15,
+                    keepWithNext=1)
 H2 = ParagraphStyle("H2", fontName=B.F_DEMI, fontSize=12, leading=14,
-                    textColor=B.BIOMAR_BLUE, spaceBefore=5.3, spaceAfter=6.2)
+                    textColor=B.BIOMAR_BLUE, spaceBefore=5.3, spaceAfter=6.2,
+                    keepWithNext=1)
 BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
                       textColor=B.BIOMAR_BLUE, alignment=TA_JUSTIFY, spaceAfter=11.4)
 BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
