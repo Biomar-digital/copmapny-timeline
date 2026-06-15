@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""
+Adapt an incoming global policy (Word .docx) into a BioMar-branded PDF.
+
+Usage:
+    python format_policy.py INPUT.docx [-o OUTPUT.pdf]
+                            [--title "Travel Policy"] [--year 2026]
+
+If --title / --year are omitted they are inferred from the document
+(title = text before the first heading; year = current year).
+"""
+import argparse
+import os
+import sys
+
+from model import parse_docx
+from generator import build_pdf
+import brand as B
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Adapt a Word policy to the BioMar PDF template.")
+    ap.add_argument("input", help="Source .docx policy")
+    ap.add_argument("-o", "--output", help="Output .pdf (default: alongside input)")
+    ap.add_argument("--title", help="Cover / header title (default: inferred)")
+    ap.add_argument("--year", help="Cover year (default: current year)")
+    args = ap.parse_args(argv)
+
+    if not os.path.exists(args.input):
+        ap.error(f"input not found: {args.input}")
+
+    out = args.output or os.path.splitext(args.input)[0] + "_BioMar.pdf"
+    policy = parse_docx(args.input, title=args.title, year=args.year)
+    build_pdf(policy, out)
+
+    using_avenir = B.register_fonts()
+    print(f"✓ {out}")
+    print(f"  title='{policy.title}'  year={policy.year}  blocks={len(policy.blocks)}")
+    if not using_avenir:
+        print("  note: rendered with the open 'Outfit' fallback font. Drop the "
+              "licensed Avenir Next LT Pro TTFs into assets/fonts/ for a "
+              "pixel-true match.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
