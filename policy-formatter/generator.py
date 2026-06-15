@@ -137,9 +137,11 @@ def _table(block):
                 style.append(("BACKGROUND", (0, i), (-1, i), B.TABLE_STRIPE))
             zebra += 1
 
-    # Light separators on the body rows only (header/bands stay solid).
-    style += [("LINEBELOW", (0, hdr), (-1, -1), 0.4, B.LIGHT_RULE),
-              ("LINEAFTER", (0, hdr), (-2, -1), 0.4, B.LIGHT_RULE)]
+    # Full grid + outer box so columns and rows read clearly (the soft blue
+    # line is visible on both the white body and the navy header). SPANs keep
+    # merged header/band cells free of internal lines automatically.
+    style += [("INNERGRID", (0, 0), (-1, -1), 0.5, B.TABLE_GRID),
+              ("BOX", (0, 0), (-1, -1), 0.7, B.TABLE_GRID)]
     t = Table(data, colWidths=colw, repeatRows=hdr if block.header else 0)
     t.setStyle(TableStyle(style))
     return t
