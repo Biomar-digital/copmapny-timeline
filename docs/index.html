@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BioMar · Policy Library</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/logo.png" alt="BioMar" class="logo" />
+      <div>
+        <h1>Policy Library</h1>
+        <p class="sub">BioMar Group — governance policies &amp; statements</p>
+      </div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Search policies…" autocomplete="off" />
+      <span class="count" id="count"></span>
+    </div>
+    <div id="list" class="list"></div>
+    <p id="empty" class="empty" hidden>No policies match your search.</p>
+    <p id="error" class="empty" hidden></p>
+  </main>
+
+  <footer class="footer">
+    <span>BioMar Group A/S · Kalkværksvej 16, 15. · 8000 Aarhus C · Denmark · www.biomar.com</span>
+    <span class="hint">Create &amp; edit policies by connecting Claude Code to this repository.</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
