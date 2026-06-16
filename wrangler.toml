@@ -9,3 +9,11 @@ main = "worker/index.js"
 directory = "./docs"
 binding = "ASSETS"
 run_worker_first = true
+
+# Where the comments API commits reader comments (policies/comments/<id>.json).
+# GH_TOKEN (a GitHub token with contents:read+write) must be set as a Worker
+# secret; these non-secret values can live here.
+[vars]
+GH_OWNER = "Biomar-digital"
+GH_REPO = "copmapny-timeline"
+GH_BRANCH = "claude/confident-curie-gudwtz"

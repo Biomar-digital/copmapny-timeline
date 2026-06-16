@@ -55,6 +55,16 @@ function card(p) {
 
 // ---- Version history modal -----------------------------------------------
 
+function edKey(ed) {
+  return `${ed.version || "Version 1"}__${ed.date}`;
+}
+
+function fmtTime(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? esc(iso) : d.toLocaleString(undefined,
+    { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
 function editionRow(ed, isLatest) {
   const appr = ed.approval_date
     ? `<span><b>Approved:</b> ${esc(ed.approval_date)}</span>` : "";
@@ -75,7 +85,93 @@ function editionRow(ed, isLatest) {
         <a href="${esc(ed.files.approval)}" target="_blank" rel="noopener">Approval PDF ↗</a>
         <a href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener">Non-approval PDF ↗</a>
       </div>
+      <div class="vh-comments" data-key="${esc(edKey(ed))}">
+        <div class="vh-clabel">Comments</div>
+        <div class="vh-clist"><p class="vh-cempty">Loading…</p></div>
+        <div class="vh-cform">
+          <input class="vh-cauthor" type="text" placeholder="Your name (optional)" />
+          <textarea class="vh-ctext" rows="2" placeholder="Add a comment for the team / AI…"></textarea>
+          <div class="vh-crow">
+            <button type="button" class="btn vh-cadd">Add comment</button>
+            <span class="vh-cstatus"></span>
+          </div>
+        </div>
+      </div>
     </li>`;
+}
+
+// ---- comments API ----
+
+async function apiGetComments(policyId) {
+  const r = await fetch(`api/comments?policy=${encodeURIComponent(policyId)}`, { cache: "no-store" });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+  return d.comments || [];
+}
+
+async function apiPostComment(policyId, edition, author, text) {
+  const r = await fetch("api/comments", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ policy: policyId, edition, author, text }),
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+  return d.comment;
+}
+
+function renderCommentList(el, comments) {
+  if (!comments.length) {
+    el.innerHTML = '<p class="vh-cempty">No comments yet.</p>';
+    return;
+  }
+  el.innerHTML = comments.map(c => `
+    <div class="vh-comment">
+      <div class="vh-cmeta"><b>${esc(c.author || "Anonymous")}</b> · ${fmtTime(c.created_at)}</div>
+      <p>${esc(c.text)}</p>
+    </div>`).join("");
+}
+
+async function loadComments(policyId) {
+  const dlg = document.getElementById("history");
+  const conts = [...dlg.querySelectorAll(".vh-comments")];
+  let byEd = {};
+  let err = null;
+  try {
+    for (const c of await apiGetComments(policyId)) {
+      (byEd[c.edition] = byEd[c.edition] || []).push(c);
+    }
+  } catch (e) { err = e; }
+  conts.forEach(cont => {
+    const list = cont.querySelector(".vh-clist");
+    if (err) list.innerHTML = `<p class="vh-cempty">Comments unavailable (${esc(err.message)}).</p>`;
+    else renderCommentList(list, byEd[cont.dataset.key] || []);
+  });
+}
+
+function wireComments(policyId) {
+  const dlg = document.getElementById("history");
+  dlg.querySelectorAll(".vh-comments").forEach(cont => {
+    const btn = cont.querySelector(".vh-cadd");
+    btn.addEventListener("click", async () => {
+      const textEl = cont.querySelector(".vh-ctext");
+      const status = cont.querySelector(".vh-cstatus");
+      const text = textEl.value.trim();
+      const author = cont.querySelector(".vh-cauthor").value.trim();
+      if (!text) { status.textContent = "Write a comment first."; return; }
+      btn.disabled = true; status.textContent = "Saving…";
+      try {
+        await apiPostComment(policyId, cont.dataset.key, author, text);
+        textEl.value = "";
+        status.textContent = "Saved ✓";
+        const all = await apiGetComments(policyId);
+        renderCommentList(cont.querySelector(".vh-clist"),
+          all.filter(c => c.edition === cont.dataset.key));
+      } catch (e) {
+        status.textContent = "Could not save: " + e.message;
+      } finally { btn.disabled = false; }
+    });
+  });
 }
 
 function openHistory(p) {
@@ -88,6 +184,8 @@ function openHistory(p) {
     p.editions.map((ed, i) => editionRow(ed, i === last)).reverse().join("");
   if (typeof dlg.showModal === "function") dlg.showModal();
   else dlg.setAttribute("open", "");
+  wireComments(p.id);
+  loadComments(p.id);
 }
 
 let POLICIES = [];
