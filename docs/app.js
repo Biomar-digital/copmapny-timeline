@@ -266,19 +266,32 @@ function initSigPad() {
   const ctx = c.getContext("2d");
   ctx.lineWidth = 2.4; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#1c2c44";
   SIGN_CTX = ctx;
-  let drawing = false, lx = 0, ly = 0;
+  let drawing = false, pts = [];
   const pos = (e) => {
     const r = c.getBoundingClientRect();
     const t = e.touches ? e.touches[0] : e;
     return { x: (t.clientX - r.left) * (c.width / r.width), y: (t.clientY - r.top) * (c.height / r.height) };
   };
-  const down = (e) => { drawing = true; const p = pos(e); lx = p.x; ly = p.y; e.preventDefault(); };
+  const down = (e) => { drawing = true; pts = [pos(e)]; e.preventDefault(); };
   const move = (e) => {
-    if (!drawing) return; const p = pos(e);
-    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(p.x, p.y); ctx.stroke();
-    lx = p.x; ly = p.y; SIGN_HAS_INK = true; e.preventDefault();
+    if (!drawing) return;
+    pts.push(pos(e));
+    const n = pts.length;
+    if (n < 3) return;
+    // Smooth: quadratic curve through the midpoints, using the real point as control.
+    const p0 = pts[n - 3], p1 = pts[n - 2], p2 = pts[n - 1];
+    const m1 = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+    const m2 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+    ctx.beginPath(); ctx.moveTo(m1.x, m1.y); ctx.quadraticCurveTo(p1.x, p1.y, m2.x, m2.y); ctx.stroke();
+    SIGN_HAS_INK = true; e.preventDefault();
   };
-  const up = () => { drawing = false; };
+  const up = (e) => {
+    if (drawing && pts.length === 1) { // a single tap → a dot
+      const p = pts[0]; ctx.beginPath(); ctx.arc(p.x, p.y, ctx.lineWidth / 2, 0, Math.PI * 2); ctx.fill(); SIGN_HAS_INK = true;
+    }
+    drawing = false;
+  };
+  ctx.fillStyle = "#1c2c44";
   c.addEventListener("mousedown", down); c.addEventListener("mousemove", move); window.addEventListener("mouseup", up);
   c.addEventListener("touchstart", down, { passive: false }); c.addEventListener("touchmove", move, { passive: false }); window.addEventListener("touchend", up);
 
@@ -308,12 +321,15 @@ function openSign(policyId, edition) {
   SIGN_TARGET = { policyId, edition };
   document.getElementById("signSub").textContent = edition.replace("__", " · ");
   clearSig();
+  document.getElementById("sigName").value = "";
   const dlg = document.getElementById("sign");
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
 }
 
 async function saveSig() {
   const status = document.getElementById("sigStatus");
+  const label = document.getElementById("sigName").value.trim();
+  if (!label) { status.textContent = "Add the name / title for this signature line."; return; }
   if (!SIGN_HAS_INK) { status.textContent = "Draw or upload a signature first."; return; }
   const dataUrl = document.getElementById("sigPad").toDataURL("image/png");
   const btn = document.getElementById("sigSave");
@@ -321,7 +337,7 @@ async function saveSig() {
   try {
     const r = await fetch("api/signatures", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ policy: SIGN_TARGET.policyId, edition: SIGN_TARGET.edition, image: dataUrl }),
+      body: JSON.stringify({ policy: SIGN_TARGET.policyId, edition: SIGN_TARGET.edition, label, image: dataUrl }),
     });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(d.error || ("HTTP " + r.status));
@@ -336,7 +352,10 @@ function renderSigList(el, sigs) {
     ? '<div class="vh-siglabel">Signatures</div>' + sigs.map(s => `
       <div class="vh-sig">
         <img src="${esc(s.image)}" alt="signature" />
-        <div class="vh-sigwho"><b>${esc(s.name)}</b><span>${esc(s.account)} · ${fmtTime(s.signed_at)}</span></div>
+        <div class="vh-sigwho">
+          <b>${esc(s.label || s.name)}</b>
+          <span>Signed by ${esc(s.name)} (${esc(s.account)}) · ${fmtTime(s.signed_at)}</span>
+        </div>
       </div>`).join("")
     : "";
 }
@@ -437,6 +456,7 @@ async function setupAccount() {
 
 async function setupAdmin() {
   document.getElementById("connectBtn").hidden = false; // admin-only
+  const hint = document.getElementById("adminHint"); if (hint) hint.hidden = false;
   const bell = document.getElementById("bellBtn");
   bell.hidden = false;
   bell.addEventListener("click", openAdmin);

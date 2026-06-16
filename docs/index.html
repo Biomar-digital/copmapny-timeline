@@ -45,7 +45,7 @@
 
   <footer class="footer">
     <span>BioMar Group A/S · Kalkværksvej 16, 15. · 8000 Aarhus C · Denmark · www.biomar.com</span>
-    <span class="hint">Create &amp; edit policies by connecting Claude Code to this repository.</span>
+    <span class="hint" id="adminHint" hidden>Create &amp; edit policies by connecting Claude Code to this repository.</span>
   </footer>
 
   <dialog id="history" class="vh-dialog">
@@ -195,6 +195,8 @@ codex</code></pre>
       </header>
       <div class="cn-body">
         <p class="sg-note">Draw your signature below, or upload an image of it. It is recorded under your account and applied to the signed PDF.</p>
+        <label class="sg-field">Name / title for this signature line
+          <input id="sigName" type="text" placeholder="e.g. John Doe — Chairman of the Board" /></label>
         <canvas id="sigPad" class="sg-pad" width="460" height="170"></canvas>
         <div class="sg-row">
           <button type="button" class="btn ghost" id="sigClear">Clear</button>

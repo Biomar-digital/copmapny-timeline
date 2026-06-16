@@ -247,6 +247,12 @@ main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 60px; }
 
 /* Signature pad modal */
 .sg-note { margin: 0 0 11px; font-size: 12.5px; color: #496484; line-height: 1.55; }
+.sg-field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 600; color: var(--navy); margin-bottom: 11px; }
+.sg-field input {
+  border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px;
+  font-family: inherit; font-size: 13px; color: var(--ink);
+}
+.sg-field input:focus { outline: 2px solid var(--sky); border-color: var(--sky); }
 .sg-pad {
   width: 100%; height: 170px; border: 1px dashed var(--sky); border-radius: 10px;
   background: #fbfdff; touch-action: none; cursor: crosshair; display: block;

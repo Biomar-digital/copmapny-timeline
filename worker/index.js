@@ -451,15 +451,18 @@ async function handleSignatures(request, env, user) {
     let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
     const id = safePolicyId(p.policy); if (!id) return json({ error: "Invalid policy id." }, 400);
     const edition = String(p.edition || "").slice(0, 200);
+    const label = String(p.label || "").trim().slice(0, 200);
     const img = parseDataUrl(p.image);
+    if (!label) return json({ error: "Add the name / title for this signature line." }, 400);
     if (!img) return json({ error: "A signature image is required." }, 400);
     if (img.b64.length > 3500000) return json({ error: "Signature image too large." }, 400);
     const sigId = crypto.randomUUID();
     const imgPath = `${SIGNATURES_DIR}/${id}/${sigId}.${img.ext}`;
     const cr = await ghCreateFile(env, imgPath, img.b64, `Signature on ${id} by ${user.email}`);
     if (!cr.ok) return json({ error: `Could not store signature (${cr.status}).` }, 502);
-    // Identity is taken from the session, never from the client.
-    const sig = { id: sigId, edition, name: user.name, account: user.email, image: imgPath, signed_at: new Date().toISOString() };
+    // Identity (account) is taken from the session; `label` is the name/title to
+    // print on the PDF signature line.
+    const sig = { id: sigId, edition, label, name: user.name, account: user.email, image: imgPath, signed_at: new Date().toISOString() };
     const res = await appendItem(env, `${SIGNATURES_DIR}/${id}.json`, sig, `Add signature on ${id} by ${user.email}`);
     if (!res.ok) return json({ error: `Could not record signature (${res.status}).` }, 502);
     await recordEvent(env, "signature", `${user.name} signed ${id}`, id, user.name);
