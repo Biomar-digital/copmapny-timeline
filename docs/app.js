@@ -13,34 +13,81 @@ function latest(p) {
   return p.editions[p.editions.length - 1];
 }
 
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
 function card(p) {
   const ed = latest(p);
   const el = document.createElement("article");
   el.className = "card";
   const approvalRow = ed.approval_date
-    ? `<br><b>Approved:</b> ${ed.approval_date}` : "";
+    ? `<br><b>Approved:</b> ${esc(ed.approval_date)}` : "";
+  const n = p.editions.length;
   el.innerHTML = `
     <div>
-      <h2 class="title">${p.title}</h2>
+      <h2 class="title">${esc(p.title)}</h2>
       <div class="tags">
-        <span class="tag lang">${p.language || "English"}</span>
-        <span class="tag">${ed.version || "Version 1"}</span>
+        <span class="tag lang">${esc(p.language || "English")}</span>
+        <span class="tag">${esc(ed.version || "Version 1")}</span>
         <span class="tag">${prettyDate(ed.date)}</span>
       </div>
       <div class="info">
-        <b>Owner:</b> ${p.owner || "—"} &nbsp;·&nbsp; <b>Approver:</b> ${p.approver || "—"}
+        <b>Owner:</b> ${esc(p.owner || "—")} &nbsp;·&nbsp; <b>Approver:</b> ${esc(p.approver || "—")}
         ${approvalRow}
         <br><b>Last updated:</b> ${prettyDate(ed.date)} &nbsp;·&nbsp;
-        <b>Editions:</b> ${p.editions.length}
+        <b>Editions:</b> ${n}
       </div>
     </div>
     <div class="actions">
-      <a class="btn primary" href="${ed.files.approval}" target="_blank" rel="noopener">
+      <a class="btn primary" href="${esc(ed.files.approval)}" target="_blank" rel="noopener">
         Approval PDF <span class="arrow">↗</span></a>
-      <a class="btn ghost" href="${ed.files.non_approval}" target="_blank" rel="noopener">
+      <a class="btn ghost" href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener">
         Non-approval PDF <span class="arrow">↗</span></a>
+      <button type="button" class="btn history">
+        Version history <span class="badge">${n}</span></button>
     </div>`;
+  el.querySelector(".history").addEventListener("click", () => openHistory(p));
   return el;
+}
+
+// ---- Version history modal -----------------------------------------------
+
+function editionRow(ed, isLatest) {
+  const appr = ed.approval_date
+    ? `<span><b>Approved:</b> ${esc(ed.approval_date)}</span>` : "";
+  const gen = ed.generated_at
+    ? `<span><b>Generated:</b> ${esc(ed.generated_at)}</span>` : "";
+  const notes = ed.notes
+    ? `<p class="vh-notes">${esc(ed.notes)}</p>` : "";
+  return `
+    <li class="vh-item${isLatest ? " current" : ""}">
+      <div class="vh-head">
+        <span class="vh-version">${esc(ed.version || "Version 1")}</span>
+        <span class="tag">${prettyDate(ed.date)}</span>
+        ${isLatest ? '<span class="vh-current">Current</span>' : ""}
+      </div>
+      <div class="vh-meta">${appr}${gen}</div>
+      ${notes}
+      <div class="vh-files">
+        <a href="${esc(ed.files.approval)}" target="_blank" rel="noopener">Approval PDF ↗</a>
+        <a href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener">Non-approval PDF ↗</a>
+      </div>
+    </li>`;
+}
+
+function openHistory(p) {
+  const dlg = document.getElementById("history");
+  const last = p.editions.length - 1;
+  dlg.querySelector(".vh-title").textContent = `${p.title} — version history`;
+  dlg.querySelector(".vh-sub").textContent =
+    `${p.editions.length} edition${p.editions.length !== 1 ? "s" : ""} · Owner: ${p.owner || "—"}`;
+  dlg.querySelector(".vh-list").innerHTML =
+    p.editions.map((ed, i) => editionRow(ed, i === last)).reverse().join("");
+  if (typeof dlg.showModal === "function") dlg.showModal();
+  else dlg.setAttribute("open", "");
 }
 
 let POLICIES = [];

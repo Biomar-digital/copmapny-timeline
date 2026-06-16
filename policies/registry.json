@@ -1,5 +1,5 @@
 {
-  "_comment": "Source of truth for the policy library. Edit this (via Claude Code) to add/update policies, then run `python policy-formatter/tools/publish.py` to (re)generate the PDFs into docs/files and refresh docs/library.json.",
+  "_comment": "Source of truth for the policy library. Edit this (via Claude Code) to add/update policies, then run `python policy-formatter/tools/publish.py` to (re)generate the PDFs into docs/files and refresh docs/library.json. Each policy keeps an `editions` list (oldest first; the last one is the current version). To publish a new version, append a new edition with its own `source` .docx, `date`, `version`, `approval_date` and `notes` (a short changelog) — the older editions and their PDFs are kept so the web library can show full version history.",
   "policies": [
     {
       "id": "diversity-policy",
@@ -7,10 +7,15 @@
       "language": "English",
       "owner": "People, Purpose & Communication",
       "approver": "Executive Committee",
-      "source": "Diversity_Policy.docx",
-      "version": "Version 1",
-      "date": "2026-06",
-      "approval_date": ""
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-06",
+          "approval_date": "",
+          "source": "Diversity_Policy.docx",
+          "notes": "Initial publication."
+        }
+      ]
     },
     {
       "id": "corporate-governance-statement",
@@ -18,10 +23,15 @@
       "language": "English",
       "owner": "Group Legal",
       "approver": "Executive Committee",
-      "source": "Corporate_Governance_Statement.docx",
-      "version": "Version 1",
-      "date": "2026-06",
-      "approval_date": "19-05-2026"
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-06",
+          "approval_date": "19-05-2026",
+          "source": "Corporate_Governance_Statement.docx",
+          "notes": "Initial publication."
+        }
+      ]
     },
     {
       "id": "articles-of-association",
@@ -29,10 +39,15 @@
       "language": "English",
       "owner": "Group Legal",
       "approver": "Executive Committee",
-      "source": "Articles_of_Association.docx",
-      "version": "Version 1",
-      "date": "2026-06",
-      "approval_date": "13-05-2026"
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-06",
+          "approval_date": "13-05-2026",
+          "source": "Articles_of_Association.docx",
+          "notes": "Initial publication."
+        }
+      ]
     },
     {
       "id": "remuneration-policy",
@@ -40,10 +55,15 @@
       "language": "English",
       "owner": "People, Purpose & Communication",
       "approver": "Executive Committee",
-      "source": "Remuneration_Policy.docx",
-      "version": "Version 1",
-      "date": "2026-06",
-      "approval_date": "20-01-2026"
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-06",
+          "approval_date": "20-01-2026",
+          "source": "Remuneration_Policy.docx",
+          "notes": "Initial publication."
+        }
+      ]
     },
     {
       "id": "tax-policy",
@@ -51,10 +71,15 @@
       "language": "English",
       "owner": "Group Finance",
       "approver": "Executive Committee",
-      "source": "Tax_Policy.docx",
-      "version": "Version 1",
-      "date": "2026-06",
-      "approval_date": ""
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-06",
+          "approval_date": "",
+          "source": "Tax_Policy.docx",
+          "notes": "Initial publication."
+        }
+      ]
     }
   ]
 }

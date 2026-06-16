@@ -39,6 +39,21 @@ def _gen(source, title, year, date, tag, extra):
     return os.path.relpath(out, os.path.join(REPO, "docs"))
 
 
+def _editions(p):
+    """Return the policy's editions list (oldest first). Falls back to the
+    legacy flat schema (single edition) when `editions` is absent, so old
+    registry files keep working."""
+    if p.get("editions"):
+        return p["editions"]
+    return [{
+        "version": p.get("version", "Version 1"),
+        "date": p.get("date", "2026-06"),
+        "approval_date": p.get("approval_date", ""),
+        "source": p["source"],
+        "notes": p.get("notes", ""),
+    }]
+
+
 def main():
     os.makedirs(FILES, exist_ok=True)
     reg = json.load(open(REGISTRY, encoding="utf-8"))
@@ -47,33 +62,38 @@ def main():
     out_policies = []
 
     for p in reg["policies"]:
-        src = os.path.join(SOURCES, p["source"])
-        if not os.path.exists(src):
-            raise FileNotFoundError(src)
-        year = p.get("date", "2026-06").split("-")[0]
-        date = p["date"]
-        # approval set: board signatures page + version card
-        approval_extra = ["--owner", p.get("owner", ""),
-                          "--approver", p.get("approver", "Executive Committee")]
-        if p.get("approval_date"):
-            approval_extra += ["--approval-date", p["approval_date"]]
-        if p.get("version"):
-            approval_extra += ["--version", p["version"] + ":"]
-        f_appr = _gen(src, p["title"], year, date, "approval", approval_extra)
-        f_non = _gen(src, p["title"], year, date, "non-approval", ["--no-signatures"])
+        eds_out = []
+        for ed in _editions(p):
+            src = os.path.join(SOURCES, ed["source"])
+            if not os.path.exists(src):
+                raise FileNotFoundError(src)
+            date = ed["date"]
+            year = date.split("-")[0]
+            # approval set: board signatures page + version card
+            approval_extra = ["--owner", p.get("owner", ""),
+                              "--approver", p.get("approver", "Executive Committee")]
+            if ed.get("approval_date"):
+                approval_extra += ["--approval-date", ed["approval_date"]]
+            if ed.get("version"):
+                approval_extra += ["--version", ed["version"] + ":"]
+            f_appr = _gen(src, p["title"], year, date, "approval", approval_extra)
+            f_non = _gen(src, p["title"], year, date, "non-approval", ["--no-signatures"])
+            eds_out.append({
+                "version": ed.get("version", "Version 1"),
+                "date": date,
+                "approval_date": ed.get("approval_date", ""),
+                "notes": ed.get("notes", ""),
+                "generated_at": today,
+                "files": {"approval": f_appr, "non_approval": f_non},
+            })
 
         out_policies.append({
             "id": p["id"], "title": p["title"], "language": p.get("language", "English"),
             "owner": p.get("owner", ""), "approver": p.get("approver", ""),
-            "editions": [{
-                "version": p.get("version", "Version 1"),
-                "date": date,
-                "approval_date": p.get("approval_date", ""),
-                "generated_at": today,
-                "files": {"approval": f_appr, "non_approval": f_non},
-            }],
+            "editions": eds_out,
         })
-        print(f"  published {p['title']}")
+        n = len(eds_out)
+        print(f"  published {p['title']}  ({n} edition{'s' if n != 1 else ''})")
 
     data = {"brand": "BioMar Group", "updated": today, "policies": out_policies}
     json.dump(data, open(LIBRARY, "w", encoding="utf-8"), indent=2, ensure_ascii=False)

@@ -1,7 +1,11 @@
 name = "globa-policies"
 compatibility_date = "2026-06-16"
+main = "worker/index.js"
 
-# Static-only site: serve the generated policy library (docs/) as Worker assets.
-# The deploy command `wrangler versions upload` reads this [assets] directory.
+# The Worker (worker/index.js) gates every request with Basic Auth, then serves
+# the generated policy library (docs/) via the ASSETS binding. run_worker_first
+# makes the Worker run before assets so nothing is served without authentication.
 [assets]
 directory = "./docs"
+binding = "ASSETS"
+run_worker_first = true
