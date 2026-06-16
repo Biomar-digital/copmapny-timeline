@@ -10,10 +10,14 @@ directory = "./docs"
 binding = "ASSETS"
 run_worker_first = true
 
-# Where the comments API commits reader comments (policies/comments/<id>.json).
-# GH_TOKEN (a GitHub token with contents:read+write) must be set as a Worker
-# secret; these non-secret values can live here.
+# Backend config for the feedback/request APIs.
+# Secrets (set in the dashboard, NOT here): GH_TOKEN (contents:read+write AND
+# issues:write), RESEND_API_KEY (for email notifications).
 [vars]
 GH_OWNER = "Biomar-digital"
 GH_REPO = "copmapny-timeline"
 GH_BRANCH = "claude/confident-curie-gudwtz"
+# Email notifications (Resend). NOTIFY_EMAIL is where alerts are sent; RESEND_FROM
+# must be a verified Resend sender (or the onboarding address while testing).
+NOTIFY_EMAIL = "marketing@biomar.com"
+RESEND_FROM = "BioMar Policies <onboarding@resend.dev>"

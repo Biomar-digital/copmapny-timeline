@@ -22,6 +22,7 @@
     <div class="toolbar">
       <input id="search" type="search" placeholder="Search policies…" autocomplete="off" />
       <span class="count" id="count"></span>
+      <button type="button" id="newReqBtn" class="btn reqbtn">+ Request a new policy</button>
       <button type="button" id="connectBtn" class="btn connect">
         <span class="dot"></span> Connect an AI agent
       </button>
@@ -45,8 +46,45 @@
         </div>
         <button value="close" class="vh-close" aria-label="Close">×</button>
       </header>
+      <div class="vh-reqbar">
+        <button type="button" id="reqChangeBtn" class="btn reqbtn">+ Request a change to this policy</button>
+      </div>
       <ol class="vh-list"></ol>
     </form>
+  </dialog>
+
+  <dialog id="request" class="vh-dialog connect-dialog">
+    <div class="vh-box">
+      <header class="vh-bar">
+        <div>
+          <h2 class="vh-title" id="reqTitle">Request</h2>
+          <p class="vh-sub" id="reqSub"></p>
+        </div>
+        <button type="button" class="vh-close" id="reqClose" aria-label="Close">×</button>
+      </header>
+      <div class="cn-body">
+        <div class="rq-field" id="reqTitleField">
+          <label>Policy title</label>
+          <input id="reqDocTitle" type="text" placeholder="e.g. Travel &amp; Expenses Policy" />
+        </div>
+        <div class="rq-row">
+          <div class="rq-field"><label>Your name *</label><input id="reqName" type="text" /></div>
+          <div class="rq-field"><label>Your email</label><input id="reqEmail" type="email" placeholder="optional" /></div>
+        </div>
+        <div class="rq-field">
+          <label id="reqDetailsLabel">Details *</label>
+          <textarea id="reqDetails" rows="4" placeholder="Describe the change or the new policy you need…"></textarea>
+        </div>
+        <div class="rq-field">
+          <label>Attach a document <span class="rq-hint">(.docx or .pdf, optional)</span></label>
+          <input id="reqFile" type="file" accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+        </div>
+        <div class="rq-actions">
+          <button type="button" class="btn vh-cadd" id="reqSubmit">Send request</button>
+          <span class="vh-cstatus" id="reqStatus"></span>
+        </div>
+      </div>
+    </div>
   </dialog>
 
   <dialog id="connect" class="vh-dialog connect-dialog">

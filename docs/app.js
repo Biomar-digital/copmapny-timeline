@@ -188,7 +188,76 @@ function wireComments(policyId) {
   });
 }
 
+// ---- requests (change / new policy, with optional upload) ----
+
+let HISTORY_POLICY = null;
+
+function openRequest(mode, policy) {
+  const dlg = document.getElementById("request");
+  const isNew = mode === "new";
+  document.getElementById("reqTitle").textContent =
+    isNew ? "Request a new policy" : "Request a change";
+  document.getElementById("reqSub").textContent = isNew
+    ? "Describe the policy you need and optionally attach a draft."
+    : `Policy: ${policy ? policy.title : "—"}`;
+  document.getElementById("reqTitleField").style.display = isNew ? "" : "none";
+  document.getElementById("reqDetailsLabel").textContent =
+    isNew ? "What should this policy cover? *" : "What change do you need? *";
+  document.getElementById("reqDocTitle").value = "";
+  document.getElementById("reqDetails").value = "";
+  document.getElementById("reqEmail").value = localStorage.getItem("biomar-email") || "";
+  document.getElementById("reqName").value = savedAuthor();
+  document.getElementById("reqFile").value = "";
+  document.getElementById("reqStatus").textContent = "";
+  dlg.dataset.mode = mode;
+  dlg.dataset.policy = isNew ? "" : (policy ? policy.id : "");
+  dlg.dataset.title = isNew ? "" : (policy ? policy.title : "");
+  if (typeof dlg.showModal === "function") dlg.showModal();
+  else dlg.setAttribute("open", "");
+}
+
+async function submitRequest() {
+  const dlg = document.getElementById("request");
+  const mode = dlg.dataset.mode || "new";
+  const status = document.getElementById("reqStatus");
+  const name = document.getElementById("reqName").value.trim();
+  const email = document.getElementById("reqEmail").value.trim();
+  const details = document.getElementById("reqDetails").value.trim();
+  const docTitle = document.getElementById("reqDocTitle").value.trim();
+  const fileEl = document.getElementById("reqFile");
+  if (!name) { status.textContent = "Please enter your name."; return; }
+  if (!details) { status.textContent = "Please describe your request."; return; }
+  if (mode === "new" && !docTitle) { status.textContent = "Enter a title for the new policy."; return; }
+
+  try { localStorage.setItem("biomar-author", name); } catch {}
+  try { if (email) localStorage.setItem("biomar-email", email); } catch {}
+
+  const fd = new FormData();
+  fd.set("kind", mode === "new" ? "new" : "change");
+  fd.set("author", name);
+  fd.set("email", email);
+  fd.set("details", details);
+  if (mode === "new") fd.set("title", docTitle);
+  else { fd.set("policy", dlg.dataset.policy || ""); fd.set("title", dlg.dataset.title || ""); }
+  if (fileEl.files && fileEl.files[0]) fd.set("file", fileEl.files[0]);
+
+  const btn = document.getElementById("reqSubmit");
+  btn.disabled = true; status.textContent = "Sending…";
+  try {
+    const r = await fetch("api/requests", { method: "POST", body: fd });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+    status.textContent = "Request sent ✓ — thank you!";
+    setTimeout(() => dlg.close && dlg.close(), 1200);
+  } catch (e) {
+    status.textContent = "Could not send: " + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 function openHistory(p) {
+  HISTORY_POLICY = p;
   const dlg = document.getElementById("history");
   const last = p.editions.length - 1;
   dlg.querySelector(".vh-title").textContent = `${p.title} — version history`;
@@ -238,6 +307,15 @@ async function init() {
         else connectDlg.setAttribute("open", "");
       });
     }
+    document.getElementById("newReqBtn").addEventListener("click", () => openRequest("new"));
+    document.getElementById("reqChangeBtn").addEventListener("click", () => {
+      const dlg = document.getElementById("history");
+      if (dlg.close) dlg.close();
+      openRequest("change", HISTORY_POLICY);
+    });
+    document.getElementById("reqClose").addEventListener("click",
+      () => { const d = document.getElementById("request"); if (d.close) d.close(); });
+    document.getElementById("reqSubmit").addEventListener("click", submitRequest);
   } catch (err) {
     const e = document.getElementById("error");
     e.hidden = false;
