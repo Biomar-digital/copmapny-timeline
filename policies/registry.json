@@ -136,12 +136,12 @@
             {
               "label": "Policy",
               "language": "English",
-              "source": "responsible-sourcing-policy__Policy.docx",
-              "board_approval": false
+              "pdf": "responsible-sourcing-policy__original.pdf"
             }
           ]
         }
-      ]
+      ],
+      "notes": "Original PDF kept as-is (design + images)."
     },
     {
       "id": "code-of-conduct-suppliers",

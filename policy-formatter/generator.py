@@ -40,6 +40,7 @@ BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
                       textColor=B.BIOMAR_BLUE, alignment=TA_JUSTIFY, spaceAfter=11.4,
                       splitLongWords=0, hyphenationLang="",
                       allowWidows=0, allowOrphans=0)
+BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
 BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
                         leftIndent=16, bulletIndent=2, spaceAfter=6)
 CELL = ParagraphStyle("Cell", fontName=B.F_REGULAR, fontSize=8.5, leading=11,
@@ -288,7 +289,10 @@ def _story(policy):
         if isinstance(b, Heading):
             flow.append(Paragraph(escape(b.text), H1 if b.level == 1 else H2))
         elif isinstance(b, Body):
-            flow.append(Paragraph(_fmt(b.text), BODY))
+            # Justify normal running text; left-align short lines and anything
+            # with a URL/long token so justification doesn't stretch the spaces.
+            justify = len(b.text) >= 90 and "://" not in b.text
+            flow.append(Paragraph(_fmt(b.text), BODY if justify else BODY_LEFT))
         elif isinstance(b, Bullet):
             flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):

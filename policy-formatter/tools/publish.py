@@ -20,6 +20,7 @@ import datetime
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -89,11 +90,28 @@ def main():
             year = date.split("-")[0]
             docs_out = []
             for doc in _documents(ed):
+                label = doc.get("label", "Policy")
+                name_base = f"{_slug(p['title'])}__{_slug(label)}"
+
+                # A document can ship the original PDF as-is (e.g. design-heavy
+                # pieces whose exact layout/images must be preserved verbatim).
+                if doc.get("pdf"):
+                    srcpdf = os.path.join(SOURCES, doc["pdf"])
+                    if not os.path.exists(srcpdf):
+                        raise FileNotFoundError(srcpdf)
+                    dst = os.path.join(FILES, f"{name_base}_{date}_original.pdf")
+                    shutil.copyfile(srcpdf, dst)
+                    docs_out.append({
+                        "label": label,
+                        "language": doc.get("language") or p.get("language", "English"),
+                        "original": True,
+                        "files": {"non_approval": os.path.relpath(dst, os.path.join(REPO, "docs"))},
+                    })
+                    continue
+
                 src = os.path.join(SOURCES, doc["source"])
                 if not os.path.exists(src):
                     raise FileNotFoundError(src)
-                label = doc.get("label", "Policy")
-                name_base = f"{_slug(p['title'])}__{_slug(label)}"
                 # Version / owner-approver card is drawn on every document (it was
                 # on the originals); only the board signatures page is conditional.
                 meta_args = ["--owner", p.get("owner", ""),
