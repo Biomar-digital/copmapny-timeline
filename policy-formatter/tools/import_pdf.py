@@ -23,9 +23,11 @@ Render any PDF (original or generated) to PNGs for visual QA:
 import argparse
 import re
 from collections import Counter
+from io import BytesIO
 
 import fitz  # PyMuPDF
 from docx import Document
+from docx.shared import Pt as DocxPt
 
 CTRL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 BOILER = ("Kalkværksvej", "www.biomar.com")
@@ -89,6 +91,27 @@ def extract_items(pdf):
             size = Counter(sizes).most_common(1)[0][0] if sizes else 11.0
             page_items.append((rb.y0, "block", (s, size, bold, rb.x0)))
 
+        # content images (skip the logo / header / footer / full-page artwork)
+        for im in page.get_image_info(xrefs=True):
+            bb = fitz.Rect(im["bbox"])
+            if bb.y0 < H * 0.10 or bb.y1 > H * 0.93:
+                continue
+            if bb.width < 42 or bb.height < 30:
+                continue
+            if bb.get_area() > 0.72 * page.rect.get_area():
+                continue
+            xref = im.get("xref", 0)
+            if not xref:
+                continue
+            try:
+                pix = fitz.Pixmap(doc, xref)
+                if pix.n - pix.alpha >= 4:            # CMYK/other -> RGB
+                    pix = fitz.Pixmap(fitz.csRGB, pix)
+                png = pix.tobytes("png")
+            except Exception:
+                continue
+            page_items.append((bb.y0, "image", (png, bb.width, bb.height)))
+
         page_items.sort(key=lambda it: it[0])
         items.extend((k, p) for _, k, p in page_items)
     return items
@@ -114,6 +137,14 @@ def build_docx(pdf, out):
     skip_toc = False
     last_para = None           # last body paragraph, for merging split continuations
     for k, p in items:
+        if k == "image":
+            png, w, _h = p
+            try:
+                doc.add_picture(BytesIO(png), width=DocxPt(min(w, 470)))
+            except Exception:
+                pass
+            last_para = None
+            continue
         if k == "table":
             last_para = None
             rows = [r for r in p if any((c or "").strip() for c in r)]

@@ -16,7 +16,9 @@ from xml.sax.saxutils import escape
 import re
 
 import brand as B
-from model import Heading, Body, Bullet, TableBlock
+from model import Heading, Body, Bullet, TableBlock, ImageBlock
+from reportlab.platypus import Image as RLImage
+from io import BytesIO
 
 B.register_fonts()
 
@@ -256,6 +258,30 @@ def _table_flowables(block):
     return flow
 
 
+_CONTENT_W = B.PAGE_W - B.MARGIN_L - B.MARGIN_R
+
+
+def _image_flowables(b):
+    """Render an embedded image, scaled to fit the content width."""
+    try:
+        img = RLImage(BytesIO(b.data))
+    except Exception:
+        return []
+    iw, ih = float(img.imageWidth or 1), float(img.imageHeight or 1)
+    max_h = B.PAGE_H - B.MARGIN_TOP_CONT - B.MARGIN_BOTTOM - 12   # fit one content frame
+    w = b.width or iw
+    if w > _CONTENT_W:
+        w = _CONTENT_W
+    h = ih * (w / iw)
+    if h > max_h:                       # very tall image -> scale by height
+        h = max_h
+        w = iw * (h / ih)
+    img.drawWidth = w
+    img.drawHeight = h
+    img.hAlign = "CENTER"
+    return [Spacer(1, 5), img, Spacer(1, 7)]
+
+
 def _story(policy):
     flow = []
     for b in policy.blocks:
@@ -269,6 +295,8 @@ def _story(policy):
             flow.append(Spacer(1, 4))
             flow.extend(_table_flowables(b))
             flow.append(Spacer(1, 8))
+        elif isinstance(b, ImageBlock):
+            flow.extend(_image_flowables(b))
     return flow
 
 

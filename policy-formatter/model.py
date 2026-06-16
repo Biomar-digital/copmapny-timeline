@@ -15,6 +15,7 @@ from docx.table import Table as _Table
 from docx.text.paragraph import Paragraph as _Paragraph
 from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
+from docx.oxml.ns import qn
 
 
 # ---- block types ----------------------------------------------------------
@@ -37,6 +38,12 @@ class TableBlock:
     header: bool = True
 
 @dataclass
+class ImageBlock:
+    data: bytes             # raw image bytes (png/jpeg)
+    width: float = 0.0      # intended display size in points (0 = natural)
+    height: float = 0.0
+
+@dataclass
 class Policy:
     title: str
     year: str
@@ -51,6 +58,30 @@ class Policy:
     adopted_on: str = ""
     effective_on: str = ""
     signatures: bool = True   # include the board signatures page
+
+
+def _para_images(item):
+    """Inline images in a paragraph -> [(bytes, width_pt, height_pt)]."""
+    out = []
+    p = item._p
+    for blip in p.findall(".//" + qn("a:blip")):
+        rid = blip.get(qn("r:embed"))
+        if not rid:
+            continue
+        try:
+            data = item.part.related_parts[rid].blob
+        except KeyError:
+            continue
+        w = h = 0.0
+        ext = p.find(".//" + qn("wp:extent"))
+        if ext is not None:
+            try:
+                w = int(ext.get("cx")) / 12700.0   # EMU -> points
+                h = int(ext.get("cy")) / 12700.0
+            except (TypeError, ValueError):
+                pass
+        out.append((data, w, h))
+    return out
 
 
 def _iter_block_items(parent):
@@ -101,6 +132,9 @@ def parse_docx(path: str, title: Optional[str] = None,
             if rows:
                 blocks.append(TableBlock(rows=rows))
             continue
+
+        for data, iw, ih in _para_images(item):
+            blocks.append(ImageBlock(data=data, width=iw, height=ih))
 
         text = _clean(item.text)
         if not text:
