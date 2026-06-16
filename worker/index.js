@@ -1,23 +1,27 @@
-// BioMar Policy Library — edge auth gate + comments API.
+// BioMar Policy Library — edge auth gate + comments/annotations API.
 //
 // This Worker runs in front of the static assets (docs/) and:
 //   1. Protects the whole site with HTTP Basic Auth (username + password).
-//   2. Serves a small comments API backed by the GitHub repository, so reader
-//      comments persist as files (policies/comments/<id>.json) that an AI agent
-//      connected to the repo can later read.
+//   2. Serves small JSON APIs backed by the GitHub repository so reader feedback
+//      persists as files an AI agent connected to the repo can later read:
+//        - /api/comments     -> policies/comments/<id>.json     (per version)
+//        - /api/annotations  -> policies/annotations/<id>.json  (anchored to PDF text)
 //
 // Environment:
 //   AUTH_USER, AUTH_PASS  (secrets)  — login credentials.
 //   GH_TOKEN              (secret)   — GitHub token with contents:read+write.
-//   GH_OWNER, GH_REPO, GH_BRANCH (vars) — where comments are committed.
+//   GH_OWNER, GH_REPO, GH_BRANCH (vars) — where feedback is committed.
 //
 // Fail closed: with no AUTH_USER/AUTH_PASS the site is not served. With no
-// GH_TOKEN the comments API returns 503 but the catalogue still works.
+// GH_TOKEN the feedback APIs return 503 but the catalogue still works.
 
 const REALM = "BioMar Policy Library";
 const COMMENTS_DIR = "policies/comments";
+const ANNOTATIONS_DIR = "policies/annotations";
 const MAX_TEXT = 4000;
+const MAX_QUOTE = 1000;
 const MAX_AUTHOR = 120;
+const MAX_RECTS = 80;
 
 // ---- auth ----------------------------------------------------------------
 
@@ -88,8 +92,7 @@ function contentsUrl(env, path) {
   return `https://api.github.com/repos/${env.GH_OWNER}/${env.GH_REPO}/contents/${path}`;
 }
 
-// Returns { list, sha } for a comments file, or { list: [], sha: null } if new.
-async function ghGetComments(env, path) {
+async function ghGetList(env, path) {
   const url = `${contentsUrl(env, path)}?ref=${encodeURIComponent(env.GH_BRANCH)}`;
   const r = await fetch(url, { headers: ghHeaders(env) });
   if (r.status === 404) return { list: [], sha: null };
@@ -101,22 +104,34 @@ async function ghGetComments(env, path) {
   return { list, sha: data.sha };
 }
 
-async function ghPutComments(env, path, list, sha, message) {
+async function ghPutList(env, path, list, sha, message) {
   const body = {
     message,
     content: b64encode(JSON.stringify(list, null, 2) + "\n"),
     branch: env.GH_BRANCH,
   };
   if (sha) body.sha = sha;
-  const r = await fetch(contentsUrl(env, path), {
+  return fetch(contentsUrl(env, path), {
     method: "PUT",
     headers: { ...ghHeaders(env), "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  return r;
 }
 
-// ---- comments API --------------------------------------------------------
+// Append an item to a repo JSON array with a small retry on SHA conflict.
+async function appendItem(env, path, item, message) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { list, sha } = await ghGetList(env, path);
+    list.push(item);
+    const r = await ghPutList(env, path, list, sha, message);
+    if (r.ok) return { ok: true };
+    if (r.status === 409 || r.status === 422) continue; // sha conflict → retry
+    return { ok: false, status: r.status };
+  }
+  return { ok: false, status: 409 };
+}
+
+// ---- shared helpers ------------------------------------------------------
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -129,52 +144,101 @@ function safePolicyId(id) {
   return typeof id === "string" && /^[a-z0-9-]{1,80}$/.test(id) ? id : null;
 }
 
+function safeFile(f) {
+  return typeof f === "string" && /^files\/[A-Za-z0-9._-]+\.pdf$/.test(f) ? f : null;
+}
+
+function backendReady(env) {
+  return env.GH_TOKEN && env.GH_OWNER && env.GH_REPO && env.GH_BRANCH;
+}
+
+function clamp01(n) {
+  n = Number(n);
+  if (!isFinite(n)) return 0;
+  return Math.max(0, Math.min(1, n));
+}
+
+function cleanRects(input) {
+  if (!Array.isArray(input)) return [];
+  return input.slice(0, MAX_RECTS).map(r => ({
+    x: clamp01(r.x), y: clamp01(r.y), w: clamp01(r.w), h: clamp01(r.h),
+  }));
+}
+
+// ---- /api/comments (per-version) -----------------------------------------
+
 async function handleComments(request, env, auth) {
-  if (!env.GH_TOKEN || !env.GH_OWNER || !env.GH_REPO || !env.GH_BRANCH) {
-    return json({ error: "Comments backend not configured." }, 503);
-  }
+  if (!backendReady(env)) return json({ error: "Comments backend not configured." }, 503);
   const url = new URL(request.url);
 
   if (request.method === "GET") {
     const id = safePolicyId(url.searchParams.get("policy"));
     if (!id) return json({ error: "Invalid policy id." }, 400);
-    const { list } = await ghGetComments(env, `${COMMENTS_DIR}/${id}.json`);
+    const { list } = await ghGetList(env, `${COMMENTS_DIR}/${id}.json`);
     return json({ comments: list });
   }
 
   if (request.method === "POST") {
-    let payload;
-    try { payload = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
-    const id = safePolicyId(payload.policy);
+    let p;
+    try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
+    const id = safePolicyId(p.policy);
     if (!id) return json({ error: "Invalid policy id." }, 400);
-    const edition = String(payload.edition || "").slice(0, 200);
-    const text = String(payload.text || "").trim().slice(0, MAX_TEXT);
-    const author = String(payload.author || auth.name || "Anonymous").trim().slice(0, MAX_AUTHOR) || "Anonymous";
+    const edition = String(p.edition || "").slice(0, 200);
+    const text = String(p.text || "").trim().slice(0, MAX_TEXT);
+    const author = String(p.author || auth.name || "Anonymous").trim().slice(0, MAX_AUTHOR) || "Anonymous";
     if (!edition) return json({ error: "Missing edition." }, 400);
     if (!text) return json({ error: "Comment text is required." }, 400);
 
-    const comment = {
+    const comment = { id: crypto.randomUUID(), edition, author, text, created_at: new Date().toISOString() };
+    const res = await appendItem(env, `${COMMENTS_DIR}/${id}.json`, comment, `Add comment on ${id} (${edition})`);
+    if (!res.ok) return json({ error: `GitHub write failed (${res.status}).` }, 502);
+    return json({ comment }, 201);
+  }
+
+  return json({ error: "Method not allowed." }, 405);
+}
+
+// ---- /api/annotations (anchored to PDF text) -----------------------------
+
+async function handleAnnotations(request, env, auth) {
+  if (!backendReady(env)) return json({ error: "Annotations backend not configured." }, 503);
+  const url = new URL(request.url);
+
+  if (request.method === "GET") {
+    const id = safePolicyId(url.searchParams.get("policy"));
+    if (!id) return json({ error: "Invalid policy id." }, 400);
+    const { list } = await ghGetList(env, `${ANNOTATIONS_DIR}/${id}.json`);
+    const file = url.searchParams.get("file");
+    const filtered = file ? list.filter(a => a.file === file) : list;
+    return json({ annotations: filtered });
+  }
+
+  if (request.method === "POST") {
+    let p;
+    try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
+    const id = safePolicyId(p.policy);
+    if (!id) return json({ error: "Invalid policy id." }, 400);
+    const file = safeFile(p.file);
+    if (!file) return json({ error: "Invalid file." }, 400);
+    const page = parseInt(p.page, 10);
+    if (!(page >= 1 && page <= 5000)) return json({ error: "Invalid page." }, 400);
+    const quote = String(p.quote || "").trim().slice(0, MAX_QUOTE);
+    const text = String(p.text || "").trim().slice(0, MAX_TEXT);
+    const author = String(p.author || auth.name || "Anonymous").trim().slice(0, MAX_AUTHOR) || "Anonymous";
+    const rects = cleanRects(p.rects);
+    if (!text) return json({ error: "Comment text is required." }, 400);
+
+    const ann = {
       id: crypto.randomUUID(),
-      edition,
-      author,
-      text,
+      file, page, quote, rects,
+      edition: String(p.edition || "").slice(0, 200),
+      author, text,
       created_at: new Date().toISOString(),
     };
-    const path = `${COMMENTS_DIR}/${id}.json`;
-
-    // Read-modify-write with a retry on the (rare) concurrent-write conflict.
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const { list, sha } = await ghGetComments(env, path);
-      list.push(comment);
-      const r = await ghPutComments(
-        env, path, list, sha,
-        `Add comment on ${id} (${edition})`,
-      );
-      if (r.ok) return json({ comment }, 201);
-      if (r.status === 409 || r.status === 422) continue; // sha conflict → retry
-      return json({ error: `GitHub write failed (${r.status}).` }, 502);
-    }
-    return json({ error: "Could not save comment after retries." }, 409);
+    const res = await appendItem(env, `${ANNOTATIONS_DIR}/${id}.json`, ann,
+      `Add annotation on ${id} (${file} p.${page})`);
+    if (!res.ok) return json({ error: `GitHub write failed (${res.status}).` }, 502);
+    return json({ annotation: ann }, 201);
   }
 
   return json({ error: "Method not allowed." }, 405);
@@ -195,9 +259,8 @@ export default {
     if (!auth.ok) return unauthorized();
 
     const url = new URL(request.url);
-    if (url.pathname === "/api/comments") {
-      return handleComments(request, env, auth);
-    }
+    if (url.pathname === "/api/comments") return handleComments(request, env, auth);
+    if (url.pathname === "/api/annotations") return handleAnnotations(request, env, auth);
 
     // Authenticated → serve the requested static asset.
     return env.ASSETS.fetch(request);

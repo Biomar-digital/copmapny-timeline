@@ -59,13 +59,18 @@ function edKey(ed) {
   return `${ed.version || "Version 1"}__${ed.date}`;
 }
 
+function annHref(p, ed, file) {
+  const q = new URLSearchParams({ policy: p.id, edition: edKey(ed), title: p.title, file });
+  return "review.html?" + q.toString();
+}
+
 function fmtTime(iso) {
   const d = new Date(iso);
   return isNaN(d) ? esc(iso) : d.toLocaleString(undefined,
     { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-function editionRow(ed, isLatest) {
+function editionRow(p, ed, isLatest) {
   const appr = ed.approval_date
     ? `<span><b>Approved:</b> ${esc(ed.approval_date)}</span>` : "";
   const gen = ed.generated_at
@@ -83,7 +88,9 @@ function editionRow(ed, isLatest) {
       ${notes}
       <div class="vh-files">
         <a href="${esc(ed.files.approval)}" target="_blank" rel="noopener">Approval PDF ↗</a>
+        <a class="vh-annotate" href="${esc(annHref(p, ed, ed.files.approval))}">✎ Annotate</a>
         <a href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener">Non-approval PDF ↗</a>
+        <a class="vh-annotate" href="${esc(annHref(p, ed, ed.files.non_approval))}">✎ Annotate</a>
       </div>
       <div class="vh-comments" data-key="${esc(edKey(ed))}">
         <div class="vh-clabel">Comments</div>
@@ -181,7 +188,7 @@ function openHistory(p) {
   dlg.querySelector(".vh-sub").textContent =
     `${p.editions.length} edition${p.editions.length !== 1 ? "s" : ""} · Owner: ${p.owner || "—"}`;
   dlg.querySelector(".vh-list").innerHTML =
-    p.editions.map((ed, i) => editionRow(ed, i === last)).reverse().join("");
+    p.editions.map((ed, i) => editionRow(p, ed, i === last)).reverse().join("");
   if (typeof dlg.showModal === "function") dlg.showModal();
   else dlg.setAttribute("open", "");
   wireComments(p.id);

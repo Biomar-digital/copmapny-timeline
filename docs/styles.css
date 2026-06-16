@@ -146,6 +146,10 @@ main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 60px; }
 .vh-files { margin-top: 11px; display: flex; flex-wrap: wrap; gap: 8px 18px; }
 .vh-files a { font-size: 12.5px; font-weight: 600; color: var(--ocean); text-decoration: none; }
 .vh-files a:hover { text-decoration: underline; }
+.vh-files a.vh-annotate {
+  color: var(--navy); background: var(--crisp); padding: 2px 9px; border-radius: 20px;
+}
+.vh-files a.vh-annotate:hover { background: var(--sky); text-decoration: none; }
 
 /* Per-edition comments */
 .vh-comments { margin-top: 13px; border-top: 1px dashed var(--line); padding-top: 11px; }

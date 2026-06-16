@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BioMar · Review &amp; annotate</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="review.css" />
+</head>
+<body class="review">
+  <header class="topbar">
+    <div class="brand">
+      <a href="index.html" class="back" title="Back to library">←</a>
+      <img src="assets/logo.png" alt="BioMar" class="logo" />
+      <div>
+        <h1 id="docTitle">Review &amp; annotate</h1>
+        <p class="sub" id="docSub">Select text in the document, then add a note.</p>
+      </div>
+    </div>
+    <div class="rv-name">
+      <label>Your name <input id="who" type="text" placeholder="optional" autocomplete="name" /></label>
+    </div>
+  </header>
+
+  <div class="rv-wrap">
+    <main id="viewer" class="rv-viewer" aria-label="Document"></main>
+    <aside class="rv-side">
+      <div class="rv-side-head">
+        <h2>Annotations</h2>
+        <span id="annCount" class="count"></span>
+      </div>
+      <div id="annList" class="rv-annlist"></div>
+      <p id="annEmpty" class="rv-empty">No annotations yet. Select a line in the document and click <b>Add note</b>.</p>
+    </aside>
+  </div>
+
+  <!-- floating selection button -->
+  <button id="selBtn" class="rv-selbtn" type="button" hidden>✎ Add note</button>
+
+  <!-- comment composer popover -->
+  <div id="composer" class="rv-composer" hidden>
+    <p class="rv-quote" id="cQuote"></p>
+    <textarea id="cText" rows="3" placeholder="Write your note…"></textarea>
+    <div class="rv-crow">
+      <button id="cSave" class="btn vh-cadd" type="button">Save note</button>
+      <button id="cCancel" class="btn ghost" type="button">Cancel</button>
+      <span id="cStatus" class="vh-cstatus"></span>
+    </div>
+  </div>
+
+  <p id="loadErr" class="rv-loaderr" hidden></p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="review.js"></script>
+</body>
+</html>
