@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BioMar · Policy Library — Sign in</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body class="login">
+  <div class="lg-card">
+    <div class="lg-brand">
+      <img src="assets/logo.png" alt="BioMar" class="logo" />
+      <div>
+        <h1>Policy Library</h1>
+        <p class="sub">BioMar Group — governance policies &amp; statements</p>
+      </div>
+    </div>
+
+    <div class="lg-tabs">
+      <button type="button" class="lg-tab active" data-tab="signin">Sign in</button>
+      <button type="button" class="lg-tab" data-tab="register">Request access</button>
+    </div>
+
+    <!-- Sign in -->
+    <form id="signinForm" class="lg-form">
+      <label>Email<input id="siEmail" type="email" autocomplete="username" required /></label>
+      <label>Password<input id="siPass" type="password" autocomplete="current-password" required /></label>
+      <button type="submit" class="btn primary">Sign in</button>
+      <p class="lg-status" id="siStatus"></p>
+    </form>
+
+    <!-- Register -->
+    <form id="registerForm" class="lg-form" hidden>
+      <p class="lg-note">Request an account. An administrator must approve it before you can sign in.</p>
+      <label>Full name<input id="rgName" type="text" autocomplete="name" required /></label>
+      <label>Email<input id="rgEmail" type="email" autocomplete="email" required /></label>
+      <label>Password <span class="lg-hint">(min. 8 characters)</span><input id="rgPass" type="password" autocomplete="new-password" required /></label>
+      <button type="submit" class="btn primary">Request access</button>
+      <p class="lg-status" id="rgStatus"></p>
+    </form>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>

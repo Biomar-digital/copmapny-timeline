@@ -18,7 +18,6 @@ const composer = document.getElementById("composer");
 const cQuote = document.getElementById("cQuote");
 const cText = document.getElementById("cText");
 const cStatus = document.getElementById("cStatus");
-const whoInput = document.getElementById("who");
 const annListEl = document.getElementById("annList");
 const annEmpty = document.getElementById("annEmpty");
 const annCount = document.getElementById("annCount");
@@ -167,15 +166,8 @@ function closeComposer() {
 
 async function saveNote() {
   const text = cText.value.trim();
-  const author = whoInput.value.trim();
-  if (!author) {
-    cStatus.textContent = "Enter your name (top-right) first.";
-    whoInput.focus();
-    return;
-  }
   if (!text) { cStatus.textContent = "Write a note first."; return; }
   if (!pendingAnchor) { cStatus.textContent = "Select text again."; return; }
-  try { localStorage.setItem("biomar-author", author); } catch {}
   const saveBtn = document.getElementById("cSave");
   saveBtn.disabled = true; cStatus.textContent = "Saving…";
   try {
@@ -185,7 +177,7 @@ async function saveNote() {
       body: JSON.stringify({
         policy: POLICY, file: FILE, edition: EDITION,
         page: pendingAnchor.page, quote: pendingAnchor.quote,
-        rects: pendingAnchor.rects, text, author,
+        rects: pendingAnchor.rects, text,
       }),
     });
     const d = await r.json().catch(() => ({}));
@@ -276,8 +268,6 @@ async function init() {
   document.getElementById("docSub").textContent =
     (EDITION ? EDITION.replace("__", " · ") + " — " : "") + "Select text, then add a note.";
   document.title = `BioMar · Review — ${TITLE}`;
-  whoInput.value = localStorage.getItem("biomar-author") || "";
-  whoInput.placeholder = "required";
 
   selBtn.addEventListener("click", openComposer);
   document.getElementById("cSave").addEventListener("click", saveNote);

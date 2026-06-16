@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BioMar · Policy Library</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -15,7 +16,16 @@
         <p class="sub">BioMar Group — governance policies &amp; statements</p>
       </div>
     </div>
-    <div class="meta" id="meta"></div>
+    <div class="topbar-right">
+      <div class="meta" id="meta"></div>
+      <div class="acct">
+        <button id="bellBtn" class="acct-bell" type="button" hidden aria-label="Notifications">
+          🔔<span class="bell-badge" id="bellBadge" hidden>0</span>
+        </button>
+        <span id="acctName" class="acct-name"></span>
+        <button id="logoutBtn" class="acct-logout" type="button" hidden>Sign out</button>
+      </div>
+    </div>
   </header>
 
   <main>
@@ -66,10 +76,6 @@
         <div class="rq-field" id="reqTitleField">
           <label>Policy title</label>
           <input id="reqDocTitle" type="text" placeholder="e.g. Travel &amp; Expenses Policy" />
-        </div>
-        <div class="rq-row">
-          <div class="rq-field"><label>Your name *</label><input id="reqName" type="text" /></div>
-          <div class="rq-field"><label>Your email</label><input id="reqEmail" type="email" placeholder="optional" /></div>
         </div>
         <div class="rq-field">
           <label id="reqDetailsLabel">Details *</label>
@@ -153,6 +159,28 @@ codex</code></pre>
         </section>
       </div>
     </form>
+  </dialog>
+
+  <dialog id="admin" class="vh-dialog connect-dialog">
+    <div class="vh-box">
+      <header class="vh-bar">
+        <div>
+          <h2 class="vh-title">Admin</h2>
+          <p class="vh-sub" id="adminSub">Notifications &amp; account approvals</p>
+        </div>
+        <button type="button" class="vh-close" id="adminClose" aria-label="Close">×</button>
+      </header>
+      <div class="ad-tabs">
+        <button type="button" class="ad-tab active" data-tab="notifs">Notifications</button>
+        <button type="button" class="ad-tab" data-tab="pending">
+          Pending accounts <span id="pendBadge" class="badge" hidden>0</span>
+        </button>
+      </div>
+      <div class="cn-body">
+        <div id="adNotifs" class="ad-list"></div>
+        <div id="adPending" class="ad-list" hidden></div>
+      </div>
+    </div>
   </dialog>
 
   <script src="library-data.js"></script>

@@ -10,6 +10,12 @@ directory = "./docs"
 binding = "ASSETS"
 run_worker_first = true
 
+# Accounts + sessions + notification events (two-role auth, signup/approval).
+[[d1_databases]]
+binding = "DB"
+database_name = "policy-users"
+database_id = "0b2578fc-06a3-426b-83a7-f8a8df25502a"
+
 # Backend config for the feedback/request APIs.
 # Secrets (set in the dashboard, NOT here): GH_TOKEN (contents:read+write AND
 # issues:write), RESEND_API_KEY (for email notifications).

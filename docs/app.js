@@ -100,7 +100,6 @@ function editionRow(p, ed, isLatest) {
         <div class="vh-clabel">Comments</div>
         <div class="vh-clist"><p class="vh-cempty">Loading…</p></div>
         <div class="vh-cform">
-          <input class="vh-cauthor" type="text" placeholder="Your name (required)" value="${esc(savedAuthor())}" />
           <textarea class="vh-ctext" rows="2" placeholder="Add a comment for the team / AI…"></textarea>
           <div class="vh-crow">
             <button type="button" class="btn vh-cadd">Add comment</button>
@@ -168,14 +167,10 @@ function wireComments(policyId) {
       const textEl = cont.querySelector(".vh-ctext");
       const status = cont.querySelector(".vh-cstatus");
       const text = textEl.value.trim();
-      const authorEl = cont.querySelector(".vh-cauthor");
-      const author = authorEl.value.trim();
-      if (!author) { status.textContent = "Please enter your name."; authorEl.focus(); return; }
       if (!text) { status.textContent = "Write a comment first."; return; }
-      try { localStorage.setItem("biomar-author", author); } catch {}
       btn.disabled = true; status.textContent = "Saving…";
       try {
-        await apiPostComment(policyId, cont.dataset.key, author, text);
+        await apiPostComment(policyId, cont.dataset.key, "", text);
         textEl.value = "";
         status.textContent = "Saved ✓";
         const all = await apiGetComments(policyId);
@@ -205,8 +200,6 @@ function openRequest(mode, policy) {
     isNew ? "What should this policy cover? *" : "What change do you need? *";
   document.getElementById("reqDocTitle").value = "";
   document.getElementById("reqDetails").value = "";
-  document.getElementById("reqEmail").value = localStorage.getItem("biomar-email") || "";
-  document.getElementById("reqName").value = savedAuthor();
   document.getElementById("reqFile").value = "";
   document.getElementById("reqStatus").textContent = "";
   dlg.dataset.mode = mode;
@@ -220,22 +213,14 @@ async function submitRequest() {
   const dlg = document.getElementById("request");
   const mode = dlg.dataset.mode || "new";
   const status = document.getElementById("reqStatus");
-  const name = document.getElementById("reqName").value.trim();
-  const email = document.getElementById("reqEmail").value.trim();
   const details = document.getElementById("reqDetails").value.trim();
   const docTitle = document.getElementById("reqDocTitle").value.trim();
   const fileEl = document.getElementById("reqFile");
-  if (!name) { status.textContent = "Please enter your name."; return; }
   if (!details) { status.textContent = "Please describe your request."; return; }
   if (mode === "new" && !docTitle) { status.textContent = "Enter a title for the new policy."; return; }
 
-  try { localStorage.setItem("biomar-author", name); } catch {}
-  try { if (email) localStorage.setItem("biomar-email", email); } catch {}
-
   const fd = new FormData();
   fd.set("kind", mode === "new" ? "new" : "change");
-  fd.set("author", name);
-  fd.set("email", email);
   fd.set("details", details);
   if (mode === "new") fd.set("title", docTitle);
   else { fd.set("policy", dlg.dataset.policy || ""); fd.set("title", dlg.dataset.title || ""); }
@@ -287,6 +272,108 @@ function render(filter = "") {
     `${shown.length} of ${POLICIES.length} policies`;
 }
 
+// ---- account + admin (bell / approvals) ----
+
+const EVENT_LABEL = {
+  account_request: "Account request", account_approved: "Account approved",
+  account_rejected: "Account rejected", comment: "New comment", annotation: "New annotation",
+  request_new: "New policy request", request_change: "Change request",
+};
+
+async function setupAccount() {
+  let me = null;
+  try { me = (await (await fetch("api/auth/me", { cache: "no-store" })).json()).user; } catch {}
+  if (!me) return;
+  document.getElementById("acctName").textContent = me.name;
+  const logout = document.getElementById("logoutBtn");
+  logout.hidden = false;
+  logout.addEventListener("click", async () => {
+    try { await fetch("api/auth/logout", { method: "POST" }); } catch {}
+    location.href = "login.html";
+  });
+  if (me.role === "admin") setupAdmin();
+}
+
+async function setupAdmin() {
+  const bell = document.getElementById("bellBtn");
+  bell.hidden = false;
+  bell.addEventListener("click", openAdmin);
+  document.getElementById("adminClose").addEventListener("click",
+    () => { const d = document.getElementById("admin"); if (d.close) d.close(); });
+  document.querySelectorAll(".ad-tab").forEach(t => t.addEventListener("click", () => {
+    document.querySelectorAll(".ad-tab").forEach(x => x.classList.toggle("active", x === t));
+    document.getElementById("adNotifs").hidden = t.dataset.tab !== "notifs";
+    document.getElementById("adPending").hidden = t.dataset.tab !== "pending";
+  }));
+  await refreshBadges();
+}
+
+async function refreshBadges() {
+  try {
+    const d = await (await fetch("api/admin/inbox", { cache: "no-store" })).json();
+    const b = document.getElementById("bellBadge");
+    if (d.unread > 0) { b.hidden = false; b.textContent = d.unread > 99 ? "99+" : d.unread; } else b.hidden = true;
+  } catch {}
+  try {
+    const d = await (await fetch("api/admin/users?status=pending", { cache: "no-store" })).json();
+    const n = (d.users || []).length;
+    const pb = document.getElementById("pendBadge");
+    if (n > 0) { pb.hidden = false; pb.textContent = n; } else pb.hidden = true;
+  } catch {}
+}
+
+async function openAdmin() {
+  const dlg = document.getElementById("admin");
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  const notifs = document.getElementById("adNotifs");
+  notifs.innerHTML = '<p class="ad-empty">Loading…</p>';
+  try {
+    const d = await (await fetch("api/admin/inbox", { cache: "no-store" })).json();
+    notifs.innerHTML = (d.events || []).length ? d.events.map(e => `
+      <div class="ad-item">
+        <div class="ad-h"><b>${esc(EVENT_LABEL[e.type] || e.type)}</b> · ${fmtTime(new Date(e.created_at).toISOString())}</div>
+        <div class="ad-s">${esc(e.summary || "")}</div>
+      </div>`).join("") : '<p class="ad-empty">No notifications yet.</p>';
+  } catch (e) { notifs.innerHTML = `<p class="ad-empty">Could not load (${esc(e.message)}).</p>`; }
+  try { await fetch("api/admin/inbox/seen", { method: "POST" }); } catch {}
+  document.getElementById("bellBadge").hidden = true;
+  await loadPending();
+}
+
+async function loadPending() {
+  const el = document.getElementById("adPending");
+  el.innerHTML = '<p class="ad-empty">Loading…</p>';
+  try {
+    const d = await (await fetch("api/admin/users?status=pending", { cache: "no-store" })).json();
+    const users = d.users || [];
+    if (!users.length) { el.innerHTML = '<p class="ad-empty">No pending accounts.</p>'; return; }
+    el.innerHTML = users.map(u => `
+      <div class="ad-item" data-id="${esc(u.id)}">
+        <div class="ad-h"><b>${esc(u.name)}</b> · ${esc(u.email)}</div>
+        <div class="ad-actions">
+          <button type="button" class="btn vh-cadd ad-approve">Approve</button>
+          <button type="button" class="btn ghost ad-reject">Reject</button>
+        </div>
+      </div>`).join("");
+    el.querySelectorAll(".ad-item").forEach(item => {
+      const id = item.dataset.id;
+      item.querySelector(".ad-approve").addEventListener("click", () => decideUser(id, "approve", item));
+      item.querySelector(".ad-reject").addEventListener("click", () => decideUser(id, "reject", item));
+    });
+  } catch (e) { el.innerHTML = `<p class="ad-empty">Could not load (${esc(e.message)}).</p>`; }
+}
+
+async function decideUser(id, action, item) {
+  try {
+    const r = await fetch(`api/admin/users/${action}`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }),
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    item.remove();
+    await refreshBadges();
+  } catch (e) { alert("Could not update: " + e.message); }
+}
+
 async function init() {
   try {
     // Use embedded data when present (works from file:// with no server),
@@ -316,6 +403,7 @@ async function init() {
     document.getElementById("reqClose").addEventListener("click",
       () => { const d = document.getElementById("request"); if (d.close) d.close(); });
     document.getElementById("reqSubmit").addEventListener("click", submitRequest);
+    setupAccount();
   } catch (err) {
     const e = document.getElementById("error");
     e.hidden = false;

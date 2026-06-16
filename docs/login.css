@@ -1,0 +1,38 @@
+body.login {
+  min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #1c4076, #0471ad); padding: 24px;
+}
+.lg-card {
+  width: 100%; max-width: 400px; background: #fff; border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(10, 30, 60, .35); padding: 26px 26px 24px;
+}
+.lg-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.lg-brand .logo { width: 48px; height: 48px; border-radius: 11px; }
+.lg-brand h1 { margin: 0; font-size: 19px; color: var(--navy); }
+.lg-brand .sub { margin: 2px 0 0; font-size: 12px; color: #5a7898; }
+
+.lg-tabs { display: flex; gap: 6px; background: var(--bg); border-radius: 10px; padding: 4px; margin-bottom: 18px; }
+.lg-tab {
+  flex: 1; border: none; background: transparent; padding: 9px; border-radius: 8px;
+  font-family: inherit; font-size: 13px; font-weight: 600; color: #5a7898; cursor: pointer;
+}
+.lg-tab.active { background: #fff; color: var(--navy); box-shadow: 0 1px 3px rgba(28,64,118,.14); }
+
+.lg-form { display: flex; flex-direction: column; gap: 13px; }
+.lg-form label { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 600; color: var(--navy); }
+.lg-hint { font-weight: 400; color: #7c95b1; }
+.lg-form input {
+  border: 1px solid var(--line); border-radius: 9px; padding: 11px 12px;
+  font-family: inherit; font-size: 14px; color: var(--ink); background: #fff;
+}
+.lg-form input:focus { outline: 2px solid var(--sky); border-color: var(--sky); }
+.lg-note { margin: 0; font-size: 12.5px; color: #5a7898; line-height: 1.55; }
+.btn.primary {
+  display: flex; justify-content: center; background: var(--navy); color: #fff;
+  border: 1px solid var(--navy); padding: 11px; border-radius: 9px; font-size: 14px;
+  font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 2px;
+}
+.btn.primary:hover { background: #163461; }
+.btn.primary:disabled { opacity: .6; cursor: default; }
+.lg-status { margin: 2px 0 0; font-size: 12.5px; min-height: 16px; color: #b4233a; }
+.lg-status.ok { color: #1d7a4d; }
