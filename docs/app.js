@@ -39,7 +39,7 @@ function card(p) {
   const n = p.editions.length;
   el.innerHTML = `
     <div>
-      <h2 class="title">${esc(p.title)}</h2>
+      <h2 class="title">${esc(p.title)}${PENDING.has(p.id) ? ' <span class="pending-badge">Change pending</span>' : ""}</h2>
       <div class="tags">
         <span class="tag lang">${esc(p.language || "English")}</span>
         <span class="tag">${esc(ed.version || "Version 1")}</span>
@@ -61,6 +61,18 @@ function card(p) {
         Version history <span class="badge">${n}</span></button>
     </div>`;
   el.querySelector(".history").addEventListener("click", () => openHistory(p));
+  const pb = el.querySelector(".pending-badge");
+  if (pb && IS_ADMIN) {
+    pb.classList.add("clickable");
+    pb.title = "Mark resolved";
+    pb.addEventListener("click", async () => {
+      if (!confirm(`Mark the change request for "${p.title}" as resolved?`)) return;
+      try {
+        await fetch("api/pending", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ policy: p.id }) });
+        PENDING.delete(p.id); render();
+      } catch (e) { alert("Could not update: " + e.message); }
+    });
+  }
   return el;
 }
 
@@ -259,6 +271,47 @@ async function submitRequest() {
 // ---- signatures ----
 
 let SIGN_CTX = null, SIGN_TARGET = null, SIGN_HAS_INK = false;
+let WALLET = [], SELECTED_WALLET = null;
+
+async function loadWallet() {
+  const wrap = document.getElementById("sgSaved");
+  const list = document.getElementById("sgSavedList");
+  list.innerHTML = "";
+  try {
+    const d = await (await fetch("api/wallet", { cache: "no-store" })).json();
+    WALLET = d.signatures || [];
+  } catch { WALLET = []; }
+  if (!WALLET.length) { wrap.hidden = true; return; }
+  wrap.hidden = false;
+  list.innerHTML = WALLET.map(s =>
+    `<button type="button" class="sg-thumb" data-id="${esc(s.id)}" title="${esc(s.label || "")}"><img src="${esc(s.image)}" alt="saved signature" /></button>`).join("");
+  list.querySelectorAll(".sg-thumb").forEach(b => b.addEventListener("click", () => selectWallet(b)));
+}
+
+function deselectWallet() {
+  SELECTED_WALLET = null;
+  document.querySelectorAll(".sg-thumb.active").forEach(x => x.classList.remove("active"));
+}
+
+function selectWallet(btn) {
+  const s = WALLET.find(x => x.id === btn.dataset.id);
+  if (!s || !SIGN_CTX) return;
+  SELECTED_WALLET = s.id;
+  document.querySelectorAll(".sg-thumb.active").forEach(x => x.classList.remove("active"));
+  btn.classList.add("active");
+  const c = document.getElementById("sigPad");
+  SIGN_CTX.clearRect(0, 0, c.width, c.height);
+  const img = new Image();
+  img.onload = () => {
+    const scale = Math.min(c.width / img.width, c.height / img.height);
+    const w = img.width * scale, h = img.height * scale;
+    SIGN_CTX.drawImage(img, (c.width - w) / 2, (c.height - h) / 2, w, h);
+    SIGN_HAS_INK = true;
+  };
+  img.src = s.image;
+  const nameEl = document.getElementById("sigName");
+  if (!nameEl.value && s.label) nameEl.value = s.label;
+}
 
 function initSigPad() {
   const c = document.getElementById("sigPad");
@@ -272,7 +325,7 @@ function initSigPad() {
     const t = e.touches ? e.touches[0] : e;
     return { x: (t.clientX - r.left) * (c.width / r.width), y: (t.clientY - r.top) * (c.height / r.height) };
   };
-  const down = (e) => { drawing = true; pts = [pos(e)]; e.preventDefault(); };
+  const down = (e) => { drawing = true; pts = [pos(e)]; deselectWallet(); e.preventDefault(); };
   const move = (e) => {
     if (!drawing) return;
     pts.push(pos(e));
@@ -300,6 +353,7 @@ function initSigPad() {
   document.getElementById("signClose").addEventListener("click", () => { const d = document.getElementById("sign"); if (d.close) d.close(); });
   document.getElementById("sigFile").addEventListener("change", (e) => {
     const f = e.target.files[0]; if (!f) return;
+    deselectWallet();
     const img = new Image();
     img.onload = () => {
       clearSig();
@@ -314,6 +368,7 @@ function initSigPad() {
 
 function clearSig() {
   if (SIGN_CTX) { SIGN_CTX.clearRect(0, 0, 460, 170); SIGN_HAS_INK = false; }
+  deselectWallet();
   const s = document.getElementById("sigStatus"); if (s) s.textContent = "";
 }
 
@@ -324,20 +379,26 @@ function openSign(policyId, edition) {
   document.getElementById("sigName").value = "";
   const dlg = document.getElementById("sign");
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  loadWallet();
 }
 
 async function saveSig() {
   const status = document.getElementById("sigStatus");
   const label = document.getElementById("sigName").value.trim();
   if (!label) { status.textContent = "Add the name / title for this signature line."; return; }
-  if (!SIGN_HAS_INK) { status.textContent = "Draw or upload a signature first."; return; }
-  const dataUrl = document.getElementById("sigPad").toDataURL("image/png");
+  const body = { policy: SIGN_TARGET.policyId, edition: SIGN_TARGET.edition, label };
+  if (SELECTED_WALLET) {
+    body.walletId = SELECTED_WALLET;
+  } else {
+    if (!SIGN_HAS_INK) { status.textContent = "Pick a saved signature, or draw / upload one."; return; }
+    body.image = document.getElementById("sigPad").toDataURL("image/png");
+  }
   const btn = document.getElementById("sigSave");
   btn.disabled = true; status.textContent = "Saving…";
   try {
     const r = await fetch("api/signatures", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ policy: SIGN_TARGET.policyId, edition: SIGN_TARGET.edition, label, image: dataUrl }),
+      body: JSON.stringify(body),
     });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(d.error || ("HTTP " + r.status));
@@ -396,6 +457,16 @@ function openHistory(p) {
 let POLICIES = [];
 let SEARCH = "";
 let CHIP = null; // { type: "owner"|"approver", value }
+let PENDING = new Set(); // policy ids with an open change request
+let IS_ADMIN = false;
+
+async function loadPendingChanges() {
+  try {
+    const d = await (await fetch("api/pending", { cache: "no-store" })).json();
+    PENDING = new Set((d.pending || []).map(x => x.policy));
+  } catch { PENDING = new Set(); }
+  render();
+}
 
 function render() {
   const list = document.getElementById("list");
@@ -444,6 +515,7 @@ async function setupAccount() {
   let me = null;
   try { me = (await (await fetch("api/auth/me", { cache: "no-store" })).json()).user; } catch {}
   if (!me) return;
+  IS_ADMIN = me.role === "admin";
   document.getElementById("acctName").textContent = me.name;
   const logout = document.getElementById("logoutBtn");
   logout.hidden = false;
@@ -451,7 +523,8 @@ async function setupAccount() {
     try { await fetch("api/auth/logout", { method: "POST" }); } catch {}
     location.href = "/login";
   });
-  if (me.role === "admin") setupAdmin();
+  if (IS_ADMIN) setupAdmin();
+  render();
 }
 
 async function setupAdmin() {
@@ -568,6 +641,7 @@ async function init() {
     document.getElementById("reqSubmit").addEventListener("click", submitRequest);
     initSigPad();
     setupAccount();
+    loadPendingChanges();
   } catch (err) {
     const e = document.getElementById("error");
     e.hidden = false;

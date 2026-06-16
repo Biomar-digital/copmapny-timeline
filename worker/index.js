@@ -107,6 +107,8 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS events (
      id TEXT PRIMARY KEY, type TEXT, summary TEXT, ref TEXT, actor TEXT, created_at INTEGER NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS inbox_state (user_id TEXT PRIMARY KEY, last_seen INTEGER NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS wallet (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, label TEXT, image TEXT NOT NULL, created_at INTEGER NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS pending_change (id TEXT PRIMARY KEY, policy TEXT NOT NULL, request_id TEXT, title TEXT, created_at INTEGER NOT NULL)`,
 ];
 
 let schemaPromise = null;
@@ -433,6 +435,12 @@ async function handleRequests(request, env, user) {
   if (!mail.ok && !mail.skipped) warnings.push("email:" + mail.status);
 
   await recordEvent(env, kind === "new" ? "request_new" : "request_change", `${author}: ${issueTitle}`, policy || "", author);
+  if (kind === "change" && policy && env.DB) {
+    try {
+      await env.DB.prepare("INSERT INTO pending_change (id,policy,request_id,title,created_at) VALUES (?,?,?,?,?)")
+        .bind(crypto.randomUUID(), policy, id, issueTitle, Date.now()).run();
+    } catch { /* non-fatal */ }
+  }
   return json({ ok: true, id, issue: issue.ok ? issue.number : null, warnings }, 201);
 }
 
@@ -452,13 +460,29 @@ async function handleSignatures(request, env, user) {
     const id = safePolicyId(p.policy); if (!id) return json({ error: "Invalid policy id." }, 400);
     const edition = String(p.edition || "").slice(0, 200);
     const label = String(p.label || "").trim().slice(0, 200);
-    const img = parseDataUrl(p.image);
     if (!label) return json({ error: "Add the name / title for this signature line." }, 400);
-    if (!img) return json({ error: "A signature image is required." }, 400);
-    if (img.b64.length > 3500000) return json({ error: "Signature image too large." }, 400);
+
+    // Image comes either from a saved wallet signature (reuse) or a new upload.
+    let b64, ext;
+    if (p.walletId) {
+      const w = await env.DB.prepare("SELECT image FROM wallet WHERE id=? AND user_id=?").bind(String(p.walletId), user.id).first();
+      const parsed = w ? parseDataUrl(w.image) : null;
+      if (!parsed) return json({ error: "Saved signature not found." }, 400);
+      b64 = parsed.b64; ext = parsed.ext;
+    } else {
+      const img = parseDataUrl(p.image);
+      if (!img) return json({ error: "A signature image is required." }, 400);
+      if (img.b64.length > 3500000) return json({ error: "Signature image too large." }, 400);
+      b64 = img.b64; ext = img.ext;
+      // Save new signatures to the user's wallet so they can reuse them.
+      try {
+        await env.DB.prepare("INSERT INTO wallet (id,user_id,label,image,created_at) VALUES (?,?,?,?,?)")
+          .bind(crypto.randomUUID(), user.id, label, p.image, Date.now()).run();
+      } catch { /* non-fatal */ }
+    }
     const sigId = crypto.randomUUID();
-    const imgPath = `${SIGNATURES_DIR}/${id}/${sigId}.${img.ext}`;
-    const cr = await ghCreateFile(env, imgPath, img.b64, `Signature on ${id} by ${user.email}`);
+    const imgPath = `${SIGNATURES_DIR}/${id}/${sigId}.${ext}`;
+    const cr = await ghCreateFile(env, imgPath, b64, `Signature on ${id} by ${user.email}`);
     if (!cr.ok) return json({ error: `Could not store signature (${cr.status}).` }, 502);
     // Identity (account) is taken from the session; `label` is the name/title to
     // print on the PDF signature line.
@@ -467,6 +491,41 @@ async function handleSignatures(request, env, user) {
     if (!res.ok) return json({ error: `Could not record signature (${res.status}).` }, 502);
     await recordEvent(env, "signature", `${user.name} signed ${id}`, id, user.name);
     return json({ signature: sig }, 201);
+  }
+  return json({ error: "Method not allowed." }, 405);
+}
+
+// ============================================================ /api/wallet
+
+async function handleWallet(request, env, user) {
+  if (request.method === "GET") {
+    const { results } = await env.DB.prepare(
+      "SELECT id,label,image,created_at FROM wallet WHERE user_id=? ORDER BY created_at DESC LIMIT 24").bind(user.id).all();
+    return json({ signatures: results || [] });
+  }
+  if (request.method === "DELETE") {
+    let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
+    await env.DB.prepare("DELETE FROM wallet WHERE id=? AND user_id=?").bind(String(p.id || ""), user.id).run();
+    return json({ ok: true });
+  }
+  return json({ error: "Method not allowed." }, 405);
+}
+
+// ========================================================= /api/pending
+
+async function handlePending(request, env, user) {
+  if (request.method === "GET") {
+    const { results } = await env.DB.prepare(
+      "SELECT policy, COUNT(*) AS n FROM pending_change GROUP BY policy").all();
+    return json({ pending: results || [] });
+  }
+  if (request.method === "DELETE") {
+    if (user.role !== "admin") return json({ error: "Forbidden." }, 403);
+    let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
+    const policy = safePolicyId(p.policy);
+    if (!policy) return json({ error: "Invalid policy." }, 400);
+    await env.DB.prepare("DELETE FROM pending_change WHERE policy=?").bind(policy).run();
+    return json({ ok: true });
   }
   return json({ error: "Method not allowed." }, 405);
 }
@@ -506,12 +565,15 @@ export default {
       if (!user || user.role !== "admin") return json({ error: "Forbidden." }, 403);
       return handleAdmin(request, env, path, user);
     }
-    if (path === "/api/comments" || path === "/api/annotations" || path === "/api/requests" || path === "/api/signatures") {
+    if (path.startsWith("/api/")) {
       if (!user) return json({ error: "Not authenticated." }, 401);
       if (path === "/api/comments") return handleComments(request, env, user);
       if (path === "/api/annotations") return handleAnnotations(request, env, user);
       if (path === "/api/signatures") return handleSignatures(request, env, user);
-      return handleRequests(request, env, user);
+      if (path === "/api/requests") return handleRequests(request, env, user);
+      if (path === "/api/wallet") return handleWallet(request, env, user);
+      if (path === "/api/pending") return handlePending(request, env, user);
+      return json({ error: "Not found." }, 404);
     }
 
     if (isPublicAsset(path)) return serveAsset(request, env);

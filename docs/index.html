@@ -194,7 +194,12 @@ codex</code></pre>
         <button type="button" class="vh-close" id="signClose" aria-label="Close">×</button>
       </header>
       <div class="cn-body">
-        <p class="sg-note">Draw your signature below, or upload an image of it. It is recorded under your account and applied to the signed PDF.</p>
+        <p class="sg-note">Reuse a saved signature, or draw / upload a new one. It is recorded under your account and applied to the signed PDF.</p>
+        <div class="sg-saved" id="sgSaved" hidden>
+          <div class="sg-savedlabel">Your saved signatures — click to reuse</div>
+          <div class="sg-savedlist" id="sgSavedList"></div>
+          <div class="sg-or">— or draw / upload a new one —</div>
+        </div>
         <label class="sg-field">Name / title for this signature line
           <input id="sigName" type="text" placeholder="e.g. John Doe — Chairman of the Board" /></label>
         <canvas id="sigPad" class="sg-pad" width="460" height="170"></canvas>
