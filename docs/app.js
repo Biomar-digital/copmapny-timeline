@@ -306,6 +306,7 @@ async function setupAccount() {
 }
 
 async function setupAdmin() {
+  document.getElementById("connectBtn").hidden = false; // admin-only
   const bell = document.getElementById("bellBtn");
   bell.hidden = false;
   bell.addEventListener("click", openAdmin);
