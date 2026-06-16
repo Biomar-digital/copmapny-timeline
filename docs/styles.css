@@ -9,6 +9,7 @@
   --white: #fff;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   margin: 0;
   font-family: "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
