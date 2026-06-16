@@ -11,12 +11,12 @@ from reportlab.lib.utils import ImageReader
 from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame,
                                 Paragraph, Spacer, Table, TableStyle,
                                 NextPageTemplate, PageBreak)
-from reportlab.platypus.flowables import HRFlowable
+from reportlab.platypus.flowables import HRFlowable, BalancedColumns
 from xml.sax.saxutils import escape
 import re
 
 import brand as B
-from model import Heading, Body, Bullet, TableBlock, ImageBlock
+from model import Heading, Body, Bullet, TableBlock, ImageBlock, Columns
 from reportlab.platypus import Image as RLImage
 from io import BytesIO
 
@@ -283,6 +283,45 @@ def _image_flowables(b):
     return [Spacer(1, 5), img, Spacer(1, 7)]
 
 
+def _col_flowables(blocks):
+    out = []
+    for sb in blocks:
+        if isinstance(sb, Heading):
+            out.append(Paragraph(escape(sb.text), H1 if sb.level == 1 else H2))
+        elif isinstance(sb, Bullet):
+            out.append(Paragraph(_fmt(sb.text), BULLET, bulletText="•"))
+        else:
+            out.append(Paragraph(_fmt(sb.text), BODY_LEFT))
+    return out
+
+
+def _columns_flowables(b):
+    """Render two text columns as a borderless table whose rows pair the items
+    of each column. Reading a column top-to-bottom gives that column's items in
+    order; the table splits between rows so it paginates across pages."""
+    cols = [c for c in b.cols if c]
+    if not cols:
+        return []
+    if len(cols) == 1:
+        return _col_flowables(cols[0])
+    left = _col_flowables(cols[0])
+    right = _col_flowables(cols[1])
+    n = max(len(left), len(right))
+    left += [""] * (n - len(left))
+    right += [""] * (n - len(right))
+    half = (_CONTENT_W - 16) / 2
+    t = Table([[left[i], right[i]] for i in range(n)], colWidths=[half, half])
+    t.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (0, -1), 16),
+        ("RIGHTPADDING", (1, 0), (1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
+    return [Spacer(1, 4), t, Spacer(1, 6)]
+
+
 def _story(policy):
     flow = []
     for b in policy.blocks:
@@ -301,6 +340,8 @@ def _story(policy):
             flow.append(Spacer(1, 8))
         elif isinstance(b, ImageBlock):
             flow.extend(_image_flowables(b))
+        elif isinstance(b, Columns):
+            flow.extend(_columns_flowables(b))
     return flow
 
 

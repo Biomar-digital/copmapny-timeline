@@ -44,6 +44,10 @@ class ImageBlock:
     height: float = 0.0
 
 @dataclass
+class Columns:
+    cols: list = field(default_factory=list)   # list of columns; each a list of blocks
+
+@dataclass
 class Policy:
     title: str
     year: str
@@ -127,6 +131,28 @@ def parse_docx(path: str, title: Optional[str] = None,
 
     for item in _iter_block_items(doc):
         if isinstance(item, _Table):
+            # A borderless 1-row, 2-column table (no "Grid" style) encodes a
+            # two-column text layout (e.g. a definitions / references page).
+            style_name = item.style.name if item.style else ""
+            if "Grid" not in (style_name or "") and len(item.columns) == 2 and len(item.rows) == 1:
+                cols = []
+                for ci in range(2):
+                    sub = []
+                    for para in item.rows[0].cells[ci].paragraphs:
+                        t = _clean(para.text)
+                        if not t:
+                            continue
+                        kind, level = _classify(t, para.style.name if para.style else "Normal")
+                        if kind == "heading":
+                            sub.append(Heading(level=level, text=t))
+                        elif kind == "bullet":
+                            sub.append(Bullet(text=t))
+                        else:
+                            sub.append(Body(text=t))
+                    cols.append(sub)
+                if any(cols):
+                    blocks.append(Columns(cols=cols))
+                continue
             rows = [[_clean(c.text) for c in row.cells] for row in item.rows]
             rows = [r for r in rows if any(r)]
             if rows:

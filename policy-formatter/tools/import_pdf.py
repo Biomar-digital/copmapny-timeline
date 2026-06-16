@@ -68,6 +68,8 @@ def extract_items(pdf):
             if rows:
                 page_items.append((fitz.Rect(t.bbox).y0, "table", rows))
 
+        W = page.rect.width
+        tblocks = []                      # (y0, text, size, bold, x0, x1)
         for b in page.get_text("dict")["blocks"]:
             if b.get("type") != 0:
                 continue
@@ -89,7 +91,27 @@ def extract_items(pdf):
             if not s or s == "BioMar Group" or any(b0 in s for b0 in BOILER):
                 continue
             size = Counter(sizes).most_common(1)[0][0] if sizes else 11.0
-            page_items.append((rb.y0, "block", (s, size, bold, rb.x0)))
+            tblocks.append((rb.y0, s, size, bold, rb.x0, rb.x1))
+
+        # Two-column detection: narrow blocks split across the left and right
+        # halves -> emit a single "columns" item; otherwise normal blocks.
+        narrow = [tb for tb in tblocks if (tb[5] - tb[4]) < W * 0.52]
+        left = [tb for tb in narrow if tb[4] < W * 0.5 - 12]
+        right = [tb for tb in narrow if tb[4] >= W * 0.5 - 12]
+        if len(left) >= 2 and len(right) >= 2:
+            nid = {id(tb) for tb in narrow}
+            ytop = min(tb[0] for tb in narrow)
+            left.sort(key=lambda t: t[0])
+            right.sort(key=lambda t: t[0])
+            for tb in tblocks:
+                if id(tb) not in nid:
+                    page_items.append((tb[0], "block", (tb[1], tb[2], tb[3], tb[4])))
+            lc = [(tb[1], tb[2], tb[3], tb[4]) for tb in left]
+            rc = [(tb[1], tb[2], tb[3], tb[4]) for tb in right]
+            page_items.append((ytop, "columns", (lc, rc)))
+        else:
+            for tb in tblocks:
+                page_items.append((tb[0], "block", (tb[1], tb[2], tb[3], tb[4])))
 
         # content images (skip the logo / header / footer / full-page artwork)
         for im in page.get_image_info(xrefs=True):
@@ -137,6 +159,30 @@ def build_docx(pdf, out):
     skip_toc = False
     last_para = None           # last body paragraph, for merging split continuations
     for k, p in items:
+        if k == "columns":
+            last_para = None
+            tbl = doc.add_table(rows=1, cols=2)   # default (no-grid) style -> columns
+            for ci, col in enumerate(p):
+                cell = tbl.rows[0].cells[ci]
+                first = True
+                for cs, csize, cbold, _cx in col:
+                    ss = _clean(re.sub(r"[ \t]*\n[ \t]*", " ", cs).strip())
+                    ss = re.sub(r" {2,}", " ", ss)
+                    if not ss:
+                        continue
+                    is_h = (csize in head_sizes) or (cbold and csize > body + 0.3)
+                    para = cell.paragraphs[0] if first else cell.add_paragraph()
+                    first = False
+                    if is_h:
+                        para.style = "Heading 1" if (h1 and csize >= h1 - 0.1) else "Heading 2"
+                        para.add_run(ss)
+                    elif ss[:1] in "••-▪◦":
+                        para.style = "List Bullet"
+                        para.add_run(re.sub(r"^[\s••\-▪◦]+", "", ss))
+                    else:
+                        para.add_run(ss)
+            doc.add_paragraph("")
+            continue
         if k == "image":
             png, w, _h = p
             try:
