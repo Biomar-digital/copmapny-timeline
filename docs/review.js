@@ -167,10 +167,15 @@ function closeComposer() {
 
 async function saveNote() {
   const text = cText.value.trim();
+  const author = whoInput.value.trim();
+  if (!author) {
+    cStatus.textContent = "Enter your name (top-right) first.";
+    whoInput.focus();
+    return;
+  }
   if (!text) { cStatus.textContent = "Write a note first."; return; }
   if (!pendingAnchor) { cStatus.textContent = "Select text again."; return; }
-  const author = whoInput.value.trim();
-  if (author) localStorage.setItem("rv-who", author);
+  try { localStorage.setItem("biomar-author", author); } catch {}
   const saveBtn = document.getElementById("cSave");
   saveBtn.disabled = true; cStatus.textContent = "Saving…";
   try {
@@ -271,7 +276,8 @@ async function init() {
   document.getElementById("docSub").textContent =
     (EDITION ? EDITION.replace("__", " · ") + " — " : "") + "Select text, then add a note.";
   document.title = `BioMar · Review — ${TITLE}`;
-  whoInput.value = localStorage.getItem("rv-who") || "";
+  whoInput.value = localStorage.getItem("biomar-author") || "";
+  whoInput.placeholder = "required";
 
   selBtn.addEventListener("click", openComposer);
   document.getElementById("cSave").addEventListener("click", saveNote);

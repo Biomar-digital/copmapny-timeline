@@ -55,6 +55,10 @@ function card(p) {
 
 // ---- Version history modal -----------------------------------------------
 
+function savedAuthor() {
+  try { return localStorage.getItem("biomar-author") || ""; } catch { return ""; }
+}
+
 function edKey(ed) {
   return `${ed.version || "Version 1"}__${ed.date}`;
 }
@@ -96,7 +100,7 @@ function editionRow(p, ed, isLatest) {
         <div class="vh-clabel">Comments</div>
         <div class="vh-clist"><p class="vh-cempty">Loading…</p></div>
         <div class="vh-cform">
-          <input class="vh-cauthor" type="text" placeholder="Your name (optional)" />
+          <input class="vh-cauthor" type="text" placeholder="Your name (required)" value="${esc(savedAuthor())}" />
           <textarea class="vh-ctext" rows="2" placeholder="Add a comment for the team / AI…"></textarea>
           <div class="vh-crow">
             <button type="button" class="btn vh-cadd">Add comment</button>
@@ -164,8 +168,11 @@ function wireComments(policyId) {
       const textEl = cont.querySelector(".vh-ctext");
       const status = cont.querySelector(".vh-cstatus");
       const text = textEl.value.trim();
-      const author = cont.querySelector(".vh-cauthor").value.trim();
+      const authorEl = cont.querySelector(".vh-cauthor");
+      const author = authorEl.value.trim();
+      if (!author) { status.textContent = "Please enter your name."; authorEl.focus(); return; }
       if (!text) { status.textContent = "Write a comment first."; return; }
+      try { localStorage.setItem("biomar-author", author); } catch {}
       btn.disabled = true; status.textContent = "Saving…";
       try {
         await apiPostComment(policyId, cont.dataset.key, author, text);

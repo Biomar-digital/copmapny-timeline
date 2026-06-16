@@ -105,11 +105,13 @@ codex</code></pre>
           <ul class="cn-prompts">
             <li>"Add a new policy from this .docx — owner <i>X</i>, approver <i>Y</i> — and publish it."</li>
             <li>"Publish <b>Version 2</b> of the Diversity Policy from this updated .docx, with changelog notes '<i>…</i>'."</li>
-            <li>"Change the owner of the Tax Policy to <i>Group Tax</i> and regenerate."</li>
+            <li>"Review the reader <b>comments and PDF annotations</b> and address each one in the next revision."</li>
             <li>"Regenerate the Remuneration Policy without the approval pages."</li>
           </ul>
-          <p class="cn-foot">Under the hood the agent edits <code>policies/registry.json</code>,
-            runs <code>python policy-formatter/tools/publish.py</code> and pushes the branch.</p>
+          <p class="cn-foot">The agent edits <code>policies/registry.json</code>, runs
+            <code>python policy-formatter/tools/publish.py</code> and pushes. Reader feedback
+            it can read lives in <code>policies/comments/</code> (per version) and
+            <code>policies/annotations/</code> (anchored to the exact quoted PDF text).</p>
         </section>
       </div>
     </form>
