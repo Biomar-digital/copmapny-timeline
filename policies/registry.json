@@ -62,6 +62,20 @@
           "approval_date": "20-01-2026",
           "source": "Remuneration_Policy.docx",
           "notes": "Initial publication."
+        },
+        {
+          "version": "Version 1",
+          "date": "2026-06",
+          "approval_date": "20-01-2026",
+          "notes": "Board-approved edition (imported from official PDF).",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "remuneration-policy__Approval.docx",
+              "board_approval": true
+            }
+          ]
         }
       ]
     },
@@ -78,6 +92,504 @@
           "approval_date": "",
           "source": "Tax_Policy.docx",
           "notes": "Initial publication."
+        }
+      ]
+    },
+    {
+      "id": "animal-welfare-policy",
+      "title": "Animal Welfare Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 2",
+          "date": "2026-01",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "animal-welfare-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "responsible-sourcing-policy",
+      "title": "Responsible Sourcing Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "Group Sourcing",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-01",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "responsible-sourcing-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "code-of-conduct-suppliers",
+      "title": "Code of Conduct for Suppliers",
+      "category": "Policy",
+      "language": "English",
+      "owner": "Group Sourcing",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-01",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "code-of-conduct-suppliers__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "environmental-energy-policy",
+      "title": "Environmental & Energy Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "Global Manufacturing & Technology",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-01",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "environmental-energy-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finance-policy",
+      "title": "Finance Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "Group Finance",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "finance-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "health-safety-policy",
+      "title": "Health and Safety Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-01",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "health-safety-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "human-rights-policy",
+      "title": "Human Rights Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Management",
+      "editions": [
+        {
+          "version": "Version 2",
+          "date": "2026-05",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "human-rights-policy__Policy.docx",
+              "board_approval": false
+            },
+            {
+              "label": "Implementation",
+              "language": "English",
+              "source": "human-rights-policy__Implementation.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "it-security-policy",
+      "title": "IT Security Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "Global IT",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "it-security-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "medical-service-policy",
+      "title": "Medical Service Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "medical-service-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "personal-data-privacy-policy",
+      "title": "Personal Data Privacy Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 2",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "personal-data-privacy-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quality-food-safety-policy",
+      "title": "Quality and Food Safety Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "Global Manufacturing & Technology",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "quality-food-safety-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "responsible-employment-policy",
+      "title": "Responsible Employment Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "responsible-employment-policy__Policy.docx",
+              "board_approval": false
+            },
+            {
+              "label": "Implementation",
+              "language": "English",
+              "source": "responsible-employment-policy__Implementation.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "salary-policy",
+      "title": "Salary Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "salary-policy__Policy.docx",
+              "board_approval": false
+            },
+            {
+              "label": "Implementation",
+              "language": "English",
+              "source": "salary-policy__Implementation.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sanctions-export-controls-policy",
+      "title": "Sanctions and Export Controls Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "Compliance Committe",
+      "approver": "BioMar Board of Directors",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-04",
+          "approval_date": "28-04-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "sanctions-export-controls-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "travel-policy",
+      "title": "Travel Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "travel-policy__Policy.docx",
+              "board_approval": false
+            },
+            {
+              "label": "Implementation Guidelines",
+              "language": "English",
+              "source": "travel-policy__Implementation_Guidelines.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "whistleblower-policy",
+      "title": "Whistleblower Policy",
+      "category": "Policy",
+      "language": "English",
+      "owner": "VP People, Purpose & Communication",
+      "approver": "Executive Management",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-05",
+          "approval_date": "08-05-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "whistleblower-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "position-marine-ingredients",
+      "title": "Position Statement — Marine Ingredients",
+      "category": "Position Statement",
+      "language": "English",
+      "owner": "Anja dé Friés Nielsen",
+      "approver": "Morten Holdorff Møjbæk",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2022-06",
+          "approval_date": "25-02-2022",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "English",
+              "language": "English",
+              "source": "position-marine-ingredients__English.docx",
+              "board_approval": false
+            },
+            {
+              "label": "Espanol (Digital)",
+              "language": "Spanish",
+              "source": "position-marine-ingredients__Espanol_Digital.docx",
+              "board_approval": false
+            },
+            {
+              "label": "Espanol (Print)",
+              "language": "Spanish",
+              "source": "position-marine-ingredients__Espanol_Print.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "position-plant-based-ingredients",
+      "title": "Position Statement — Plant-based Ingredients",
+      "category": "Position Statement",
+      "language": "English",
+      "owner": "Group Sourcing",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 6",
+          "date": "2026-03",
+          "approval_date": "",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "English",
+              "language": "English",
+              "source": "position-plant-based-ingredients__English.docx",
+              "board_approval": false
+            },
+            {
+              "label": "Espanol",
+              "language": "Spanish",
+              "source": "position-plant-based-ingredients__Espanol.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "position-microplastics",
+      "title": "Position Statement — Microplastics",
+      "category": "Position Statement",
+      "language": "English",
+      "owner": "Global Quality",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 2",
+          "date": "2026-03",
+          "approval_date": "03-03-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "English",
+              "language": "English",
+              "source": "position-microplastics__English.docx",
+              "board_approval": false
+            }
+          ]
         }
       ]
     }

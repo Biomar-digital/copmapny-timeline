@@ -30,6 +30,20 @@ const PDF_LABELS = {
   },
 };
 
+function docLinks(doc, multi) {
+  const pfx = multi ? esc(doc.label) + " · " : "";
+  if (doc.files.approval) {
+    return `
+      <a class="btn primary" href="${esc(doc.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">
+        ${pfx}${PDF_LABELS.approval.label} <span class="arrow">↗</span></a>
+      <a class="btn ghost" href="${esc(doc.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">
+        ${pfx}${PDF_LABELS.non_approval.label} <span class="arrow">↗</span></a>`;
+  }
+  return `
+      <a class="btn primary" href="${esc(doc.files.non_approval)}" target="_blank" rel="noopener">
+        ${multi ? esc(doc.label) : "Download PDF"} <span class="arrow">↗</span></a>`;
+}
+
 function card(p) {
   const ed = latest(p);
   const el = document.createElement("article");
@@ -37,6 +51,8 @@ function card(p) {
   const approvalRow = ed.approval_date
     ? `<br><b>Approved:</b> ${esc(ed.approval_date)}` : "";
   const n = p.editions.length;
+  const docs = ed.documents || [];
+  const multi = docs.length > 1;
   el.innerHTML = `
     <div>
       <h2 class="title">${esc(p.title)}${PENDING.has(p.id) ? ' <span class="pending-badge">Change pending</span>' : ""}</h2>
@@ -44,6 +60,7 @@ function card(p) {
         <span class="tag lang">${esc(p.language || "English")}</span>
         <span class="tag">${esc(ed.version || "Version 1")}</span>
         <span class="tag">${prettyDate(ed.date)}</span>
+        ${p.category && p.category !== "Policy" ? `<span class="tag cat">${esc(p.category)}</span>` : ""}
       </div>
       <div class="info">
         <b>Owner:</b> ${esc(p.owner || "—")} &nbsp;·&nbsp; <b>Approver:</b> ${esc(p.approver || "—")}
@@ -53,12 +70,8 @@ function card(p) {
       </div>
     </div>
     <div class="actions">
-      <a class="btn primary" href="${esc(ed.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">
-        ${PDF_LABELS.approval.label} <span class="arrow">↗</span></a>
-      <a class="btn ghost" href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">
-        ${PDF_LABELS.non_approval.label} <span class="arrow">↗</span></a>
-      <button type="button" class="btn history">
-        Version history <span class="badge">${n}</span></button>
+      ${docs.map(d => docLinks(d, multi)).join("")}
+      <button type="button" class="btn history">Request change or edit</button>
     </div>`;
   el.querySelector(".history").addEventListener("click", () => openHistory(p));
   const pb = el.querySelector(".pending-badge");
@@ -113,11 +126,16 @@ function editionRow(p, ed, isLatest) {
       </div>
       <div class="vh-meta">${appr}${gen}</div>
       ${notes}
-      <div class="vh-files">
-        <a href="${esc(ed.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">${PDF_LABELS.approval.label} ↗</a>
-        <a class="vh-annotate" href="${esc(annHref(p, ed, ed.files.approval))}">✎ Annotate</a>
-        <a href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">${PDF_LABELS.non_approval.label} ↗</a>
-        <a class="vh-annotate" href="${esc(annHref(p, ed, ed.files.non_approval))}">✎ Annotate</a>
+      <div class="vh-docs">
+        ${(ed.documents || []).map(doc => `
+          <div class="vh-doc">
+            <span class="vh-doclabel">${esc(doc.label)}</span>
+            ${doc.files.approval ? `
+              <a href="${esc(doc.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">Signed ↗</a>
+              <a class="vh-annotate" href="${esc(annHref(p, ed, doc.files.approval))}">✎</a>` : ""}
+            <a href="${esc(doc.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">${doc.files.approval ? "Unsigned" : "PDF"} ↗</a>
+            <a class="vh-annotate" href="${esc(annHref(p, ed, doc.files.non_approval))}">✎ Annotate</a>
+          </div>`).join("")}
       </div>
       <div class="vh-sign" data-key="${esc(edKey(ed))}">
         <div class="vh-siglist"></div>
