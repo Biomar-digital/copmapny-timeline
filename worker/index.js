@@ -148,8 +148,8 @@ function safeFile(f) {
   return typeof f === "string" && /^files\/[A-Za-z0-9._-]+\.pdf$/.test(f) ? f : null;
 }
 
-function backendReady(env) {
-  return env.GH_TOKEN && env.GH_OWNER && env.GH_REPO && env.GH_BRANCH;
+function missingEnv(env) {
+  return ["GH_TOKEN", "GH_OWNER", "GH_REPO", "GH_BRANCH"].filter(k => !env[k]);
 }
 
 function clamp01(n) {
@@ -168,7 +168,7 @@ function cleanRects(input) {
 // ---- /api/comments (per-version) -----------------------------------------
 
 async function handleComments(request, env, auth) {
-  if (!backendReady(env)) return json({ error: "Comments backend not configured." }, 503);
+  { const miss = missingEnv(env); if (miss.length) return json({ error: "Comments backend not configured. Missing: " + miss.join(", ") }, 503); }
   const url = new URL(request.url);
 
   if (request.method === "GET") {
@@ -201,7 +201,7 @@ async function handleComments(request, env, auth) {
 // ---- /api/annotations (anchored to PDF text) -----------------------------
 
 async function handleAnnotations(request, env, auth) {
-  if (!backendReady(env)) return json({ error: "Annotations backend not configured." }, 503);
+  { const miss = missingEnv(env); if (miss.length) return json({ error: "Annotations backend not configured. Missing: " + miss.join(", ") }, 503); }
   const url = new URL(request.url);
 
   if (request.method === "GET") {
