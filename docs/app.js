@@ -19,6 +19,17 @@ function esc(s) {
   }[c]));
 }
 
+const PDF_LABELS = {
+  approval: {
+    label: "Signed PDF",
+    tip: "Official approved version — includes the Board of Directors signature/approval page and the version card.",
+  },
+  non_approval: {
+    label: "Unsigned PDF",
+    tip: "The policy text only — without the signature/approval page.",
+  },
+};
+
 function card(p) {
   const ed = latest(p);
   const el = document.createElement("article");
@@ -42,10 +53,10 @@ function card(p) {
       </div>
     </div>
     <div class="actions">
-      <a class="btn primary" href="${esc(ed.files.approval)}" target="_blank" rel="noopener">
-        Approval PDF <span class="arrow">↗</span></a>
-      <a class="btn ghost" href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener">
-        Non-approval PDF <span class="arrow">↗</span></a>
+      <a class="btn primary" href="${esc(ed.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">
+        ${PDF_LABELS.approval.label} <span class="arrow">↗</span></a>
+      <a class="btn ghost" href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">
+        ${PDF_LABELS.non_approval.label} <span class="arrow">↗</span></a>
       <button type="button" class="btn history">
         Version history <span class="badge">${n}</span></button>
     </div>`;
@@ -91,9 +102,9 @@ function editionRow(p, ed, isLatest) {
       <div class="vh-meta">${appr}${gen}</div>
       ${notes}
       <div class="vh-files">
-        <a href="${esc(ed.files.approval)}" target="_blank" rel="noopener">Approval PDF ↗</a>
+        <a href="${esc(ed.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">${PDF_LABELS.approval.label} ↗</a>
         <a class="vh-annotate" href="${esc(annHref(p, ed, ed.files.approval))}">✎ Annotate</a>
-        <a href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener">Non-approval PDF ↗</a>
+        <a href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">${PDF_LABELS.non_approval.label} ↗</a>
         <a class="vh-annotate" href="${esc(annHref(p, ed, ed.files.non_approval))}">✎ Annotate</a>
       </div>
       <div class="vh-comments" data-key="${esc(edKey(ed))}">
