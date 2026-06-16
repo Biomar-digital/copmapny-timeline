@@ -524,13 +524,13 @@
               "board_approval": false
             },
             {
-              "label": "Espanol (Digital)",
+              "label": "Spanish (Digital)",
               "language": "Spanish",
               "source": "position-marine-ingredients__Espanol_Digital.docx",
               "board_approval": false
             },
             {
-              "label": "Espanol (Print)",
+              "label": "Spanish (Print)",
               "language": "Spanish",
               "source": "position-marine-ingredients__Espanol_Print.docx",
               "board_approval": false
@@ -560,7 +560,7 @@
               "board_approval": false
             },
             {
-              "label": "Espanol",
+              "label": "Spanish",
               "language": "Spanish",
               "source": "position-plant-based-ingredients__Espanol.docx",
               "board_approval": false
