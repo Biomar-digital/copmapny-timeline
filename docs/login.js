@@ -32,7 +32,7 @@ document.getElementById("signinForm").addEventListener("submit", async (e) => {
     const d = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
     setStatus(status, "Welcome — loading…", true);
-    location.href = "index.html";
+    location.href = "/";
   } catch (err) {
     setStatus(status, err.message);
     btn.disabled = false;

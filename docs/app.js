@@ -300,7 +300,7 @@ async function setupAccount() {
   logout.hidden = false;
   logout.addEventListener("click", async () => {
     try { await fetch("api/auth/logout", { method: "POST" }); } catch {}
-    location.href = "login.html";
+    location.href = "/login";
   });
   if (me.role === "admin") setupAdmin();
 }

@@ -433,7 +433,7 @@ async function handleRequests(request, env, user) {
 
 // ==================================================================== gate
 
-const PUBLIC_ASSETS = new Set(["/login.html", "/login.js", "/login.css", "/styles.css", "/favicon.png", "/favicon.ico"]);
+const PUBLIC_ASSETS = new Set(["/login", "/login.html", "/login.js", "/login.css", "/styles.css", "/favicon.png", "/favicon.ico"]);
 function isPublicAsset(path) { return PUBLIC_ASSETS.has(path) || path.startsWith("/assets/"); }
 
 export default {
@@ -463,7 +463,7 @@ export default {
     if (isPublicAsset(path)) return env.ASSETS.fetch(request);
 
     if (!user) {
-      if (request.method === "GET") return Response.redirect(new URL("/login.html", request.url).toString(), 302);
+      if (request.method === "GET") return Response.redirect(new URL("/login", request.url).toString(), 302);
       return json({ error: "Not authenticated." }, 401);
     }
     return env.ASSETS.fetch(request);
