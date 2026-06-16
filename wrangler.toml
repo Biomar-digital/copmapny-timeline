@@ -1,4 +1,4 @@
-name = "copmapny-timeline"
+name = "globa-policies"
 compatibility_date = "2026-06-16"
 
 # Static-only site: serve the generated policy library (docs/) as Worker assets.
