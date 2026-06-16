@@ -476,6 +476,19 @@ async function handleSignatures(request, env, user) {
 const PUBLIC_ASSETS = new Set(["/login", "/login.html", "/login.js", "/login.css", "/styles.css", "/favicon.png", "/favicon.ico"]);
 function isPublicAsset(path) { return PUBLIC_ASSETS.has(path) || path.startsWith("/assets/"); }
 
+// Serve a static asset, but force revalidation of HTML/JS/CSS so a deploy is
+// picked up immediately (avoids stale app.js after updates).
+async function serveAsset(request, env) {
+  const res = await env.ASSETS.fetch(request);
+  const path = new URL(request.url).pathname;
+  if (path === "/" || path === "/login" || /\.(html|js|css)$/.test(path)) {
+    const h = new Headers(res.headers);
+    h.set("Cache-Control", "no-cache, must-revalidate");
+    return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
+  }
+  return res;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -501,12 +514,12 @@ export default {
       return handleRequests(request, env, user);
     }
 
-    if (isPublicAsset(path)) return env.ASSETS.fetch(request);
+    if (isPublicAsset(path)) return serveAsset(request, env);
 
     if (!user) {
       if (request.method === "GET") return Response.redirect(new URL("/login", request.url).toString(), 302);
       return json({ error: "Not authenticated." }, 401);
     }
-    return env.ASSETS.fetch(request);
+    return serveAsset(request, env);
   },
 };
