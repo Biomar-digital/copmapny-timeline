@@ -107,6 +107,10 @@ function editionRow(p, ed, isLatest) {
         <a href="${esc(ed.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">${PDF_LABELS.non_approval.label} ↗</a>
         <a class="vh-annotate" href="${esc(annHref(p, ed, ed.files.non_approval))}">✎ Annotate</a>
       </div>
+      <div class="vh-sign" data-key="${esc(edKey(ed))}">
+        <div class="vh-siglist"></div>
+        <button type="button" class="btn vh-signbtn">🖋 Sign this version</button>
+      </div>
       <div class="vh-comments" data-key="${esc(edKey(ed))}">
         <div class="vh-clabel">Comments</div>
         <div class="vh-clist"><p class="vh-cempty">Loading…</p></div>
@@ -252,6 +256,107 @@ async function submitRequest() {
   }
 }
 
+// ---- signatures ----
+
+let SIGN_CTX = null, SIGN_TARGET = null, SIGN_HAS_INK = false;
+
+function initSigPad() {
+  const c = document.getElementById("sigPad");
+  if (!c) return;
+  const ctx = c.getContext("2d");
+  ctx.lineWidth = 2.4; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#1c2c44";
+  SIGN_CTX = ctx;
+  let drawing = false, lx = 0, ly = 0;
+  const pos = (e) => {
+    const r = c.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: (t.clientX - r.left) * (c.width / r.width), y: (t.clientY - r.top) * (c.height / r.height) };
+  };
+  const down = (e) => { drawing = true; const p = pos(e); lx = p.x; ly = p.y; e.preventDefault(); };
+  const move = (e) => {
+    if (!drawing) return; const p = pos(e);
+    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(p.x, p.y); ctx.stroke();
+    lx = p.x; ly = p.y; SIGN_HAS_INK = true; e.preventDefault();
+  };
+  const up = () => { drawing = false; };
+  c.addEventListener("mousedown", down); c.addEventListener("mousemove", move); window.addEventListener("mouseup", up);
+  c.addEventListener("touchstart", down, { passive: false }); c.addEventListener("touchmove", move, { passive: false }); window.addEventListener("touchend", up);
+
+  document.getElementById("sigClear").addEventListener("click", clearSig);
+  document.getElementById("sigSave").addEventListener("click", saveSig);
+  document.getElementById("signClose").addEventListener("click", () => { const d = document.getElementById("sign"); if (d.close) d.close(); });
+  document.getElementById("sigFile").addEventListener("change", (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const img = new Image();
+    img.onload = () => {
+      clearSig();
+      const scale = Math.min(c.width / img.width, c.height / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      ctx.drawImage(img, (c.width - w) / 2, (c.height - h) / 2, w, h);
+      SIGN_HAS_INK = true; URL.revokeObjectURL(img.src);
+    };
+    img.src = URL.createObjectURL(f);
+  });
+}
+
+function clearSig() {
+  if (SIGN_CTX) { SIGN_CTX.clearRect(0, 0, 460, 170); SIGN_HAS_INK = false; }
+  const s = document.getElementById("sigStatus"); if (s) s.textContent = "";
+}
+
+function openSign(policyId, edition) {
+  SIGN_TARGET = { policyId, edition };
+  document.getElementById("signSub").textContent = edition.replace("__", " · ");
+  clearSig();
+  const dlg = document.getElementById("sign");
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+}
+
+async function saveSig() {
+  const status = document.getElementById("sigStatus");
+  if (!SIGN_HAS_INK) { status.textContent = "Draw or upload a signature first."; return; }
+  const dataUrl = document.getElementById("sigPad").toDataURL("image/png");
+  const btn = document.getElementById("sigSave");
+  btn.disabled = true; status.textContent = "Saving…";
+  try {
+    const r = await fetch("api/signatures", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ policy: SIGN_TARGET.policyId, edition: SIGN_TARGET.edition, image: dataUrl }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || ("HTTP " + r.status));
+    status.textContent = "Signed ✓";
+    await loadSignatures(SIGN_TARGET.policyId);
+    setTimeout(() => { const dlg = document.getElementById("sign"); if (dlg.close) dlg.close(); }, 900);
+  } catch (e) { status.textContent = "Could not sign: " + e.message; } finally { btn.disabled = false; }
+}
+
+function renderSigList(el, sigs) {
+  el.innerHTML = sigs.length
+    ? '<div class="vh-siglabel">Signatures</div>' + sigs.map(s => `
+      <div class="vh-sig">
+        <img src="${esc(s.image)}" alt="signature" />
+        <div class="vh-sigwho"><b>${esc(s.name)}</b><span>${esc(s.account)} · ${fmtTime(s.signed_at)}</span></div>
+      </div>`).join("")
+    : "";
+}
+
+async function loadSignatures(policyId) {
+  const dlg = document.getElementById("history");
+  const byEd = {};
+  try {
+    const d = await (await fetch(`api/signatures?policy=${encodeURIComponent(policyId)}`, { cache: "no-store" })).json();
+    for (const s of (d.signatures || [])) (byEd[s.edition] = byEd[s.edition] || []).push(s);
+  } catch {}
+  dlg.querySelectorAll(".vh-sign").forEach(el =>
+    renderSigList(el.querySelector(".vh-siglist"), byEd[el.dataset.key] || []));
+}
+
+function wireSign(p) {
+  document.getElementById("history").querySelectorAll(".vh-sign").forEach(el =>
+    el.querySelector(".vh-signbtn").addEventListener("click", () => openSign(p.id, el.dataset.key)));
+}
+
 function openHistory(p) {
   HISTORY_POLICY = p;
   const dlg = document.getElementById("history");
@@ -265,22 +370,47 @@ function openHistory(p) {
   else dlg.setAttribute("open", "");
   wireComments(p.id);
   loadComments(p.id);
+  wireSign(p);
+  loadSignatures(p.id);
 }
 
 let POLICIES = [];
+let SEARCH = "";
+let CHIP = null; // { type: "owner"|"approver", value }
 
-function render(filter = "") {
+function render() {
   const list = document.getElementById("list");
-  const f = filter.trim().toLowerCase();
-  const shown = POLICIES.filter(p =>
-    !f || p.title.toLowerCase().includes(f) ||
-    (p.owner || "").toLowerCase().includes(f) ||
-    (p.language || "").toLowerCase().includes(f));
+  const f = SEARCH.trim().toLowerCase();
+  const shown = POLICIES.filter(p => {
+    if (CHIP && (p[CHIP.type] || "") !== CHIP.value) return false;
+    if (!f) return true;
+    return p.title.toLowerCase().includes(f) || (p.owner || "").toLowerCase().includes(f) ||
+      (p.approver || "").toLowerCase().includes(f) || (p.language || "").toLowerCase().includes(f);
+  });
   list.innerHTML = "";
   shown.forEach(p => list.appendChild(card(p)));
   document.getElementById("empty").hidden = shown.length > 0;
   document.getElementById("count").textContent =
     `${shown.length} of ${POLICIES.length} policies`;
+}
+
+function renderChips() {
+  const el = document.getElementById("chips");
+  const uniq = (k) => [...new Set(POLICIES.map(p => p[k]).filter(Boolean))].sort();
+  const chip = (type, val) =>
+    `<button type="button" class="chip${CHIP && CHIP.type === type && CHIP.value === val ? " active" : ""}" data-type="${esc(type)}" data-val="${esc(val)}">${esc(val)}</button>`;
+  const owners = uniq("owner"), approvers = uniq("approver");
+  el.innerHTML =
+    '<span class="chips-label">Owner</span>' + owners.map(o => chip("owner", o)).join("") +
+    '<span class="chips-sep"></span><span class="chips-label">Approver</span>' + approvers.map(a => chip("approver", a)).join("") +
+    (CHIP ? '<button type="button" class="chip clear" data-type="" data-val="">Clear ✕</button>' : "");
+  el.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
+    const t = b.dataset.type, v = b.dataset.val;
+    if (!t) CHIP = null;
+    else if (CHIP && CHIP.type === t && CHIP.value === v) CHIP = null;
+    else CHIP = { type: t, value: v };
+    renderChips(); render();
+  }));
 }
 
 // ---- account + admin (bell / approvals) ----
@@ -396,8 +526,9 @@ async function init() {
       .sort((a, b) => a.title.localeCompare(b.title));
     document.getElementById("meta").textContent =
       `${POLICIES.length} policies · Last update: ${data.updated || ""}`;
+    renderChips();
     render();
-    document.getElementById("search").addEventListener("input", e => render(e.target.value));
+    document.getElementById("search").addEventListener("input", e => { SEARCH = e.target.value; render(); });
     const connectBtn = document.getElementById("connectBtn");
     const connectDlg = document.getElementById("connect");
     if (connectBtn && connectDlg) {
@@ -415,6 +546,7 @@ async function init() {
     document.getElementById("reqClose").addEventListener("click",
       () => { const d = document.getElementById("request"); if (d.close) d.close(); });
     document.getElementById("reqSubmit").addEventListener("click", submitRequest);
+    initSigPad();
     setupAccount();
   } catch (err) {
     const e = document.getElementById("error");

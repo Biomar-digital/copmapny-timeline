@@ -16,6 +16,7 @@
 const COMMENTS_DIR = "policies/comments";
 const ANNOTATIONS_DIR = "policies/annotations";
 const REQUESTS_DIR = "policies/requests";
+const SIGNATURES_DIR = "policies/signatures";
 const MAX_TEXT = 4000;
 const MAX_QUOTE = 1000;
 const MAX_AUTHOR = 120;
@@ -213,6 +214,10 @@ function safeFile(f) { return typeof f === "string" && /^files\/[A-Za-z0-9._-]+\
 function safeUploadName(name) {
   const base = String(name || "upload").split(/[\\/]/).pop().slice(-120).replace(/[^A-Za-z0-9._-]/g, "_");
   return /\.(docx|pdf)$/i.test(base) ? base : null;
+}
+function parseDataUrl(s) {
+  const m = /^data:(image\/(png|jpeg));base64,([A-Za-z0-9+/=]+)$/.exec(String(s || ""));
+  return m ? { ext: m[2] === "jpeg" ? "jpg" : "png", b64: m[3] } : null;
 }
 function clamp01(n) { n = Number(n); return isFinite(n) ? Math.max(0, Math.min(1, n)) : 0; }
 function cleanRects(input) {
@@ -431,6 +436,38 @@ async function handleRequests(request, env, user) {
   return json({ ok: true, id, issue: issue.ok ? issue.number : null, warnings }, 201);
 }
 
+// ============================================================ /api/signatures
+
+async function handleSignatures(request, env, user) {
+  const miss = missingEnv(env); if (miss.length) return json({ error: "Signatures backend not configured. Missing: " + miss.join(", ") }, 503);
+  const url = new URL(request.url);
+  if (request.method === "GET") {
+    const id = safePolicyId(url.searchParams.get("policy"));
+    if (!id) return json({ error: "Invalid policy id." }, 400);
+    const { list } = await ghGetList(env, `${SIGNATURES_DIR}/${id}.json`);
+    return json({ signatures: list });
+  }
+  if (request.method === "POST") {
+    let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
+    const id = safePolicyId(p.policy); if (!id) return json({ error: "Invalid policy id." }, 400);
+    const edition = String(p.edition || "").slice(0, 200);
+    const img = parseDataUrl(p.image);
+    if (!img) return json({ error: "A signature image is required." }, 400);
+    if (img.b64.length > 3500000) return json({ error: "Signature image too large." }, 400);
+    const sigId = crypto.randomUUID();
+    const imgPath = `${SIGNATURES_DIR}/${id}/${sigId}.${img.ext}`;
+    const cr = await ghCreateFile(env, imgPath, img.b64, `Signature on ${id} by ${user.email}`);
+    if (!cr.ok) return json({ error: `Could not store signature (${cr.status}).` }, 502);
+    // Identity is taken from the session, never from the client.
+    const sig = { id: sigId, edition, name: user.name, account: user.email, image: imgPath, signed_at: new Date().toISOString() };
+    const res = await appendItem(env, `${SIGNATURES_DIR}/${id}.json`, sig, `Add signature on ${id} by ${user.email}`);
+    if (!res.ok) return json({ error: `Could not record signature (${res.status}).` }, 502);
+    await recordEvent(env, "signature", `${user.name} signed ${id}`, id, user.name);
+    return json({ signature: sig }, 201);
+  }
+  return json({ error: "Method not allowed." }, 405);
+}
+
 // ==================================================================== gate
 
 const PUBLIC_ASSETS = new Set(["/login", "/login.html", "/login.js", "/login.css", "/styles.css", "/favicon.png", "/favicon.ico"]);
@@ -453,10 +490,11 @@ export default {
       if (!user || user.role !== "admin") return json({ error: "Forbidden." }, 403);
       return handleAdmin(request, env, path, user);
     }
-    if (path === "/api/comments" || path === "/api/annotations" || path === "/api/requests") {
+    if (path === "/api/comments" || path === "/api/annotations" || path === "/api/requests" || path === "/api/signatures") {
       if (!user) return json({ error: "Not authenticated." }, 401);
       if (path === "/api/comments") return handleComments(request, env, user);
       if (path === "/api/annotations") return handleAnnotations(request, env, user);
+      if (path === "/api/signatures") return handleSignatures(request, env, user);
       return handleRequests(request, env, user);
     }
 

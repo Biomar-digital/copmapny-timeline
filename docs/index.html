@@ -37,6 +37,7 @@
         <span class="dot"></span> Connect an AI agent
       </button>
     </div>
+    <div id="chips" class="chips"></div>
     <div id="list" class="list"></div>
     <p id="empty" class="empty" hidden>No policies match your search.</p>
     <p id="error" class="empty" hidden></p>
@@ -179,6 +180,29 @@ codex</code></pre>
       <div class="cn-body">
         <div id="adNotifs" class="ad-list"></div>
         <div id="adPending" class="ad-list" hidden></div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="sign" class="vh-dialog">
+    <div class="vh-box">
+      <header class="vh-bar">
+        <div>
+          <h2 class="vh-title">Sign policy</h2>
+          <p class="vh-sub" id="signSub"></p>
+        </div>
+        <button type="button" class="vh-close" id="signClose" aria-label="Close">×</button>
+      </header>
+      <div class="cn-body">
+        <p class="sg-note">Draw your signature below, or upload an image of it. It is recorded under your account and applied to the signed PDF.</p>
+        <canvas id="sigPad" class="sg-pad" width="460" height="170"></canvas>
+        <div class="sg-row">
+          <button type="button" class="btn ghost" id="sigClear">Clear</button>
+          <label class="btn ghost sg-upload">Upload image<input id="sigFile" type="file" accept="image/png,image/jpeg" hidden /></label>
+          <span class="sg-spacer"></span>
+          <button type="button" class="btn vh-cadd" id="sigSave">Sign</button>
+        </div>
+        <span class="vh-cstatus" id="sigStatus"></span>
       </div>
     </div>
   </dialog>
