@@ -240,36 +240,6 @@
       ]
     },
     {
-      "id": "human-rights-policy",
-      "title": "Human Rights Policy",
-      "category": "Policy",
-      "language": "English",
-      "owner": "People, Purpose & Communication",
-      "approver": "Executive Management",
-      "editions": [
-        {
-          "version": "Version 2",
-          "date": "2026-05",
-          "approval_date": "20-01-2026",
-          "notes": "Imported from official PDF.",
-          "documents": [
-            {
-              "label": "Policy",
-              "language": "English",
-              "source": "human-rights-policy__Policy.docx",
-              "board_approval": false
-            },
-            {
-              "label": "Implementation",
-              "language": "English",
-              "source": "human-rights-policy__Implementation.docx",
-              "board_approval": false
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "it-security-policy",
       "title": "IT Security Policy",
       "category": "Policy",
@@ -366,66 +336,6 @@
       ]
     },
     {
-      "id": "responsible-employment-policy",
-      "title": "Responsible Employment Policy",
-      "category": "Policy",
-      "language": "English",
-      "owner": "People, Purpose & Communication",
-      "approver": "Executive Committee",
-      "editions": [
-        {
-          "version": "Version 1",
-          "date": "2026-02",
-          "approval_date": "20-01-2026",
-          "notes": "Imported from official PDF.",
-          "documents": [
-            {
-              "label": "Policy",
-              "language": "English",
-              "source": "responsible-employment-policy__Policy.docx",
-              "board_approval": false
-            },
-            {
-              "label": "Implementation",
-              "language": "English",
-              "source": "responsible-employment-policy__Implementation.docx",
-              "board_approval": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "salary-policy",
-      "title": "Salary Policy",
-      "category": "Policy",
-      "language": "English",
-      "owner": "People, Purpose & Communication",
-      "approver": "Executive Committee",
-      "editions": [
-        {
-          "version": "Version 1",
-          "date": "2026-02",
-          "approval_date": "20-01-2026",
-          "notes": "Imported from official PDF.",
-          "documents": [
-            {
-              "label": "Policy",
-              "language": "English",
-              "source": "salary-policy__Policy.docx",
-              "board_approval": false
-            },
-            {
-              "label": "Implementation",
-              "language": "English",
-              "source": "salary-policy__Implementation.docx",
-              "board_approval": false
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "sanctions-export-controls-policy",
       "title": "Sanctions and Export Controls Policy",
       "category": "Policy",
@@ -443,36 +353,6 @@
               "label": "Policy",
               "language": "English",
               "source": "sanctions-export-controls-policy__Policy.docx",
-              "board_approval": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "travel-policy",
-      "title": "Travel Policy",
-      "category": "Policy",
-      "language": "English",
-      "owner": "People, Purpose & Communication",
-      "approver": "Executive Committee",
-      "editions": [
-        {
-          "version": "Version 1",
-          "date": "2026-02",
-          "approval_date": "20-01-2026",
-          "notes": "Imported from official PDF.",
-          "documents": [
-            {
-              "label": "Policy",
-              "language": "English",
-              "source": "travel-policy__Policy.docx",
-              "board_approval": false
-            },
-            {
-              "label": "Implementation Guidelines",
-              "language": "English",
-              "source": "travel-policy__Implementation_Guidelines.docx",
               "board_approval": false
             }
           ]
@@ -504,72 +384,6 @@
       ]
     },
     {
-      "id": "position-marine-ingredients",
-      "title": "Position Statement — Marine Ingredients",
-      "category": "Position Statement",
-      "language": "English",
-      "owner": "Anja dé Friés Nielsen",
-      "approver": "Morten Holdorff Møjbæk",
-      "editions": [
-        {
-          "version": "Version 1",
-          "date": "2022-06",
-          "approval_date": "25-02-2022",
-          "notes": "Imported from official PDF.",
-          "documents": [
-            {
-              "label": "English",
-              "language": "English",
-              "source": "position-marine-ingredients__English.docx",
-              "board_approval": false
-            },
-            {
-              "label": "Spanish (Digital)",
-              "language": "Spanish",
-              "source": "position-marine-ingredients__Espanol_Digital.docx",
-              "board_approval": false
-            },
-            {
-              "label": "Spanish (Print)",
-              "language": "Spanish",
-              "source": "position-marine-ingredients__Espanol_Print.docx",
-              "board_approval": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "position-plant-based-ingredients",
-      "title": "Position Statement — Plant-based Ingredients",
-      "category": "Position Statement",
-      "language": "English",
-      "owner": "Group Sourcing",
-      "approver": "Executive Committee",
-      "editions": [
-        {
-          "version": "Version 6",
-          "date": "2026-03",
-          "approval_date": "",
-          "notes": "Imported from official PDF.",
-          "documents": [
-            {
-              "label": "English",
-              "language": "English",
-              "source": "position-plant-based-ingredients__English.docx",
-              "board_approval": false
-            },
-            {
-              "label": "Spanish",
-              "language": "Spanish",
-              "source": "position-plant-based-ingredients__Espanol.docx",
-              "board_approval": false
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "position-microplastics",
       "title": "Position Statement — Microplastics",
       "category": "Position Statement",
@@ -587,6 +401,331 @@
               "label": "English",
               "language": "English",
               "source": "position-microplastics__English.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "human-rights-policy",
+      "title": "Human Rights Policy",
+      "category": "Policy",
+      "group": "Human Rights",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Management",
+      "editions": [
+        {
+          "version": "Version 2",
+          "date": "2026-05",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "human-rights-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "human-rights-implementation",
+      "title": "Human Rights Policy — Implementation",
+      "category": "Policy",
+      "group": "Human Rights",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Management",
+      "editions": [
+        {
+          "version": "Version 2",
+          "date": "2026-05",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "human-rights-policy__Implementation.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "responsible-employment-policy",
+      "title": "Responsible Employment Policy",
+      "category": "Policy",
+      "group": "Responsible Employment",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "responsible-employment-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "responsible-employment-implementation",
+      "title": "Responsible Employment Policy — Implementation",
+      "category": "Policy",
+      "group": "Responsible Employment",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "responsible-employment-policy__Implementation.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "salary-policy",
+      "title": "Salary Policy",
+      "category": "Policy",
+      "group": "Salary",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "salary-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "salary-implementation",
+      "title": "Salary Policy — Implementation",
+      "category": "Policy",
+      "group": "Salary",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "salary-policy__Implementation.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "travel-policy",
+      "title": "Travel Policy",
+      "category": "Policy",
+      "group": "Travel",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "travel-policy__Policy.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "travel-implementation",
+      "title": "Travel Policy — Implementation Guidelines",
+      "category": "Policy",
+      "group": "Travel",
+      "language": "English",
+      "owner": "People, Purpose & Communication",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-02",
+          "approval_date": "20-01-2026",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "travel-policy__Implementation_Guidelines.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "position-marine-en",
+      "title": "Position Statement — Marine Ingredients (English)",
+      "category": "Position Statement",
+      "group": "Marine Ingredients",
+      "language": "English",
+      "owner": "Anja dé Friés Nielsen",
+      "approver": "Morten Holdorff Møjbæk",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2022-06",
+          "approval_date": "25-02-2022",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "position-marine-ingredients__English.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "position-marine-es-digital",
+      "title": "Position Statement — Marine Ingredients (Spanish, Digital)",
+      "category": "Position Statement",
+      "group": "Marine Ingredients",
+      "language": "Spanish",
+      "owner": "BioMar Group",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2022-07",
+          "approval_date": "",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "Spanish",
+              "source": "position-marine-ingredients__Espanol_Digital.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "position-marine-es-print",
+      "title": "Position Statement — Marine Ingredients (Spanish, Print)",
+      "category": "Position Statement",
+      "group": "Marine Ingredients",
+      "language": "Spanish",
+      "owner": "BioMar Group",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2022-07",
+          "approval_date": "",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "Spanish",
+              "source": "position-marine-ingredients__Espanol_Print.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "position-plant-en",
+      "title": "Position Statement — Plant-based Ingredients (English)",
+      "category": "Position Statement",
+      "group": "Plant-based Ingredients",
+      "language": "English",
+      "owner": "Group Sourcing",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 4",
+          "date": "2026-03",
+          "approval_date": "",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "position-plant-based-ingredients__English.docx",
+              "board_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "position-plant-es",
+      "title": "Position Statement — Plant-based Ingredients (Spanish)",
+      "category": "Position Statement",
+      "group": "Plant-based Ingredients",
+      "language": "Spanish",
+      "owner": "Group Sourcing",
+      "approver": "Executive Committee",
+      "editions": [
+        {
+          "version": "Version 4",
+          "date": "2026-04",
+          "approval_date": "",
+          "notes": "Imported from official PDF.",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "Spanish",
+              "source": "position-plant-based-ingredients__Espanol.docx",
               "board_approval": false
             }
           ]

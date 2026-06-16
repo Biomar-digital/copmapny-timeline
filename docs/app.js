@@ -489,14 +489,32 @@ async function loadPendingChanges() {
 function render() {
   const list = document.getElementById("list");
   const f = SEARCH.trim().toLowerCase();
-  const shown = POLICIES.filter(p => {
+  let shown = POLICIES.filter(p => {
     if (CHIP && (p[CHIP.type] || "") !== CHIP.value) return false;
     if (!f) return true;
     return p.title.toLowerCase().includes(f) || (p.owner || "").toLowerCase().includes(f) ||
-      (p.approver || "").toLowerCase().includes(f) || (p.language || "").toLowerCase().includes(f);
+      (p.approver || "").toLowerCase().includes(f) || (p.language || "").toLowerCase().includes(f) ||
+      (p.group || "").toLowerCase().includes(f);
+  });
+  // Cluster family members together (under a section header), keep the rest alphabetical.
+  shown = shown.slice().sort((a, b) => {
+    const ka = (a.group || a.title).toLowerCase(), kb = (b.group || b.title).toLowerCase();
+    return ka < kb ? -1 : ka > kb ? 1 : a.title.localeCompare(b.title);
   });
   list.innerHTML = "";
-  shown.forEach(p => list.appendChild(card(p)));
+  let curGroup = null;
+  shown.forEach(p => {
+    if (p.group && p.group !== curGroup) {
+      const h = document.createElement("div");
+      h.className = "family-head";
+      h.innerHTML = `${esc(p.group)} <span class="family-count">family</span>`;
+      list.appendChild(h);
+      curGroup = p.group;
+    } else if (!p.group) {
+      curGroup = null;
+    }
+    list.appendChild(card(p));
+  });
   document.getElementById("empty").hidden = shown.length > 0;
   document.getElementById("count").textContent =
     `${shown.length} of ${POLICIES.length} policies`;

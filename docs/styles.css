@@ -134,6 +134,14 @@ main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 60px; }
 .chip.clear { color: var(--ocean); border-style: dashed; }
 
 .list { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.family-head {
+  margin: 10px 2px 0; padding-bottom: 6px; border-bottom: 2px solid var(--sky);
+  font-size: 14px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px;
+}
+.family-head .family-count {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  color: #fff; background: var(--ocean); padding: 2px 7px; border-radius: 20px;
+}
 
 .card {
   background: #fff;
