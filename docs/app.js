@@ -118,6 +118,14 @@ async function init() {
       `${POLICIES.length} policies · Last update: ${data.updated || ""}`;
     render();
     document.getElementById("search").addEventListener("input", e => render(e.target.value));
+    const connectBtn = document.getElementById("connectBtn");
+    const connectDlg = document.getElementById("connect");
+    if (connectBtn && connectDlg) {
+      connectBtn.addEventListener("click", () => {
+        if (typeof connectDlg.showModal === "function") connectDlg.showModal();
+        else connectDlg.setAttribute("open", "");
+      });
+    }
   } catch (err) {
     const e = document.getElementById("error");
     e.hidden = false;

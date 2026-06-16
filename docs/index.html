@@ -22,6 +22,9 @@
     <div class="toolbar">
       <input id="search" type="search" placeholder="Search policies…" autocomplete="off" />
       <span class="count" id="count"></span>
+      <button type="button" id="connectBtn" class="btn connect">
+        <span class="dot"></span> Connect an AI agent
+      </button>
     </div>
     <div id="list" class="list"></div>
     <p id="empty" class="empty" hidden>No policies match your search.</p>
@@ -43,6 +46,72 @@
         <button value="close" class="vh-close" aria-label="Close">×</button>
       </header>
       <ol class="vh-list"></ol>
+    </form>
+  </dialog>
+
+  <dialog id="connect" class="vh-dialog connect-dialog">
+    <form method="dialog" class="vh-box">
+      <header class="vh-bar">
+        <div>
+          <h2 class="vh-title">Administer this library with an AI agent</h2>
+          <p class="vh-sub">No admin server — the whole library is managed from its GitHub repo.</p>
+        </div>
+        <button value="close" class="vh-close" aria-label="Close">×</button>
+      </header>
+      <div class="cn-body">
+        <p class="cn-lead">
+          This catalogue, the source documents, the generated PDFs and the metadata
+          all live in one GitHub repository. To add, edit or re-publish a policy you
+          connect an AI coding agent — <b>Claude Code</b> or <b>OpenAI Codex</b> — to
+          that repo and ask in plain language. It edits the registry, regenerates the
+          PDFs and pushes; Cloudflare redeploys this site automatically.
+        </p>
+
+        <div class="cn-repo">
+          <div><span class="cn-k">Repository</span><code>Biomar-digital/copmapny-timeline</code></div>
+          <div><span class="cn-k">Branch (deploys this site)</span><code>claude/confident-curie-gudwtz</code></div>
+        </div>
+
+        <section class="cn-sec">
+          <h3>① Connect Claude Code</h3>
+          <ul>
+            <li><b>On the web:</b> open <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a>,
+              authorise the GitHub app for <code>Biomar-digital</code>, pick the repo above
+              and start a session on the branch above.</li>
+            <li><b>In the terminal:</b>
+              <pre><code>npm install -g @anthropic-ai/claude-code
+git clone https://github.com/Biomar-digital/copmapny-timeline
+cd copmapny-timeline &amp;&amp; git checkout claude/confident-curie-gudwtz
+claude</code></pre>
+            </li>
+          </ul>
+        </section>
+
+        <section class="cn-sec">
+          <h3>② Or connect OpenAI Codex</h3>
+          <ul>
+            <li><b>On the web:</b> open Codex, connect the same GitHub repo and branch.</li>
+            <li><b>In the terminal:</b>
+              <pre><code>npm install -g @openai/codex
+git clone https://github.com/Biomar-digital/copmapny-timeline
+cd copmapny-timeline &amp;&amp; git checkout claude/confident-curie-gudwtz
+codex</code></pre>
+            </li>
+          </ul>
+        </section>
+
+        <section class="cn-sec">
+          <h3>③ Then just ask</h3>
+          <ul class="cn-prompts">
+            <li>"Add a new policy from this .docx — owner <i>X</i>, approver <i>Y</i> — and publish it."</li>
+            <li>"Publish <b>Version 2</b> of the Diversity Policy from this updated .docx, with changelog notes '<i>…</i>'."</li>
+            <li>"Change the owner of the Tax Policy to <i>Group Tax</i> and regenerate."</li>
+            <li>"Regenerate the Remuneration Policy without the approval pages."</li>
+          </ul>
+          <p class="cn-foot">Under the hood the agent edits <code>policies/registry.json</code>,
+            runs <code>python policy-formatter/tools/publish.py</code> and pushes the branch.</p>
+        </section>
+      </div>
     </form>
   </dialog>
 
