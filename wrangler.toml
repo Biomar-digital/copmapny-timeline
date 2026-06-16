@@ -1,2 +1,7 @@
-name = "biomar-policy-library"
-pages_build_output_dir = "docs"
+name = "copmapny-timeline"
+compatibility_date = "2026-06-16"
+
+# Static-only site: serve the generated policy library (docs/) as Worker assets.
+# The deploy command `wrangler versions upload` reads this [assets] directory.
+[assets]
+directory = "./docs"
