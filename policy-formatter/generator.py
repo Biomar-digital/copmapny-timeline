@@ -36,7 +36,8 @@ H2 = ParagraphStyle("H2", fontName=B.F_DEMI, fontSize=12, leading=14,
                     keepWithNext=1)
 BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
                       textColor=B.BIOMAR_BLUE, alignment=TA_JUSTIFY, spaceAfter=11.4,
-                      splitLongWords=0, hyphenationLang="")
+                      splitLongWords=0, hyphenationLang="",
+                      allowWidows=0, allowOrphans=0)
 BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
                         leftIndent=16, bulletIndent=2, spaceAfter=6)
 CELL = ParagraphStyle("Cell", fontName=B.F_REGULAR, fontSize=8.5, leading=11,

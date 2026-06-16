@@ -405,7 +405,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Position Statement Microplastics"
     },
     {
       "id": "human-rights-policy",
@@ -430,7 +431,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Human Rights Policy"
     },
     {
       "id": "human-rights-implementation",
@@ -455,7 +457,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Human Rights Policy Implementation"
     },
     {
       "id": "responsible-employment-policy",
@@ -480,7 +483,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Responsible Employment Policy"
     },
     {
       "id": "responsible-employment-implementation",
@@ -505,7 +509,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Responsible Employment Policy Implementation"
     },
     {
       "id": "salary-policy",
@@ -530,7 +535,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Salary Policy"
     },
     {
       "id": "salary-implementation",
@@ -555,7 +561,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Salary Policy Implementation"
     },
     {
       "id": "travel-policy",
@@ -580,7 +587,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Travel Policy"
     },
     {
       "id": "travel-implementation",
@@ -605,7 +613,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Travel Policy Implementation Guidelines"
     },
     {
       "id": "position-marine-en",
@@ -630,7 +639,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Position Statement Marine Ingredients"
     },
     {
       "id": "position-marine-es-digital",
@@ -655,7 +665,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Position Statement Marine Ingredients"
     },
     {
       "id": "position-marine-es-print",
@@ -680,7 +691,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Position Statement Marine Ingredients"
     },
     {
       "id": "position-plant-en",
@@ -705,7 +717,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Position Statement Plant-based Ingredients"
     },
     {
       "id": "position-plant-es",
@@ -730,7 +743,8 @@
             }
           ]
         }
-      ]
+      ],
+      "doc_title": "Position Statement Plant-based Ingredients"
     }
   ]
 }

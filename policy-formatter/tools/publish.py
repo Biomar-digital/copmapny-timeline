@@ -80,6 +80,9 @@ def main():
     out_policies = []
 
     for p in reg["policies"]:
+        # Cover title: the clean document title (doc_title) when set, else the
+        # card title (which may carry family/variant text not meant for the cover).
+        cover_title = p.get("doc_title", p["title"])
         eds_out = []
         for ed in _editions(p):
             date = ed["date"]
@@ -91,15 +94,17 @@ def main():
                     raise FileNotFoundError(src)
                 label = doc.get("label", "Policy")
                 name_base = f"{_slug(p['title'])}__{_slug(label)}"
-                files = {"non_approval": _gen(src, p["title"], year, date, name_base, "non-approval", ["--no-signatures"])}
-                if doc.get("board_approval"):
-                    extra = ["--owner", p.get("owner", ""),
+                # Version / owner-approver card is drawn on every document (it was
+                # on the originals); only the board signatures page is conditional.
+                meta_args = ["--owner", p.get("owner", ""),
                              "--approver", p.get("approver", "Executive Committee")]
-                    if ed.get("approval_date"):
-                        extra += ["--approval-date", ed["approval_date"]]
-                    if ed.get("version"):
-                        extra += ["--version", ed["version"] + ":"]
-                    files["approval"] = _gen(src, p["title"], year, date, name_base, "approval", extra)
+                if ed.get("approval_date"):
+                    meta_args += ["--approval-date", ed["approval_date"]]
+                if ed.get("version"):
+                    meta_args += ["--version", ed["version"] + ":"]
+                files = {"non_approval": _gen(src, cover_title, year, date, name_base, "non-approval", meta_args + ["--no-signatures"])}
+                if doc.get("board_approval"):
+                    files["approval"] = _gen(src, cover_title, year, date, name_base, "approval", meta_args)
                 docs_out.append({
                     "label": label,
                     "language": doc.get("language") or p.get("language", "English"),

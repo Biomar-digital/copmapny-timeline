@@ -112,8 +112,10 @@ def build_docx(pdf, out):
 
     doc = Document()
     skip_toc = False
+    last_para = None           # last body paragraph, for merging split continuations
     for k, p in items:
         if k == "table":
+            last_para = None
             rows = [r for r in p if any((c or "").strip() for c in r)]
             if not rows:
                 continue
@@ -139,6 +141,7 @@ def build_docx(pdf, out):
 
         if is_head and re.match(r"^contents?$", s, re.I):
             skip_toc = True
+            last_para = None
             continue
         if skip_toc:
             if len(s) > 90 or s.endswith("."):
@@ -149,13 +152,20 @@ def build_docx(pdf, out):
         if is_head:
             level = 1 if (h1 and size >= h1 - 0.1) else 2
             doc.add_heading(s, level=level)
+            last_para = None
         elif s[:1] in "••-▪◦":
             for line in s.split("\n"):
                 item = re.sub(r"^[\s••\-▪◦]+", "", line).strip()
                 if item:
                     doc.add_paragraph(item, style="List Bullet")
+            last_para = None
         else:
-            doc.add_paragraph(s)
+            # Merge a block that is the continuation of the previous paragraph
+            # (previous didn't end a sentence and this one starts lower-case).
+            if last_para is not None and s[:1].islower() and not re.search(r"[.:;!?»\")]\s*$", last_para.text):
+                last_para.text = last_para.text + " " + s
+            else:
+                last_para = doc.add_paragraph(s)
     doc.save(out)
 
 
