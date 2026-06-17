@@ -677,46 +677,10 @@ def _draw_back_cover(c, doc):
     # the tagline and the URL baked in; we only overlay the optional card.
     c.drawImage(ImageReader(B.COVER_BG_BACK), 0, 0, B.PAGE_W, B.PAGE_H,
                 preserveAspectRatio=False, mask=None)
-    # Signed variants get the full version-history card; unsigned variants show
-    # just the Owner / Approver block (no version history or approval date).
-    if policy.signatures and any([policy.approval_date, policy.owner, policy.approver]):
+    # Both variants show the version-history / owner-approver card with the
+    # version line + date; only the signed variant adds the "Approval date" row.
+    if any([policy.approval_date, policy.owner, policy.approver]):
         _draw_version_card(c, policy)
-    elif policy.owner or policy.approver:
-        _draw_owner_card(c, policy)
-
-
-def _draw_owner_card(c, policy):
-    """Owner / approver card for unsigned variants (no version history)."""
-    cw, ch = 300.0, 92.0
-    cx = (B.PAGE_W - cw) / 2.0
-    cy = B.PAGE_H - 150 - ch            # top area, like the version card on other policies
-    right = cx + cw
-    c.setFillColor(B.WHITE)
-    c.roundRect(cx, cy, cw, ch, 10, stroke=0, fill=1)
-    head_y = cy + ch - 22
-    c.setFillColor(B.BIOMAR_BLUE)
-    c.setFont(B.F_DEMI, 10)
-    c.drawCentredString(B.PAGE_W / 2.0, head_y, "Owner and approver")
-    c.setStrokeColor(B.LIGHT_RULE)
-    c.setLineWidth(0.5)
-    c.line(cx + 14, head_y - 9, right - 14, head_y - 9)
-    label_x, value_x = cx + 26, cx + 104
-    rows = [("Owner:", policy.owner or "—"),
-            ("Approver:", policy.approver or "Executive Committee")]
-    ry = head_y - 26
-    for idx, (lb, vb) in enumerate(rows):
-        c.setFillColor(B.BIOMAR_BLUE)
-        c.setFont(B.F_LIGHT, 8)
-        c.drawString(label_x, ry, lb)
-        size, avail = 8.0, right - value_x - 14
-        while size > 6 and c.stringWidth(vb, B.F_LIGHT, size) > avail:
-            size -= 0.5
-        c.setFont(B.F_LIGHT, size)
-        c.drawString(value_x, ry, vb)
-        if idx < len(rows) - 1:        # divider between rows only, not below the last
-            c.setStrokeColor(B.LIGHT_RULE)
-            c.line(cx + 14, ry - 9, right - 14, ry - 9)
-        ry -= 25
 
 
 def _draw_version_card(c, policy):
