@@ -56,6 +56,9 @@ COL_BODY = ParagraphStyle("ColBody", parent=BODY_LEFT, fontSize=10, leading=13,
 COL_BULLET = ParagraphStyle("ColBullet", parent=COL_BODY, alignment=TA_LEFT,
                             leftIndent=14, bulletIndent=2, spaceAfter=5)
 COL_BODY_BOLD = ParagraphStyle("ColBodyBold", parent=COL_BODY, fontName=B.F_DEMI)
+COL_FOOTNOTE = ParagraphStyle("ColFootnote", fontName=B.F_REGULAR, fontSize=7, leading=9,
+                              textColor=B.BIOMAR_BLUE, alignment=TA_LEFT,
+                              spaceBefore=6, spaceAfter=2)
 CELL = ParagraphStyle("Cell", fontName=B.F_REGULAR, fontSize=8.5, leading=11,
                       textColor=B.BIOMAR_BLUE, splitLongWords=0, hyphenationLang="")
 CELL_H = ParagraphStyle("CellH", parent=CELL, fontName=B.F_DEMI,
@@ -422,16 +425,38 @@ def _is_col_heading(f):
     return getattr(f, "style", None) is not None and f.style.name in ("H1", "H2")
 
 
+def _is_footnote(text):
+    return text.lstrip()[:1] in "¹²³⁴⁵⁶⁷⁸⁹"
+
+
 def _columns_flowables(b):
     """Render two text columns newspaper-style and balanced: the content flows
     in reading order (left column top-to-bottom, then right) and BalancedColumns
     splits it so both columns end at the same height — matching the original,
     instead of one column finishing early with a white gap."""
-    cols = [c for c in b.cols if c]
+    # Pull out small footnotes (¹ ², …) so they render small at the foot of the
+    # page instead of inline in a column.
+    foot = []
+    src = []
+    for c in b.cols:
+        keep = []
+        for sb in c:
+            if isinstance(sb, Body) and _is_footnote(sb.text):
+                foot.append(sb)
+            else:
+                keep.append(sb)
+        src.append(keep)
+    foot_flow = []
+    if foot:
+        foot_flow = [HRFlowable(width=130, thickness=0.5, color=colors.Color(0.73, 0.898, 0.957),
+                                spaceBefore=10, spaceAfter=2)]
+        foot_flow += [Paragraph(_fmt(f.text), COL_FOOTNOTE) for f in foot]
+
+    cols = [c for c in src if c]
     if not cols:
-        return []
+        return foot_flow
     if len(cols) == 1:
-        return _col_flowables(cols[0])
+        return _col_flowables(cols[0]) + foot_flow
     flow = _col_flowables(cols[0]) + _col_flowables(cols[1])
     gutter = 16
     colw = (_CONTENT_W - gutter) / 2          # text width of each column
@@ -439,7 +464,8 @@ def _columns_flowables(b):
     # Usable column height on a content page, with headroom for measurement
     # slack so a non-splitting column never overflows the frame.
     col_h = B.PAGE_H - B.MARGIN_TOP_CONT - B.MARGIN_BOTTOM - 18
-    budget = col_h - 28
+    foot_h = sum(_flow_height(f, _CONTENT_W) for f in foot_flow)
+    budget = col_h - 28 - foot_h
 
     def _table(items):
         # Balance one page-worth of items into two columns by choosing the split
@@ -488,7 +514,7 @@ def _columns_flowables(b):
             out.append(PageBreak())
         out.append(_table(chunk))
         first = False
-    return [Spacer(1, 4)] + out + [Spacer(1, 6)]
+    return [Spacer(1, 4)] + out + [Spacer(1, 6)] + foot_flow
 
 
 def _story(policy):
@@ -661,23 +687,30 @@ def _draw_version_card(c, policy):
     c.line(cx + 14, head_y - 10, right - 14, head_y - 10)   # under headers
     c.line(DIVIDER, cy + 10, DIVIDER, head_y - 10)          # column divider
 
-    rows_l = [(policy.version, policy.approval_date or "—"),
-              ("Approval date:", policy.approval_date or "—")]
+    # The "Approval date" row only belongs on the signed (board-approved)
+    # variant; an unsigned copy shows just the version line.
+    rows_l = [(policy.version, policy.approval_date or "—")]
+    if policy.signatures:
+        rows_l.append(("Approval date:", policy.approval_date or "—"))
     rows_r = [("Owner:", policy.owner or "—"),
               ("Approver:", policy.approver or "Executive Committee")]
     ry = head_y - 27
-    for (la, va), (lb, vb) in zip(rows_l, rows_r):
+    for k in range(max(len(rows_l), len(rows_r))):
         c.setFillColor(B.BIOMAR_BLUE)
         c.setFont(B.F_LIGHT, 8)
-        c.drawRightString(L_LABEL_R, ry, la)
-        c.drawString(L_VALUE, ry, va)
-        c.drawString(R_LABEL, ry, lb)
-        # Shrink the owner/approver value if it would overflow the card.
-        size, avail = 8.0, right - R_VALUE - 8
-        while size > 6 and c.stringWidth(vb, B.F_LIGHT, size) > avail:
-            size -= 0.5
-        c.setFont(B.F_LIGHT, size)
-        c.drawString(R_VALUE, ry, vb)
+        if k < len(rows_l):
+            la, va = rows_l[k]
+            c.drawRightString(L_LABEL_R, ry, la)
+            c.drawString(L_VALUE, ry, va)
+        if k < len(rows_r):
+            lb, vb = rows_r[k]
+            c.drawString(R_LABEL, ry, lb)
+            # Shrink the owner/approver value if it would overflow the card.
+            size, avail = 8.0, right - R_VALUE - 8
+            while size > 6 and c.stringWidth(vb, B.F_LIGHT, size) > avail:
+                size -= 0.5
+            c.setFont(B.F_LIGHT, size)
+            c.drawString(R_VALUE, ry, vb)
         c.setStrokeColor(B.LIGHT_RULE)
         c.line(cx + 14, ry - 9, right - 14, ry - 9)
         ry -= 25
