@@ -296,9 +296,10 @@ def _col_flowables(blocks):
 
 
 def _columns_flowables(b):
-    """Render two text columns as a borderless table whose rows pair the items
-    of each column. Reading a column top-to-bottom gives that column's items in
-    order; the table splits between rows so it paginates across pages."""
+    """Render two text columns side by side, newspaper-style: each column is a
+    single table cell holding its own stack of flowables, so the columns flow
+    independently (a long paragraph on the left does not push the right column
+    down). splitInRow lets the row break across pages when a column overflows."""
     cols = [c for c in b.cols if c]
     if not cols:
         return []
@@ -306,18 +307,15 @@ def _columns_flowables(b):
         return _col_flowables(cols[0])
     left = _col_flowables(cols[0])
     right = _col_flowables(cols[1])
-    n = max(len(left), len(right))
-    left += [""] * (n - len(left))
-    right += [""] * (n - len(right))
     half = (_CONTENT_W - 16) / 2
-    t = Table([[left[i], right[i]] for i in range(n)], colWidths=[half, half])
+    t = Table([[left, right]], colWidths=[half, half], splitInRow=1)
     t.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
         ("RIGHTPADDING", (0, 0), (0, -1), 16),
         ("RIGHTPADDING", (1, 0), (1, -1), 0),
         ("TOPPADDING", (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
     ]))
     return [Spacer(1, 4), t, Spacer(1, 6)]
 
