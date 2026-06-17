@@ -44,6 +44,12 @@ BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
 BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
 BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
                         leftIndent=16, bulletIndent=2, spaceAfter=6)
+# Two-column running text is set at the original's denser 10pt so each section
+# keeps the same footprint as the official PDF (one page per 2-column section).
+COL_BODY = ParagraphStyle("ColBody", parent=BODY_LEFT, fontSize=10, leading=13,
+                          spaceAfter=8)
+COL_BULLET = ParagraphStyle("ColBullet", parent=COL_BODY, alignment=TA_LEFT,
+                            leftIndent=14, bulletIndent=2, spaceAfter=5)
 CELL = ParagraphStyle("Cell", fontName=B.F_REGULAR, fontSize=8.5, leading=11,
                       textColor=B.BIOMAR_BLUE, splitLongWords=0, hyphenationLang="")
 CELL_H = ParagraphStyle("CellH", parent=CELL, fontName=B.F_DEMI,
@@ -373,10 +379,24 @@ def _col_flowables(blocks):
         if isinstance(sb, Heading):
             out.append(Paragraph(escape(sb.text), H1 if sb.level == 1 else H2))
         elif isinstance(sb, Bullet):
-            out.append(Paragraph(_fmt(sb.text), BULLET, bulletText="•"))
+            out.append(Paragraph(_fmt(sb.text), COL_BULLET, bulletText="•"))
         else:
-            out.append(Paragraph(_fmt(sb.text), BODY_LEFT))
+            out.append(Paragraph(_fmt(sb.text), COL_BODY))
     return out
+
+
+def _flow_height(f, w):
+    try:
+        h = f.wrap(w, 100000)[1]
+    except Exception:
+        return 0.0
+    sb = f.getSpaceBefore() if hasattr(f, "getSpaceBefore") else 0
+    sa = f.getSpaceAfter() if hasattr(f, "getSpaceAfter") else 0
+    return h + sb + sa
+
+
+def _is_col_heading(f):
+    return getattr(f, "style", None) is not None and f.style.name in ("H1", "H2")
 
 
 def _columns_flowables(b):
@@ -390,39 +410,62 @@ def _columns_flowables(b):
     if len(cols) == 1:
         return _col_flowables(cols[0])
     flow = _col_flowables(cols[0]) + _col_flowables(cols[1])
-    half = (_CONTENT_W - 16) / 2
-    # Balance: split the reading-order flow where the cumulative height first
-    # reaches half, so both columns end at about the same depth.
-    heights = []
-    for f in flow:
-        try:
-            heights.append(f.wrap(half, 100000)[1])
-        except Exception:
-            heights.append(0)
-    total = sum(heights)
-    acc, split = 0.0, len(flow)
-    for i, hgt in enumerate(heights):
-        acc += hgt
-        if acc >= total / 2:
-            split = i + 1
-            break
-    split = max(1, min(split, len(flow) - 1))
-    # never leave a heading orphaned at the foot of the left column
-    def _is_head(f):
-        return getattr(f, "style", None) is not None and f.style.name in ("H1", "H2")
-    while split > 1 and _is_head(flow[split - 1]):
-        split -= 1
-    left, right = flow[:split], flow[split:]
-    t = Table([[left, right]], colWidths=[half, half], splitInRow=1)
-    t.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-        ("RIGHTPADDING", (0, 0), (0, -1), 16),
-        ("RIGHTPADDING", (1, 0), (1, -1), 0),
-        ("TOPPADDING", (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-    ]))
-    return [Spacer(1, 4), t, Spacer(1, 6)]
+    gutter = 16
+    colw = (_CONTENT_W - gutter) / 2          # text width of each column
+    heights = [_flow_height(f, colw) for f in flow]
+    # Usable column height on a content page, with headroom for measurement
+    # slack so a non-splitting column never overflows the frame.
+    col_h = B.PAGE_H - B.MARGIN_TOP_CONT - B.MARGIN_BOTTOM - 18
+    budget = col_h - 28
+
+    def _table(items):
+        # Balance one page-worth of items into two columns by choosing the split
+        # that minimises the taller column, so both end about level and neither
+        # overflows; the table never splits, keeping the reading order intact.
+        if len(items) == 1:
+            left, right = items, []
+        else:
+            best_sp, best_max = 1, float("inf")
+            for sp in range(1, len(items)):
+                l = sum(heights[j] for j in items[:sp])
+                rr = sum(heights[j] for j in items[sp:])
+                m = max(l, rr)
+                if m < best_max:
+                    best_max, best_sp = m, sp
+            sp = best_sp
+            while sp > 1 and _is_col_heading(flow[items[sp - 1]]):
+                sp -= 1
+            left = items[:sp]
+            right = items[sp:]
+        t = Table([[[flow[j] for j in left], [flow[j] for j in right]]],
+                  colWidths=[colw + gutter / 2, colw + gutter / 2])
+        t.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("LEFTPADDING", (0, 0), (0, -1), 0),
+            ("RIGHTPADDING", (0, 0), (0, -1), gutter / 2),
+            ("LEFTPADDING", (1, 0), (1, -1), gutter / 2),
+            ("RIGHTPADDING", (1, 0), (1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ]))
+        return t
+
+    # Paginate the reading-order flow into page-sized chunks; each chunk is a
+    # self-contained balanced 2-column block (a page break separates chunks so
+    # the left/right columns of one page always read together, in order). The
+    # chunk fills up to two columns (2*budget) before breaking.
+    out, i, n, first = [], 0, len(flow), True
+    while i < n:
+        chunk, acc = [], 0.0
+        while i < n and (not chunk or acc + heights[i] <= 2 * budget):
+            chunk.append(i)
+            acc += heights[i]
+            i += 1
+        if not first:
+            out.append(PageBreak())
+        out.append(_table(chunk))
+        first = False
+    return [Spacer(1, 4)] + out + [Spacer(1, 6)]
 
 
 def _story(policy):
