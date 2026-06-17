@@ -161,11 +161,12 @@
               "label": "Policy",
               "language": "English",
               "source": "code-of-conduct-suppliers__Policy.docx",
-              "pdf": "code_of_conduct_suppliers__original.pdf"
+              "board_approval": false
             }
           ]
         }
-      ]
+      ],
+      "cover_year": false
     },
     {
       "id": "environmental-energy-policy",

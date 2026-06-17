@@ -62,6 +62,7 @@ class Policy:
     adopted_on: str = ""
     effective_on: str = ""
     signatures: bool = True   # include the board signatures page
+    cover_year: bool = True   # show the year on the cover (some originals omit it)
 
 
 def _para_images(item):
@@ -86,6 +87,30 @@ def _para_images(item):
                 pass
         out.append((data, w, h))
     return out
+
+
+def _is_brand_artwork(data: bytes) -> bool:
+    """Some source .docx files bake the designed cover, back cover, section
+    dividers ("Audit Committee Charter") and full-page logos in as images. The
+    template redraws its own cover and furniture, so these must not be rendered
+    inline (otherwise they appear as stray cover pages / oversized logos). They
+    are all dominated by the BioMar navy brand colour, or are full-page portrait
+    artwork — genuine content images are neither."""
+    try:
+        from io import BytesIO
+        from PIL import Image
+        im = Image.open(BytesIO(data)).convert("RGB")
+    except Exception:
+        return False
+    w, h = im.size
+    px = list(im.resize((16, 16)).getdata())
+    n = len(px) or 1
+    mr = sum(p[0] for p in px) / n
+    mg = sum(p[1] for p in px) / n
+    mb = sum(p[2] for p in px) / n
+    navy = mb > mr and mb > 70 and mr < 95 and mg < 120
+    portrait_page = h > w and 0.6 < w / h < 0.8 and min(w, h) > 400
+    return navy or portrait_page
 
 
 def _iter_block_items(parent):
@@ -160,6 +185,8 @@ def parse_docx(path: str, title: Optional[str] = None,
             continue
 
         for data, iw, ih in _para_images(item):
+            if _is_brand_artwork(data):
+                continue
             blocks.append(ImageBlock(data=data, width=iw, height=ih))
 
         text = _clean(item.text)

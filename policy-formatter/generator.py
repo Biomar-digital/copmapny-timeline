@@ -8,9 +8,10 @@ margins and the cover artwork all come from `brand.py` / `assets/`.
 from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.utils import ImageReader
+from reportlab.lib import colors
 from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame,
                                 Paragraph, Spacer, Table, TableStyle,
-                                NextPageTemplate, PageBreak)
+                                NextPageTemplate, PageBreak, KeepTogether)
 from reportlab.platypus.flowables import HRFlowable, BalancedColumns
 from xml.sax.saxutils import escape
 import re
@@ -50,6 +51,10 @@ CELL_H = ParagraphStyle("CellH", parent=CELL, fontName=B.F_DEMI,
 CELL_SEC = ParagraphStyle("CellSec", parent=CELL, fontName=B.F_DEMI,
                           textColor=B.WHITE)                            # section band row
 CELL_C = ParagraphStyle("CellC", parent=CELL, alignment=TA_CENTER)     # short marks (√, —)
+SIG_LABEL = ParagraphStyle("SigLabel", fontName=B.F_DEMI, fontSize=10.5, leading=15,
+                           textColor=B.BIOMAR_BLUE)                    # declaration-box label
+SIG_LINE = ParagraphStyle("SigLine", fontName=B.F_REGULAR, fontSize=10.5, leading=15,
+                          textColor=B.BIOMAR_BLUE)                     # writing line
 
 
 _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
@@ -206,6 +211,54 @@ def _row_height(cells, colw):
     return t.wrap(sum(colw), 100000)[1]
 
 
+_SIG_FILL = colors.Color(184 / 255, 224 / 255, 240 / 255)   # original box tone #b8e0f0
+_SIG_LABELS = ("company", "name", "position", "date", "place", "signature")
+
+
+def _is_signature_form(block):
+    """A small form whose left column is labels ending in ':' (Company:, Date:,
+    Signature: …) — drawn as the official light-blue declaration box."""
+    rows = block.rows
+    if not (2 <= len(rows) <= 8):
+        return False
+    labels = [(_first(r) or "").strip().lower() for r in rows]
+    if not all(l.endswith(":") for l in labels if l):
+        return False
+    hits = sum(any(k in l for k in _SIG_LABELS) for l in labels)
+    return hits >= 3
+
+
+def _first(row):
+    return row[0] if row else ""
+
+
+def _signature_card_flowables(block):
+    """Render the supplier declaration as a rounded light-blue card with the
+    field labels and a writing line for each, matching the official PDF."""
+    line = "_" * 34
+    data = []
+    for r in block.rows:
+        cells = list(r)
+        # 'Date:' shares a row with 'Place:' in the original.
+        if len(cells) >= 2 and cells[1].strip():
+            data.append([Paragraph(escape(cells[0]), SIG_LABEL),
+                         Paragraph(escape(cells[1]) + "  " + line[:14], SIG_LINE)])
+        else:
+            data.append([Paragraph(escape(cells[0]), SIG_LABEL),
+                         Paragraph(line, SIG_LINE)])
+    w0 = 120
+    t = Table(data, colWidths=[w0, _CONTENT_W - w0 - 28])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), _SIG_FILL),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 14),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 14),
+        ("TOPPADDING", (0, 0), (-1, -1), 9),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
+    ]))
+    return [Spacer(1, 6), KeepTogether([t]), Spacer(1, 8)]
+
+
 def _table_flowables(block):
     """Return the flowables for a table. Small tables are a single Table; large
     tables are paginated manually so the header repeats and a page never ends
@@ -333,9 +386,12 @@ def _story(policy):
         elif isinstance(b, Bullet):
             flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):
-            flow.append(Spacer(1, 4))
-            flow.extend(_table_flowables(b))
-            flow.append(Spacer(1, 8))
+            if _is_signature_form(b):
+                flow.extend(_signature_card_flowables(b))
+            else:
+                flow.append(Spacer(1, 4))
+                flow.extend(_table_flowables(b))
+                flow.append(Spacer(1, 8))
         elif isinstance(b, ImageBlock):
             flow.extend(_image_flowables(b))
         elif isinstance(b, Columns):
@@ -356,7 +412,10 @@ def _draw_cover(c, doc):
     # Title - auto-fit width, wrap; anchored so the bottom line sits just above
     # the baked rule, with the year stacked above it.
     avail = B.PAGE_W - B.MARGIN_L - 30
-    size, lines = _fit_title(c, policy.title, avail, 70)
+    # Covers that carry a year stack a big title above it; year-less covers
+    # (e.g. the Code of Conduct) use the original's smaller 44pt title instead.
+    start = 70 if getattr(policy, "cover_year", True) else 44
+    size, lines = _fit_title(c, policy.title, avail, start)
     n = len(lines)
     last_baseline = B.COVER_RULE_Y + 65.6    # bottom title line, matches template
     c.setFillColor(B.COVER_TITLE)
@@ -365,10 +424,11 @@ def _draw_cover(c, doc):
         c.drawString(B.MARGIN_L, last_baseline + (n - 1 - i) * size * 1.02, ln)
     top_title = last_baseline + (n - 1) * size * 1.02
 
-    # Year sits above the title block.
-    c.setFillColor(B.COVER_YEAR)
-    c.setFont(B.F_BOLD, 60)
-    c.drawString(B.MARGIN_L, top_title + 84.3, policy.year)
+    # Year sits above the title block (some originals carry no year on the cover).
+    if getattr(policy, "cover_year", True):
+        c.setFillColor(B.COVER_YEAR)
+        c.setFont(B.F_BOLD, 60)
+        c.drawString(B.MARGIN_L, top_title + 84.3, policy.year)
 
     # Address block (bottom-left, below the rule)
     c.setFillColor(B.COVER_ADDR)

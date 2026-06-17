@@ -116,6 +116,8 @@ def main():
                 # on the originals); only the board signatures page is conditional.
                 meta_args = ["--owner", p.get("owner", ""),
                              "--approver", p.get("approver", "Executive Committee")]
+                if p.get("cover_year") is False:
+                    meta_args += ["--no-cover-year"]
                 if ed.get("approval_date"):
                     meta_args += ["--approval-date", ed["approval_date"]]
                 if ed.get("version"):

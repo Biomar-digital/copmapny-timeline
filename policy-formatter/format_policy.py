@@ -34,6 +34,8 @@ def main(argv=None):
     ap.add_argument("--effective-on", dest="effective_on", help="Effective date")
     ap.add_argument("--no-signatures", dest="signatures", action="store_false",
                     help="Omit the board signatures page")
+    ap.add_argument("--no-cover-year", dest="cover_year", action="store_false",
+                    help="Omit the year on the cover (matches originals that have none)")
     ap.add_argument("--date", help="Date tag in the file name (default: current YYYY-MM)")
     args = ap.parse_args(argv)
 
@@ -44,7 +46,7 @@ def main(argv=None):
                         owner=args.owner, approver=args.approver,
                         approval_date=args.approval_date, version=args.version,
                         adopted_on=args.adopted_on, effective_on=args.effective_on,
-                        signatures=args.signatures)
+                        signatures=args.signatures, cover_year=args.cover_year)
 
     # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
     import datetime
