@@ -446,11 +446,7 @@ def _columns_flowables(b):
             else:
                 keep.append(sb)
         src.append(keep)
-    foot_flow = []
-    if foot:
-        foot_flow = [HRFlowable(width=130, thickness=0.5, color=colors.Color(0.73, 0.898, 0.957),
-                                spaceBefore=10, spaceAfter=2)]
-        foot_flow += [Paragraph(_fmt(f.text), COL_FOOTNOTE) for f in foot]
+    foot_flow = [Paragraph(_fmt(f.text), COL_FOOTNOTE) for f in foot]
 
     cols = [c for c in src if c]
     if not cols:
@@ -514,6 +510,16 @@ def _columns_flowables(b):
             out.append(PageBreak())
         out.append(_table(chunk))
         first = False
+    # Push the footnotes down so they sit at the foot of the last page, like the
+    # original, instead of right under the (possibly short) last column.
+    if foot_flow:
+        try:
+            last_h = out[-1].wrap(_CONTENT_W, col_h)[1]
+        except Exception:
+            last_h = budget
+        gap = col_h - last_h - foot_h - 8
+        if gap > 6:
+            foot_flow = [Spacer(1, gap)] + foot_flow
     return [Spacer(1, 4)] + out + [Spacer(1, 6)] + foot_flow
 
 
@@ -646,9 +652,15 @@ def _draw_content_furniture(c, doc):
     c.drawString(B.MARGIN_L, B.PAGE_H - 47, B.COMPANY)
     c.drawString(B.MARGIN_L, B.PAGE_H - 47 - 13, policy.title)
     _draw_logo(c)
-    # Footer (centred)
+    # Footer (centred), with an optional small disclaimer line beneath it.
     c.setFont(B.F_REGULAR, 8)
     c.drawCentredString(B.PAGE_W / 2.0, 25, B.FOOTER)
+    note = getattr(policy, "footer_note", "")
+    if note:
+        c.setFillColor(colors.Color(0.576, 0.584, 0.596))   # #939598 grey
+        c.setFont(B.F_REGULAR, 6.5)
+        c.drawCentredString(B.PAGE_W / 2.0, 14, note)
+        c.setFillColor(B.BIOMAR_BLUE)
 
 
 def _draw_back_cover(c, doc):

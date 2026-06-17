@@ -40,6 +40,8 @@ def main(argv=None):
                     help="Repeat the title as a bold lead heading on the first body page")
     ap.add_argument("--body-size", dest="body_size", type=float, default=11,
                     help="Body text point size (default 11; the Code of Conduct uses 10)")
+    ap.add_argument("--footer-note", dest="footer_note", default="",
+                    help="Small disclaimer line under the footer address")
     ap.add_argument("--date", help="Date tag in the file name (default: current YYYY-MM)")
     args = ap.parse_args(argv)
 
@@ -51,7 +53,8 @@ def main(argv=None):
                         approval_date=args.approval_date, version=args.version,
                         adopted_on=args.adopted_on, effective_on=args.effective_on,
                         signatures=args.signatures, cover_year=args.cover_year,
-                        lead_title=args.lead_title, body_size=args.body_size)
+                        lead_title=args.lead_title, body_size=args.body_size,
+                        footer_note=args.footer_note)
 
     # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
     import datetime

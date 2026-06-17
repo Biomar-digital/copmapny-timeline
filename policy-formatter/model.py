@@ -67,6 +67,7 @@ class Policy:
     cover_year: bool = True   # show the year on the cover (some originals omit it)
     lead_title: bool = False  # repeat the title as a lead heading on page 1 of body
     body_size: float = 11     # body point size (e.g. the Code of Conduct uses 10)
+    footer_note: str = ""     # small disclaimer line under the footer address
 
 
 def _para_images(item):
