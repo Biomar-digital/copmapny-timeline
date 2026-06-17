@@ -11,6 +11,7 @@ const FILE = params.get("file") || "";
 const POLICY = params.get("policy") || "";
 const EDITION = params.get("edition") || "";
 const TITLE = params.get("title") || "Document";
+const VARIANT = params.get("variant") || "";
 
 const viewer = document.getElementById("viewer");
 const selBtn = document.getElementById("selBtn");
@@ -306,10 +307,13 @@ async function sendRequest() {
 // ---- init ----------------------------------------------------------------
 
 async function init() {
-  document.getElementById("docTitle").textContent = TITLE;
+  document.getElementById("docTitle").textContent =
+    TITLE + (VARIANT ? "  ·  " + VARIANT : "");
   document.getElementById("docSub").textContent =
-    (EDITION ? EDITION.replace("__", " · ") + " — " : "") + "Select text, then add a note.";
-  document.title = `BioMar · Review — ${TITLE}`;
+    (EDITION ? EDITION.replace("__", " · ") + " — " : "") +
+    (VARIANT ? `Editing the ${VARIANT} version. ` : "") +
+    "Highlight text, add a comment and a file, then send.";
+  document.title = `BioMar · Edit — ${TITLE}${VARIANT ? " (" + VARIANT + ")" : ""}`;
 
   selBtn.addEventListener("click", openComposer);
   document.getElementById("cSave").addEventListener("click", saveNote);

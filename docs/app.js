@@ -71,11 +71,53 @@ function card(p) {
     </div>
     <div class="actions">
       ${docs.map(d => docLinks(d, multi)).join("")}
-      <button type="button" class="btn history">Request change or edit</button>
+      <button type="button" class="btn primary edit">Request change or edit</button>
+      <button type="button" class="btn ghost history">History</button>
     </div>`;
+  el.querySelector(".edit").addEventListener("click", () => openEditChooser(p));
   el.querySelector(".history").addEventListener("click", () => openHistory(p));
   wireStatusActions(el, p);
   return el;
+}
+
+// ---- single edit workspace entry (PDF + notes + comment + file) -----------
+
+function editTargets(p) {
+  const ed = latest(p);
+  const out = [];
+  const docs = ed.documents || [];
+  docs.forEach(d => {
+    const base = docs.length > 1 ? d.label + " — " : "";
+    if (d.files && d.files.non_approval)
+      out.push({ label: base + (d.files.approval ? "Unsigned" : "PDF"), file: d.files.non_approval, variant: d.files.approval ? "Unsigned" : "", ed });
+    if (d.files && d.files.approval)
+      out.push({ label: base + "Signed", file: d.files.approval, variant: "Signed", ed });
+  });
+  return out;
+}
+
+function gotoEdit(p, t) {
+  const q = new URLSearchParams({ policy: p.id, edition: edKey(t.ed), title: p.title, file: t.file });
+  if (t.variant) q.set("variant", t.variant);
+  location.href = "review.html?" + q.toString();
+}
+
+function openEditChooser(p) {
+  const targets = editTargets(p);
+  if (targets.length === 0) { alert("No document available to edit."); return; }
+  if (targets.length === 1) { gotoEdit(p, targets[0]); return; }
+  let dlg = document.getElementById("editChooser");
+  if (!dlg) { dlg = document.createElement("dialog"); dlg.id = "editChooser"; dlg.className = "vh-dialog chooser"; document.body.appendChild(dlg); }
+  dlg.innerHTML = `<div class="vh-box chooser-box">
+      <h3>Which version do you want to edit?</h3>
+      <p class="chooser-hint">You'll open the live PDF to add highlights, a comment and a file, then send.</p>
+      <div class="chooser-list">${targets.map((t, i) => `<button type="button" class="btn primary" data-i="${i}">${esc(t.label)} ↗</button>`).join("")}</div>
+      <button type="button" class="btn ghost chooser-x">Cancel</button>
+    </div>`;
+  dlg.querySelectorAll("[data-i]").forEach(b =>
+    b.addEventListener("click", () => { dlg.close(); gotoEdit(p, targets[+b.dataset.i]); }));
+  dlg.querySelector(".chooser-x").addEventListener("click", () => dlg.close());
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
 }
 
 // ---- change-request status badge + actions -------------------------------
@@ -165,10 +207,8 @@ function editionRow(p, ed, isLatest) {
           <div class="vh-doc">
             <span class="vh-doclabel">${esc(doc.label)}</span>
             ${doc.files.approval ? `
-              <a href="${esc(doc.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">Signed ↗</a>
-              <a class="vh-annotate" href="${esc(annHref(p, ed, doc.files.approval))}">✎</a>` : ""}
+              <a href="${esc(doc.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">Signed ↗</a>` : ""}
             <a href="${esc(doc.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">${doc.files.approval ? "Unsigned" : "PDF"} ↗</a>
-            <a class="vh-annotate" href="${esc(annHref(p, ed, doc.files.non_approval))}">✎ Annotate</a>
           </div>`).join("")}
       </div>
       <div class="vh-sign" data-key="${esc(edKey(ed))}">
@@ -709,11 +749,6 @@ async function init() {
       });
     }
     document.getElementById("newReqBtn").addEventListener("click", () => openRequest("new"));
-    document.getElementById("reqChangeBtn").addEventListener("click", () => {
-      const dlg = document.getElementById("history");
-      if (dlg.close) dlg.close();
-      openRequest("change", HISTORY_POLICY);
-    });
     document.getElementById("reqClose").addEventListener("click",
       () => { const d = document.getElementById("request"); if (d.close) d.close(); });
     document.getElementById("reqSubmit").addEventListener("click", submitRequest);
