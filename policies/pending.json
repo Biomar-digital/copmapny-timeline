@@ -30,5 +30,15 @@
     "author": "Andres Bernadou",
     "email": "anber@biomar.com",
     "created_at": 1781704199043
+  },
+  {
+    "id": "1652939e-f732-47f3-a8a0-7243668ea22b",
+    "policy": "code-of-conduct-suppliers",
+    "request_id": "c742abd2-2d8c-4eb2-828e-c1da74afab36",
+    "title": "Change: code-of-conduct-suppliers",
+    "status": "change_pending",
+    "author": "Andres Bernadou",
+    "email": "anber@biomar.com",
+    "created_at": 1781707118413
   }
 ]
