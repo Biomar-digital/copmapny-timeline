@@ -44,11 +44,16 @@ function docLinks(doc, multi) {
         ${multi ? esc(doc.label) : "Download PDF"} <span class="arrow">↗</span></a>`;
 }
 
+function hasSigned(ed) {
+  return (ed.documents || []).some(d => d.files && d.files.approval);
+}
+
 function card(p) {
   const ed = latest(p);
   const el = document.createElement("article");
   el.className = "card";
-  const approvalRow = ed.approval_date
+  // Approval date only applies to board-approved (signed) documents.
+  const approvalRow = (ed.approval_date && hasSigned(ed))
     ? `<br><b>Approved:</b> ${esc(ed.approval_date)}` : "";
   const n = p.editions.length;
   const docs = ed.documents || [];
@@ -187,7 +192,7 @@ function fmtTime(iso) {
 }
 
 function editionRow(p, ed, isLatest) {
-  const appr = ed.approval_date
+  const appr = (ed.approval_date && hasSigned(ed))
     ? `<span><b>Approved:</b> ${esc(ed.approval_date)}</span>` : "";
   const gen = ed.generated_at
     ? `<span><b>Generated:</b> ${esc(ed.generated_at)}</span>` : "";
