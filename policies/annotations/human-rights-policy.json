@@ -412,5 +412,23 @@
     "author": "Jeppe Andersen",
     "text": "It should be:\n\nplatform is managed by the Ethics Commitee via a secure and confidental process and will provide feedback to the reporter within a reasonable timeframe and no later than 60 days from acknowledgement, or within the extended timeframe permitted by law for complex cases",
     "created_at": "2026-06-17T11:46:48.115Z"
+  },
+  {
+    "id": "796a7d4e-42ef-44cd-898f-2a524a616534",
+    "file": "files/Human_Rights_Policy__Policy_2026-05_non-approval.pdf",
+    "page": 5,
+    "quote": "Modern Slavery Polic",
+    "rects": [
+      {
+        "x": 0.09828702533491473,
+        "y": 0.4714114848980602,
+        "w": 0.19072124545507574,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 2__2026-05",
+    "author": "Jeppe Andersen",
+    "text": "Modern Slavery Policy (Australia and UK)",
+    "created_at": "2026-06-17T11:47:25.777Z"
   }
 ]
