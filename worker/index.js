@@ -240,6 +240,23 @@ async function sendEmail(env, subject, html, to) {
   return { ok: false, skipped: true };
 }
 
+// Consistent branded layout for every notification email.
+function emailHtml(heading, intro, rows) {
+  const APP = "https://globa-policies.marketing-70b.workers.dev";
+  const tr = (rows || []).filter(Boolean).map(([k, v]) =>
+    `<tr><td style="padding:5px 14px 5px 0;color:#6b87a4;white-space:nowrap;vertical-align:top">${escapeHtml(k)}</td>` +
+    `<td style="padding:5px 0;color:#1c4076">${v}</td></tr>`).join("");
+  return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;border:1px solid #e3e8ef;border-radius:10px;overflow:hidden">
+    <div style="background:#1c4076;color:#fff;padding:14px 20px;font-weight:700;letter-spacing:.2px">BioMar Policy Library</div>
+    <div style="padding:20px 22px">
+      <h2 style="margin:0 0 8px;color:#1c4076;font-size:18px">${escapeHtml(heading)}</h2>
+      ${intro ? `<p style="margin:0 0 14px;color:#43607f;line-height:1.5">${escapeHtml(intro)}</p>` : ""}
+      ${tr ? `<table style="font-size:14px;border-collapse:collapse">${tr}</table>` : ""}
+      <p style="margin:18px 0 0"><a href="${APP}" style="background:#1c4076;color:#fff;text-decoration:none;padding:9px 16px;border-radius:8px;display:inline-block;font-weight:600">Open the library</a></p>
+    </div>
+  </div>`;
+}
+
 function missingEnv(env) { return ["GH_TOKEN", "GH_OWNER", "GH_REPO", "GH_BRANCH"].filter(k => !env[k]); }
 function safePolicyId(id) { return typeof id === "string" && /^[a-z0-9-]{1,80}$/.test(id) ? id : null; }
 function safeFile(f) { return typeof f === "string" && /^files\/[A-Za-z0-9._-]+\.pdf$/.test(f) ? f : null; }
@@ -284,6 +301,9 @@ async function handleAuth(request, env, path) {
     await env.DB.prepare("INSERT INTO users (id,email,name,pw_hash,pw_salt,role,status,created_at) VALUES (?,?,?,?,?,?,?,?)")
       .bind(crypto.randomUUID(), email, name, hash, salt, "visitor", "pending", Date.now()).run();
     await recordEvent(env, "account_request", `${name} requested an account`, email, name);
+    await sendEmail(env, `[BioMar Policy Library] New access request — ${name}`,
+      emailHtml("New access request", `${name} requested access to the policy library and is awaiting approval.`,
+        [["Name", escapeHtml(name)], ["Email", escapeHtml(email)]])).catch(() => {});
     return json({ ok: true, pending: true });
   }
 
@@ -456,12 +476,15 @@ async function handleRequests(request, env, user) {
   const rec = await ghCreateFile(env, `${REQUESTS_DIR}/${id}/request.json`, b64encode(JSON.stringify(record, null, 2) + "\n"), `Request ${id}: ${issueTitle}`);
   if (!rec.ok) return json({ error: `Could not save the request (${rec.status}).` }, 502);
 
-  const mail = await sendEmail(env, `[Policy Library] ${issueTitle}`,
-    `<h2>${escapeHtml(heading)}</h2><p><b>Requested by:</b> ${escapeHtml(author)}${email ? " (" + escapeHtml(email) + ")" : ""}</p>` +
-    (kind === "new" ? `<p><b>Proposed title:</b> ${escapeHtml(title)}</p>` : `<p><b>Policy:</b> ${escapeHtml(policy || "—")}</p>`) +
-    (uploadPath ? `<p><b>Attached:</b> ${escapeHtml(uploadPath)}</p>` : "") +
-    `<p style="white-space:pre-wrap">${escapeHtml(details)}</p>` +
-    (issue.ok ? `<p><a href="${issue.url}">View issue #${issue.number}</a></p>` : ""));
+  const mail = await sendEmail(env, `[BioMar Policy Library] ${heading} — ${kind === "new" ? title : (policy || title)}`,
+    emailHtml(heading, `${author} submitted a ${kind === "new" ? "new policy" : "change"} request.`, [
+      ["Requested by", escapeHtml(author) + (email ? ` (${escapeHtml(email)})` : "")],
+      kind === "new" ? ["Proposed title", escapeHtml(title)] : ["Policy", escapeHtml(policy || "—")],
+      edition ? ["Edition", escapeHtml(edition)] : null,
+      uploadPath ? ["Attached", escapeHtml(uploadPath.split("/").pop())] : null,
+      ["Details", `<span style="white-space:pre-wrap">${escapeHtml(details)}</span>`],
+      issue.ok ? ["Issue", `<a href="${issue.url}">#${issue.number}</a>`] : null,
+    ]));
   if (!mail.ok && !mail.skipped) warnings.push("email:" + mail.status);
 
   await recordEvent(env, kind === "new" ? "request_new" : "request_change", `${author}: ${issueTitle}`, policy || "", author);
@@ -582,15 +605,19 @@ async function handlePending(request, env, user) {
         await recordEvent(env, "change_" + action, `${user.name}: ${action} on ${policy}`, policy, user.name);
         // Notify the requester(s) by email when their change is ready to review.
         if (action === "review") {
+          // Notify the requester their change is ready for review.
           for (const it of affected) {
             if (!it.email) continue;
-            await sendEmail(env,
-              `Your change request is ready for review — ${it.title || policy}`,
-              `<p>Hi ${escapeHtml(it.author || "")},</p>` +
-              `<p>The change you requested on <b>${escapeHtml(it.title || policy)}</b> has been made and is ready for your review.</p>` +
-              `<p>Open the BioMar Policy Library, check the document and either approve the change or request another round.</p>`,
-              it.email).catch(() => {});
+            await sendEmail(env, `[BioMar Policy Library] Ready for your review — ${it.title || policy}`,
+              emailHtml("Your change is ready for review",
+                `The change you requested on "${it.title || policy}" has been made and is ready for your review. Check the document and either approve it or request another round.`,
+                [["Document", escapeHtml(it.title || policy)]]), it.email).catch(() => {});
           }
+        } else if (action === "approve") {
+          // Notify the admin that a change was approved.
+          await sendEmail(env, `[BioMar Policy Library] Change approved — ${policy}`,
+            emailHtml("Change approved", `${user.name} approved the changes on "${policy}".`,
+              [["Policy", escapeHtml(policy)], ["Approved by", escapeHtml(user.name)]])).catch(() => {});
         }
         return json({ ok: true });
       }
