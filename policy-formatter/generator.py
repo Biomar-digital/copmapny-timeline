@@ -708,8 +708,9 @@ def _draw_version_card(c, policy):
     c.line(DIVIDER, cy + 10, DIVIDER, head_y - 10)          # column divider
 
     # The "Approval date" row only belongs on the signed (board-approved)
-    # variant; an unsigned copy shows just the version line.
-    rows_l = [(policy.version, policy.approval_date or "—")]
+    # variant; an unsigned copy shows just the version line (with its own date).
+    vdate = policy.approval_date or getattr(policy, "version_date", "") or "—"
+    rows_l = [(policy.version, vdate)]
     if policy.signatures:
         rows_l.append(("Approval date:", policy.approval_date or "—"))
     rows_r = [("Owner:", policy.owner or "—"),

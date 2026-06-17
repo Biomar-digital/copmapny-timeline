@@ -116,6 +116,13 @@ def main():
                 # on the originals); only the board signatures page is conditional.
                 meta_args = ["--owner", p.get("owner", ""),
                              "--approver", p.get("approver", "Executive Committee")]
+                # Version line always carries a date: the approval date if there
+                # is one, otherwise the edition's own month/year.
+                try:
+                    vd = datetime.datetime.strptime(date, "%Y-%m").strftime("%B %Y")
+                except ValueError:
+                    vd = date
+                meta_args += ["--version-date", vd]
                 if p.get("cover_year") is False:
                     meta_args += ["--no-cover-year"]
                 if p.get("lead_title"):

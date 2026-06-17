@@ -42,6 +42,8 @@ def main(argv=None):
                     help="Body text point size (default 11; the Code of Conduct uses 10)")
     ap.add_argument("--footer-note", dest="footer_note", default="",
                     help="Small disclaimer line under the footer address")
+    ap.add_argument("--version-date", dest="version_date", default="",
+                    help="Date shown on the version line (defaults to approval date)")
     ap.add_argument("--date", help="Date tag in the file name (default: current YYYY-MM)")
     args = ap.parse_args(argv)
 
@@ -54,7 +56,7 @@ def main(argv=None):
                         adopted_on=args.adopted_on, effective_on=args.effective_on,
                         signatures=args.signatures, cover_year=args.cover_year,
                         lead_title=args.lead_title, body_size=args.body_size,
-                        footer_note=args.footer_note)
+                        footer_note=args.footer_note, version_date=args.version_date)
 
     # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
     import datetime
