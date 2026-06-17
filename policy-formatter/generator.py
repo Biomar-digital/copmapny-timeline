@@ -11,7 +11,7 @@ from reportlab.lib.utils import ImageReader
 from reportlab.lib import colors
 from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame,
                                 Paragraph, Spacer, Table, TableStyle,
-                                NextPageTemplate, PageBreak, KeepTogether)
+                                NextPageTemplate, PageBreak, KeepTogether, Flowable)
 from reportlab.platypus.flowables import HRFlowable, BalancedColumns
 from xml.sax.saxutils import escape
 import re
@@ -51,10 +51,6 @@ CELL_H = ParagraphStyle("CellH", parent=CELL, fontName=B.F_DEMI,
 CELL_SEC = ParagraphStyle("CellSec", parent=CELL, fontName=B.F_DEMI,
                           textColor=B.WHITE)                            # section band row
 CELL_C = ParagraphStyle("CellC", parent=CELL, alignment=TA_CENTER)     # short marks (√, —)
-SIG_LABEL = ParagraphStyle("SigLabel", fontName=B.F_DEMI, fontSize=10.5, leading=15,
-                           textColor=B.BIOMAR_BLUE)                    # declaration-box label
-SIG_LINE = ParagraphStyle("SigLine", fontName=B.F_REGULAR, fontSize=10.5, leading=15,
-                          textColor=B.BIOMAR_BLUE)                     # writing line
 
 
 _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
@@ -211,7 +207,6 @@ def _row_height(cells, colw):
     return t.wrap(sum(colw), 100000)[1]
 
 
-_SIG_FILL = colors.Color(184 / 255, 224 / 255, 240 / 255)   # original box tone #b8e0f0
 _SIG_LABELS = ("company", "name", "position", "date", "place", "signature")
 
 
@@ -232,31 +227,67 @@ def _first(row):
     return row[0] if row else ""
 
 
+_SIG_TEAL = colors.Color(0.729, 0.898, 0.957)   # #bae5f3 bands / cell borders
+
+
+class SignatureBox(Flowable):
+    """The supplier declaration box, drawn to match the official PDF: a rounded
+    white card with a teal band top and bottom, thin teal cell borders and the
+    field labels (navy) sitting at the bottom-left of each cell with writing
+    space above. 'Date:' and 'Place:' share a split row."""
+    def __init__(self, width, rows, band=20, row_h=42, radius=11):
+        Flowable.__init__(self)
+        self.width = width
+        self.rows = rows
+        self.band = band
+        self.row_h = row_h
+        self.radius = radius
+        self.height = band * 2 + row_h * len(rows)
+
+    def wrap(self, availW, availH):
+        return (self.width, self.height)
+
+    def draw(self):
+        c = self.canv
+        w, h, r, bd = self.width, self.height, self.radius, 0.8
+        top = h - self.band
+        # teal rounded base, then a white middle that leaves the two bands and
+        # thin side borders showing through.
+        c.setFillColor(_SIG_TEAL)
+        c.roundRect(0, 0, w, h, r, stroke=0, fill=1)
+        c.setFillColor(colors.white)
+        c.rect(bd, self.band, w - 2 * bd, h - 2 * self.band, stroke=0, fill=1)
+        # horizontal cell borders
+        c.setStrokeColor(_SIG_TEAL)
+        c.setLineWidth(0.8)
+        for k in range(len(self.rows) + 1):
+            y = top - k * self.row_h
+            c.line(bd, y, w - bd, y)
+        # vertical divider for the split (Date | Place) row
+        split = w * 0.55
+        for i, (_l, rt) in enumerate(self.rows):
+            if rt:
+                cell_top = top - i * self.row_h
+                c.line(split, cell_top - self.row_h, split, cell_top)
+        # labels: navy, bottom-left of each cell, writing space above
+        c.setFillColor(B.BIOMAR_BLUE)
+        c.setFont(B.F_DEMI, 11)
+        for i, (l, rt) in enumerate(self.rows):
+            cell_bot = top - (i + 1) * self.row_h
+            c.drawString(15, cell_bot + 12, l)
+            if rt:
+                c.drawString(split + 15, cell_bot + 12, rt)
+
+
 def _signature_card_flowables(block):
-    """Render the supplier declaration as a rounded light-blue card with the
-    field labels and a writing line for each, matching the official PDF."""
-    line = "_" * 34
-    data = []
+    """Build the declaration box from the imported form rows."""
+    rows = []
     for r in block.rows:
-        cells = list(r)
-        # 'Date:' shares a row with 'Place:' in the original.
-        if len(cells) >= 2 and cells[1].strip():
-            data.append([Paragraph(escape(cells[0]), SIG_LABEL),
-                         Paragraph(escape(cells[1]) + "  " + line[:14], SIG_LINE)])
-        else:
-            data.append([Paragraph(escape(cells[0]), SIG_LABEL),
-                         Paragraph(line, SIG_LINE)])
-    w0 = 120
-    t = Table(data, colWidths=[w0, _CONTENT_W - w0 - 28])
-    t.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), _SIG_FILL),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 14),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 14),
-        ("TOPPADDING", (0, 0), (-1, -1), 9),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
-    ]))
-    return [Spacer(1, 6), KeepTogether([t]), Spacer(1, 8)]
+        left = (r[0] if len(r) > 0 else "").strip()
+        right = (r[1] if len(r) > 1 else "").strip()
+        rows.append((left, right or None))
+    box = SignatureBox(_CONTENT_W, rows)
+    return [Spacer(1, 10), KeepTogether([box]), Spacer(1, 8)]
 
 
 def _table_flowables(block):
@@ -349,18 +380,39 @@ def _col_flowables(blocks):
 
 
 def _columns_flowables(b):
-    """Render two text columns side by side, newspaper-style: each column is a
-    single table cell holding its own stack of flowables, so the columns flow
-    independently (a long paragraph on the left does not push the right column
-    down). splitInRow lets the row break across pages when a column overflows."""
+    """Render two text columns newspaper-style and balanced: the content flows
+    in reading order (left column top-to-bottom, then right) and BalancedColumns
+    splits it so both columns end at the same height — matching the original,
+    instead of one column finishing early with a white gap."""
     cols = [c for c in b.cols if c]
     if not cols:
         return []
     if len(cols) == 1:
         return _col_flowables(cols[0])
-    left = _col_flowables(cols[0])
-    right = _col_flowables(cols[1])
+    flow = _col_flowables(cols[0]) + _col_flowables(cols[1])
     half = (_CONTENT_W - 16) / 2
+    # Balance: split the reading-order flow where the cumulative height first
+    # reaches half, so both columns end at about the same depth.
+    heights = []
+    for f in flow:
+        try:
+            heights.append(f.wrap(half, 100000)[1])
+        except Exception:
+            heights.append(0)
+    total = sum(heights)
+    acc, split = 0.0, len(flow)
+    for i, hgt in enumerate(heights):
+        acc += hgt
+        if acc >= total / 2:
+            split = i + 1
+            break
+    split = max(1, min(split, len(flow) - 1))
+    # never leave a heading orphaned at the foot of the left column
+    def _is_head(f):
+        return getattr(f, "style", None) is not None and f.style.name in ("H1", "H2")
+    while split > 1 and _is_head(flow[split - 1]):
+        split -= 1
+    left, right = flow[:split], flow[split:]
     t = Table([[left, right]], colWidths=[half, half], splitInRow=1)
     t.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
