@@ -677,7 +677,9 @@ def _draw_back_cover(c, doc):
     # the tagline and the URL baked in; we only overlay the optional card.
     c.drawImage(ImageReader(B.COVER_BG_BACK), 0, 0, B.PAGE_W, B.PAGE_H,
                 preserveAspectRatio=False, mask=None)
-    if any([policy.approval_date, policy.owner, policy.approver]):
+    # The version history / owner-approver card belongs only on the signed
+    # (board-approved) variant; unsigned copies show the plain back cover.
+    if policy.signatures and any([policy.approval_date, policy.owner, policy.approver]):
         _draw_version_card(c, policy)
 
 
