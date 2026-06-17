@@ -158,7 +158,23 @@ def build_docx(pdf, out):
 
     body_c = Counter(p[1] for k, p in items if k == "block" and len(p[0]) > 60)
     body = body_c.most_common(1)[0][0] if body_c else 11.0
-    head_sizes = sorted({p[1] for k, p in items if k == "block" and p[1] > body + 0.4}, reverse=True)
+    # Heading-candidate sizes from full-width blocks AND column headings (bold &
+    # larger than body), so the level scale reflects the real section headings.
+    head_counts = Counter()
+    for k, p in items:
+        if k == "block" and p[1] > body + 0.4 and (p[2] or len(p[0]) < 60):
+            head_counts[p[1]] += 1
+        elif k == "columns":
+            for col in p:
+                for cs, csize, cbold, _cx in col:
+                    if csize > body + 0.4 and cbold:
+                        head_counts[csize] += 1
+    head_sizes = sorted(head_counts, reverse=True)
+    # A lone oversized heading is usually the document title repeated on the
+    # first page; drop it from the level scale so the real section headings stay
+    # level 1 (otherwise they get demoted to the smaller level-2 size).
+    while len(head_sizes) > 1 and head_counts[head_sizes[0]] == 1 and head_sizes[0] >= head_sizes[1] + 3:
+        head_sizes = head_sizes[1:]
     h1 = head_sizes[0] if head_sizes else None
 
     doc = Document()
