@@ -687,23 +687,24 @@ def _draw_back_cover(c, doc):
 
 def _draw_owner_card(c, policy):
     """Owner / approver card for unsigned variants (no version history)."""
-    cw, ch = 300.0, 84.0
+    cw, ch = 300.0, 92.0
     cx = (B.PAGE_W - cw) / 2.0
-    cy = B.PAGE_H - 150 - ch
+    cy = B.PAGE_H - 150 - ch            # top area, like the version card on other policies
     right = cx + cw
     c.setFillColor(B.WHITE)
     c.roundRect(cx, cy, cw, ch, 10, stroke=0, fill=1)
-    head_y = cy + ch - 24
+    head_y = cy + ch - 22
     c.setFillColor(B.BIOMAR_BLUE)
     c.setFont(B.F_DEMI, 10)
     c.drawCentredString(B.PAGE_W / 2.0, head_y, "Owner and approver")
     c.setStrokeColor(B.LIGHT_RULE)
     c.setLineWidth(0.5)
-    c.line(cx + 14, head_y - 10, right - 14, head_y - 10)
+    c.line(cx + 14, head_y - 9, right - 14, head_y - 9)
     label_x, value_x = cx + 26, cx + 104
-    ry = head_y - 27
-    for lb, vb in [("Owner:", policy.owner or "—"),
-                   ("Approver:", policy.approver or "Executive Committee")]:
+    rows = [("Owner:", policy.owner or "—"),
+            ("Approver:", policy.approver or "Executive Committee")]
+    ry = head_y - 26
+    for idx, (lb, vb) in enumerate(rows):
         c.setFillColor(B.BIOMAR_BLUE)
         c.setFont(B.F_LIGHT, 8)
         c.drawString(label_x, ry, lb)
@@ -712,8 +713,9 @@ def _draw_owner_card(c, policy):
             size -= 0.5
         c.setFont(B.F_LIGHT, size)
         c.drawString(value_x, ry, vb)
-        c.setStrokeColor(B.LIGHT_RULE)
-        c.line(cx + 14, ry - 9, right - 14, ry - 9)
+        if idx < len(rows) - 1:        # divider between rows only, not below the last
+            c.setStrokeColor(B.LIGHT_RULE)
+            c.line(cx + 14, ry - 9, right - 14, ry - 9)
         ry -= 25
 
 

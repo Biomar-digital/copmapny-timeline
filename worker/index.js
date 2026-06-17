@@ -17,6 +17,9 @@ const COMMENTS_DIR = "policies/comments";
 const ANNOTATIONS_DIR = "policies/annotations";
 const REQUESTS_DIR = "policies/requests";
 const SIGNATURES_DIR = "policies/signatures";
+// Change-request lifecycle lives in the repo so the AI can move a request from
+// change_pending -> pending_review by editing this file when it ships the change.
+const PENDING_FILE = "policies/pending.json";
 const MAX_TEXT = 4000;
 const MAX_QUOTE = 1000;
 const MAX_AUTHOR = 120;
@@ -442,11 +445,10 @@ async function handleRequests(request, env, user) {
   if (!mail.ok && !mail.skipped) warnings.push("email:" + mail.status);
 
   await recordEvent(env, kind === "new" ? "request_new" : "request_change", `${author}: ${issueTitle}`, policy || "", author);
-  if (kind === "change" && policy && env.DB) {
-    try {
-      await env.DB.prepare("INSERT INTO pending_change (id,policy,request_id,title,created_at) VALUES (?,?,?,?,?)")
-        .bind(crypto.randomUUID(), policy, id, issueTitle, Date.now()).run();
-    } catch { /* non-fatal */ }
+  if (kind === "change" && policy) {
+    await appendItem(env, PENDING_FILE,
+      { id: crypto.randomUUID(), policy, request_id: id, title: issueTitle, status: "change_pending", created_at: Date.now() },
+      `Track pending change on ${policy}`).catch(() => {});
   }
   return json({ ok: true, id, issue: issue.ok ? issue.number : null, warnings }, 201);
 }
@@ -520,49 +522,59 @@ async function handleWallet(request, env, user) {
 
 // ========================================================= /api/pending
 
+async function readPending(env) {
+  try { const { list } = await ghGetList(env, PENDING_FILE); return Array.isArray(list) ? list : []; }
+  catch { return []; }
+}
+
 async function handlePending(request, env, user) {
   if (request.method === "GET") {
-    // Effective status per policy: 'change_pending' wins over 'pending_review'.
-    const { results } = await env.DB.prepare(
-      `SELECT policy,
-              CASE WHEN SUM(status='change_pending')>0 THEN 'change_pending'
-                   ELSE 'pending_review' END AS status,
-              COUNT(*) AS n
-         FROM pending_change GROUP BY policy`).all();
-    return json({ pending: results || [] });
+    const list = await readPending(env);
+    const byp = {};                       // change_pending wins over pending_review
+    for (const it of list) {
+      if (!it || !it.policy || it.status === "approved") continue;
+      const st = it.status || "change_pending";
+      if (!(it.policy in byp) || st === "change_pending") byp[it.policy] = st;
+    }
+    return json({ pending: Object.entries(byp).map(([policy, status]) => ({ policy, status })) });
   }
-  // Status transitions. 'review' (changes done -> awaiting the requester's
-  // review) is admin-only; 'approve' (accept) and 'reopen' (ask for another
-  // round) close or re-open the request.
+  // Status transitions, persisted to the repo so the AI and the dashboard share
+  // one source of truth. 'review' (changes shipped) is admin-only.
   if (request.method === "POST") {
     let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
     const policy = safePolicyId(p.policy);
     const action = String(p.action || "");
     if (!policy) return json({ error: "Invalid policy." }, 400);
-    if (action === "review") {
-      if (user.role !== "admin") return json({ error: "Forbidden." }, 403);
-      await env.DB.prepare("UPDATE pending_change SET status='pending_review', updated_at=? WHERE policy=?")
-        .bind(Date.now(), policy).run();
-      await recordEvent(env, "change_review", `${user.name}: changes ready for review on ${policy}`, policy, user.name);
-    } else if (action === "reopen") {
-      await env.DB.prepare("UPDATE pending_change SET status='change_pending', updated_at=? WHERE policy=?")
-        .bind(Date.now(), policy).run();
-      await recordEvent(env, "change_reopen", `${user.name}: requested another round on ${policy}`, policy, user.name);
-    } else if (action === "approve") {
-      await env.DB.prepare("DELETE FROM pending_change WHERE policy=?").bind(policy).run();
-      await recordEvent(env, "change_approved", `${user.name}: approved changes on ${policy}`, policy, user.name);
-    } else {
-      return json({ error: "Unknown action." }, 400);
+    if (action === "review" && user.role !== "admin") return json({ error: "Forbidden." }, 403);
+    const target = action === "review" ? "pending_review"
+      : action === "reopen" ? "change_pending"
+      : action === "approve" ? null : undefined;
+    if (target === undefined) return json({ error: "Unknown action." }, 400);
+    for (let i = 0; i < 3; i++) {
+      const { list, sha } = await ghGetList(env, PENDING_FILE).catch(() => ({ list: [], sha: null }));
+      const next = action === "approve"
+        ? list.filter(it => it.policy !== policy)
+        : list.map(it => it.policy === policy ? { ...it, status: target, updated_at: Date.now() } : it);
+      const r = await ghPutList(env, PENDING_FILE, next, sha, `Pending ${action} on ${policy}`);
+      if (r.ok) { await recordEvent(env, "change_" + action, `${user.name}: ${action} on ${policy}`, policy, user.name); return json({ ok: true }); }
+      if (r.status === 409 || r.status === 422) continue;
+      return json({ error: `Update failed (${r.status}).` }, 502);
     }
-    return json({ ok: true });
+    return json({ error: "Conflict, please retry." }, 409);
   }
-  if (request.method === "DELETE") {                 // legacy "mark resolved"
+  if (request.method === "DELETE") {                 // clear a request entirely
     if (user.role !== "admin") return json({ error: "Forbidden." }, 403);
     let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
     const policy = safePolicyId(p.policy);
     if (!policy) return json({ error: "Invalid policy." }, 400);
-    await env.DB.prepare("DELETE FROM pending_change WHERE policy=?").bind(policy).run();
-    return json({ ok: true });
+    for (let i = 0; i < 3; i++) {
+      const { list, sha } = await ghGetList(env, PENDING_FILE).catch(() => ({ list: [], sha: null }));
+      const r = await ghPutList(env, PENDING_FILE, list.filter(it => it.policy !== policy), sha, `Clear pending on ${policy}`);
+      if (r.ok) return json({ ok: true });
+      if (r.status === 409 || r.status === 422) continue;
+      return json({ error: `Update failed (${r.status}).` }, 502);
+    }
+    return json({ error: "Conflict, please retry." }, 409);
   }
   return json({ error: "Method not allowed." }, 405);
 }
