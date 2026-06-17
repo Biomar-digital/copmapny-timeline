@@ -118,6 +118,8 @@ def main():
                              "--approver", p.get("approver", "Executive Committee")]
                 if p.get("cover_year") is False:
                     meta_args += ["--no-cover-year"]
+                if p.get("lead_title"):
+                    meta_args += ["--lead-title"]
                 if ed.get("approval_date"):
                     meta_args += ["--approval-date", ed["approval_date"]]
                 if ed.get("version"):

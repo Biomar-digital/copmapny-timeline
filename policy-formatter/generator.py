@@ -42,6 +42,11 @@ BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
                       splitLongWords=0, hyphenationLang="",
                       allowWidows=0, allowOrphans=0)
 BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
+BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
+# Document title repeated as a lead heading on the first content page (some
+# originals, e.g. the Code of Conduct, open the body with the title in large bold).
+LEAD_TITLE = ParagraphStyle("LeadTitle", fontName=B.F_BOLD, fontSize=18, leading=21,
+                            textColor=B.BIOMAR_BLUE, spaceAfter=11, spaceBefore=0)
 BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
                         leftIndent=16, bulletIndent=2, spaceAfter=6)
 # Two-column running text is set at the original's denser 10pt so each section
@@ -50,6 +55,7 @@ COL_BODY = ParagraphStyle("ColBody", parent=BODY_LEFT, fontSize=10, leading=13,
                           spaceAfter=8)
 COL_BULLET = ParagraphStyle("ColBullet", parent=COL_BODY, alignment=TA_LEFT,
                             leftIndent=14, bulletIndent=2, spaceAfter=5)
+COL_BODY_BOLD = ParagraphStyle("ColBodyBold", parent=COL_BODY, fontName=B.F_DEMI)
 CELL = ParagraphStyle("Cell", fontName=B.F_REGULAR, fontSize=8.5, leading=11,
                       textColor=B.BIOMAR_BLUE, splitLongWords=0, hyphenationLang="")
 CELL_H = ParagraphStyle("CellH", parent=CELL, fontName=B.F_DEMI,
@@ -380,6 +386,8 @@ def _col_flowables(blocks):
             out.append(Paragraph(escape(sb.text), H1 if sb.level == 1 else H2))
         elif isinstance(sb, Bullet):
             out.append(Paragraph(_fmt(sb.text), COL_BULLET, bulletText="•"))
+        elif getattr(sb, "bold", False):
+            out.append(Paragraph(_fmt(sb.text), COL_BODY_BOLD))
         else:
             out.append(Paragraph(_fmt(sb.text), COL_BODY))
     return out
@@ -470,6 +478,10 @@ def _columns_flowables(b):
 
 def _story(policy):
     flow = []
+    # Some originals repeat the document title as a large bold lead on the first
+    # content page (e.g. the Code of Conduct); opt in per policy.
+    if getattr(policy, "lead_title", False):
+        flow.append(Paragraph(escape(policy.title), LEAD_TITLE))
     for b in policy.blocks:
         if isinstance(b, Heading):
             flow.append(Paragraph(escape(b.text), H1 if b.level == 1 else H2))
@@ -477,7 +489,10 @@ def _story(policy):
             # Justify normal running text; left-align short lines and anything
             # with a URL/long token so justification doesn't stretch the spaces.
             justify = len(b.text) >= 90 and "://" not in b.text
-            flow.append(Paragraph(_fmt(b.text), BODY if justify else BODY_LEFT))
+            if getattr(b, "bold", False):
+                flow.append(Paragraph(_fmt(b.text), BODY_BOLD))
+            else:
+                flow.append(Paragraph(_fmt(b.text), BODY if justify else BODY_LEFT))
         elif isinstance(b, Bullet):
             flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):

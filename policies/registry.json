@@ -166,7 +166,8 @@
           ]
         }
       ],
-      "cover_year": false
+      "cover_year": false,
+      "lead_title": true
     },
     {
       "id": "environmental-energy-policy",

@@ -36,6 +36,8 @@ def main(argv=None):
                     help="Omit the board signatures page")
     ap.add_argument("--no-cover-year", dest="cover_year", action="store_false",
                     help="Omit the year on the cover (matches originals that have none)")
+    ap.add_argument("--lead-title", dest="lead_title", action="store_true",
+                    help="Repeat the title as a bold lead heading on the first body page")
     ap.add_argument("--date", help="Date tag in the file name (default: current YYYY-MM)")
     args = ap.parse_args(argv)
 
@@ -46,7 +48,8 @@ def main(argv=None):
                         owner=args.owner, approver=args.approver,
                         approval_date=args.approval_date, version=args.version,
                         adopted_on=args.adopted_on, effective_on=args.effective_on,
-                        signatures=args.signatures, cover_year=args.cover_year)
+                        signatures=args.signatures, cover_year=args.cover_year,
+                        lead_title=args.lead_title)
 
     # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
     import datetime

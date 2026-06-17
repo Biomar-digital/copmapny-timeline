@@ -240,9 +240,11 @@ def build_docx(pdf, out):
             # Merge a block that is the continuation of the previous paragraph
             # (previous didn't end a sentence and this one starts lower-case).
             if last_para is not None and s[:1].islower() and not re.search(r"[.:;!?»\")]\s*$", last_para.text):
-                last_para.text = last_para.text + " " + s
+                last_para.runs[-1].text = last_para.runs[-1].text + " " + s
             else:
-                last_para = doc.add_paragraph(s)
+                last_para = doc.add_paragraph()
+                run = last_para.add_run(s)
+                run.bold = bool(bold)        # preserve bold (e.g. the bold intro)
     doc.save(out)
 
 

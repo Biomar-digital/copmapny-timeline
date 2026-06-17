@@ -27,6 +27,7 @@ class Heading:
 @dataclass
 class Body:
     text: str
+    bold: bool = False
 
 @dataclass
 class Bullet:
@@ -63,6 +64,7 @@ class Policy:
     effective_on: str = ""
     signatures: bool = True   # include the board signatures page
     cover_year: bool = True   # show the year on the cover (some originals omit it)
+    lead_title: bool = False  # repeat the title as a lead heading on page 1 of body
 
 
 def _para_images(item):
@@ -210,7 +212,9 @@ def parse_docx(path: str, title: Optional[str] = None,
         elif kind == "bullet":
             blocks.append(Bullet(text=text))
         else:
-            blocks.append(Body(text=text))
+            runs = [r for r in item.runs if r.text.strip()]
+            bold = bool(runs) and all(r.bold for r in runs)
+            blocks.append(Body(text=text, bold=bold))
 
     if title is None:
         title = doc_title or "Policy"
