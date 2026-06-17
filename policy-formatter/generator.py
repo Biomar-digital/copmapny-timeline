@@ -69,6 +69,14 @@ CELL_C = ParagraphStyle("CellC", parent=CELL, alignment=TA_CENTER)     # short m
 
 
 _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
+_LONG = re.compile(r"\S{28,}")
+
+
+def _breakable(t):
+    """Insert zero-width break points inside very long tokens (URLs, paths) so
+    they wrap inside a narrow column instead of overflowing and overlapping the
+    next column. Break after path separators to keep the URL readable."""
+    return _LONG.sub(lambda m: re.sub(r"([/?&])", "\\1​", m.group(0)), t)
 
 
 def _fmt(text, number=True, widow=True):
@@ -76,7 +84,7 @@ def _fmt(text, number=True, widow=True):
     never ends with a single orphaned word; (2) render a leading clause number
     (e.g. '2.3.2') in Demi. Headings are already fully Demi, so this is used
     for body/bullets/cells only."""
-    t = text.strip()
+    t = _breakable(text.strip())
     if widow:
         parts = t.rsplit(" ", 1)
         if len(parts) == 2:
