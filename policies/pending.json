@@ -4,8 +4,8 @@
     "policy": "human-rights-policy",
     "request_id": "a9cce091-b388-44ee-be5f-ad3930bf5845",
     "title": "Change: human-rights-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "created_at": 1781699169137,
-    "updated_at": 1781700558698
+    "updated_at": 1781700834806
   }
 ]
