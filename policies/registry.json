@@ -161,7 +161,7 @@
               "label": "Policy",
               "language": "English",
               "source": "code-of-conduct-suppliers__Policy.docx",
-              "board_approval": false
+              "pdf": "code_of_conduct_suppliers__original.pdf"
             }
           ]
         }
@@ -401,7 +401,7 @@
               "label": "English",
               "language": "English",
               "source": "position-microplastics__English.docx",
-              "board_approval": false
+              "pdf": "position_microplastics__original.pdf"
             }
           ]
         }
@@ -635,7 +635,7 @@
               "label": "Policy",
               "language": "English",
               "source": "position-marine-ingredients__English.docx",
-              "board_approval": false
+              "pdf": "position_marine_en__original.pdf"
             }
           ]
         }
@@ -661,7 +661,7 @@
               "label": "Policy",
               "language": "Spanish",
               "source": "position-marine-ingredients__Espanol_Digital.docx",
-              "board_approval": false
+              "pdf": "position_marine_es_digital__original.pdf"
             }
           ]
         }
@@ -687,7 +687,7 @@
               "label": "Policy",
               "language": "Spanish",
               "source": "position-marine-ingredients__Espanol_Print.docx",
-              "board_approval": false
+              "pdf": "position_marine_es_print__original.pdf"
             }
           ]
         }
@@ -713,7 +713,7 @@
               "label": "Policy",
               "language": "English",
               "source": "position-plant-based-ingredients__English.docx",
-              "board_approval": false
+              "pdf": "position_plant_en__original.pdf"
             }
           ]
         }
@@ -739,7 +739,7 @@
               "label": "Policy",
               "language": "Spanish",
               "source": "position-plant-based-ingredients__Espanol.docx",
-              "board_approval": false
+              "pdf": "position_plant_es__original.pdf"
             }
           ]
         }

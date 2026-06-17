@@ -1,6 +1,6 @@
 {
   "brand": "BioMar Group",
-  "updated": "2026-06-17 08:22:32 UTC",
+  "updated": "2026-06-17 08:38:32 UTC",
   "policies": [
     {
       "id": "diversity-policy",
@@ -15,7 +15,7 @@
           "date": "2026-06",
           "approval_date": "",
           "notes": "Initial publication.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -42,7 +42,7 @@
           "date": "2026-06",
           "approval_date": "19-05-2026",
           "notes": "Initial publication.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -69,7 +69,7 @@
           "date": "2026-06",
           "approval_date": "13-05-2026",
           "notes": "Initial publication.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -96,7 +96,7 @@
           "date": "2026-06",
           "approval_date": "20-01-2026",
           "notes": "Initial publication.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -113,7 +113,7 @@
           "date": "2026-06",
           "approval_date": "20-01-2026",
           "notes": "Board-approved edition (imported from official PDF).",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -140,7 +140,7 @@
           "date": "2026-06",
           "approval_date": "",
           "notes": "Initial publication.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -167,7 +167,7 @@
           "date": "2026-01",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -193,7 +193,7 @@
           "date": "2026-01",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -220,13 +220,14 @@
           "date": "2026-01",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
               "language": "English",
+              "original": true,
               "files": {
-                "non_approval": "files/Code_of_Conduct_for_Suppliers__Policy_2026-01_non-approval.pdf"
+                "non_approval": "files/Code_of_Conduct_for_Suppliers__Policy_2026-01_original.pdf"
               }
             }
           ]
@@ -246,7 +247,7 @@
           "date": "2026-01",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -272,7 +273,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -298,7 +299,7 @@
           "date": "2026-01",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -324,7 +325,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -350,7 +351,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -376,7 +377,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -402,7 +403,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -428,7 +429,7 @@
           "date": "2026-04",
           "approval_date": "28-04-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -454,7 +455,7 @@
           "date": "2026-05",
           "approval_date": "08-05-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -480,13 +481,14 @@
           "date": "2026-03",
           "approval_date": "03-03-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "English",
               "language": "English",
+              "original": true,
               "files": {
-                "non_approval": "files/Position_Statement_Microplastics__English_2026-03_non-approval.pdf"
+                "non_approval": "files/Position_Statement_Microplastics__English_2026-03_original.pdf"
               }
             }
           ]
@@ -506,7 +508,7 @@
           "date": "2026-05",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -532,7 +534,7 @@
           "date": "2026-05",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -558,7 +560,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -584,7 +586,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -610,7 +612,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -636,7 +638,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -662,7 +664,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -688,7 +690,7 @@
           "date": "2026-02",
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -714,13 +716,14 @@
           "date": "2022-06",
           "approval_date": "25-02-2022",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
               "language": "English",
+              "original": true,
               "files": {
-                "non_approval": "files/Position_Statement_Marine_Ingredients_English__Policy_2022-06_non-approval.pdf"
+                "non_approval": "files/Position_Statement_Marine_Ingredients_English__Policy_2022-06_original.pdf"
               }
             }
           ]
@@ -740,13 +743,14 @@
           "date": "2022-07",
           "approval_date": "",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
               "language": "Spanish",
+              "original": true,
               "files": {
-                "non_approval": "files/Position_Statement_Marine_Ingredients_Spanish_Digital__Policy_2022-07_non-approval.pdf"
+                "non_approval": "files/Position_Statement_Marine_Ingredients_Spanish_Digital__Policy_2022-07_original.pdf"
               }
             }
           ]
@@ -766,13 +770,14 @@
           "date": "2022-07",
           "approval_date": "",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
               "language": "Spanish",
+              "original": true,
               "files": {
-                "non_approval": "files/Position_Statement_Marine_Ingredients_Spanish_Print__Policy_2022-07_non-approval.pdf"
+                "non_approval": "files/Position_Statement_Marine_Ingredients_Spanish_Print__Policy_2022-07_original.pdf"
               }
             }
           ]
@@ -792,13 +797,14 @@
           "date": "2026-03",
           "approval_date": "",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
               "language": "English",
+              "original": true,
               "files": {
-                "non_approval": "files/Position_Statement_Plant_based_Ingredients_English__Policy_2026-03_non-approval.pdf"
+                "non_approval": "files/Position_Statement_Plant_based_Ingredients_English__Policy_2026-03_original.pdf"
               }
             }
           ]
@@ -818,13 +824,14 @@
           "date": "2026-04",
           "approval_date": "",
           "notes": "Imported from official PDF.",
-          "generated_at": "2026-06-17 08:22:32 UTC",
+          "generated_at": "2026-06-17 08:38:32 UTC",
           "documents": [
             {
               "label": "Policy",
               "language": "Spanish",
+              "original": true,
               "files": {
-                "non_approval": "files/Position_Statement_Plant_based_Ingredients_Spanish__Policy_2026-04_non-approval.pdf"
+                "non_approval": "files/Position_Statement_Plant_based_Ingredients_Spanish__Policy_2026-04_original.pdf"
               }
             }
           ]
