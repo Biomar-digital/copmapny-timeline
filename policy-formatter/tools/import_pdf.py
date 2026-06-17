@@ -79,14 +79,20 @@ def extract_items(pdf):
                 continue
             if rb.y0 < H * 0.085 or rb.y1 > H * 0.94:   # header/footer band
                 continue
-            parts, sizes, bold = [], [], False
+            parts, sizes = [], []
+            bchars = tchars = 0
             for ln in b["lines"]:
                 for sp in ln["spans"]:
                     parts.append(sp["text"])
                     sizes.append(round(sp["size"], 1))
+                    n = len(sp["text"].strip())
+                    tchars += n
                     if (sp["flags"] & 16) or any(k in sp["font"] for k in ("Bold", "Demi", "Semibold", "Black")):
-                        bold = True
+                        bchars += n
                 parts.append("\n")
+            # Mark the block bold only when most of its text is bold, so a
+            # paragraph with a few emphasised words is not fully bolded.
+            bold = tchars > 0 and bchars >= 0.6 * tchars
             s = "".join(parts).strip()
             if not s or s == "BioMar Group" or any(b0 in s for b0 in BOILER):
                 continue
