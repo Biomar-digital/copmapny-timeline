@@ -677,9 +677,11 @@ def _draw_back_cover(c, doc):
     # the tagline and the URL baked in; we only overlay the optional card.
     c.drawImage(ImageReader(B.COVER_BG_BACK), 0, 0, B.PAGE_W, B.PAGE_H,
                 preserveAspectRatio=False, mask=None)
-    # Both variants show the version-history / owner-approver card with the
-    # version line + date; only the signed variant adds the "Approval date" row.
-    if any([policy.approval_date, policy.owner, policy.approver]):
+    # The version-history / owner-approver card is shown on the signed copy and
+    # on standalone documents. The unsigned copy of a signed/unsigned pair drops
+    # it, so the two variants are distinguishable.
+    show_card = policy.signatures or not getattr(policy, "has_signed", False)
+    if show_card and any([policy.approval_date, policy.owner, policy.approver]):
         _draw_version_card(c, policy)
 
 

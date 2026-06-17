@@ -44,6 +44,8 @@ def main(argv=None):
                     help="Small disclaimer line under the footer address")
     ap.add_argument("--version-date", dest="version_date", default="",
                     help="Date shown on the version line (defaults to approval date)")
+    ap.add_argument("--has-signed", dest="has_signed", action="store_true",
+                    help="This unsigned render has a signed sibling, so omit the back card")
     ap.add_argument("--date", help="Date tag in the file name (default: current YYYY-MM)")
     args = ap.parse_args(argv)
 
@@ -56,7 +58,8 @@ def main(argv=None):
                         adopted_on=args.adopted_on, effective_on=args.effective_on,
                         signatures=args.signatures, cover_year=args.cover_year,
                         lead_title=args.lead_title, body_size=args.body_size,
-                        footer_note=args.footer_note, version_date=args.version_date)
+                        footer_note=args.footer_note, version_date=args.version_date,
+                        has_signed=args.has_signed)
 
     # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
     import datetime

@@ -135,7 +135,11 @@ def main():
                     meta_args += ["--approval-date", ed["approval_date"]]
                 if ed.get("version"):
                     meta_args += ["--version", ed["version"] + ":"]
-                files = {"non_approval": _gen(src, cover_title, year, date, name_base, "non-approval", meta_args + ["--no-signatures"])}
+                # When a document has a signed sibling, the unsigned copy drops
+                # the back card so the two are distinguishable; standalone
+                # documents keep it.
+                unsigned_extra = ["--no-signatures"] + (["--has-signed"] if doc.get("board_approval") else [])
+                files = {"non_approval": _gen(src, cover_title, year, date, name_base, "non-approval", meta_args + unsigned_extra)}
                 if doc.get("board_approval"):
                     files["approval"] = _gen(src, cover_title, year, date, name_base, "approval", meta_args)
                 docs_out.append({

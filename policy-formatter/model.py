@@ -69,6 +69,7 @@ class Policy:
     body_size: float = 11     # body point size (e.g. the Code of Conduct uses 10)
     footer_note: str = ""     # small disclaimer line under the footer address
     version_date: str = ""    # date shown on the version line (defaults to approval date)
+    has_signed: bool = False  # this unsigned render has a signed sibling (-> drop the card)
 
 
 def _para_images(item):
