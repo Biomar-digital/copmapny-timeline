@@ -17,13 +17,14 @@ database_name = "policy-users"
 database_id = "0b2578fc-06a3-426b-83a7-f8a8df25502a"
 
 # Backend config for the feedback/request APIs.
-# Secrets (set in the dashboard, NOT here): GH_TOKEN (contents:read+write AND
-# issues:write), RESEND_API_KEY (for email notifications).
+# Secrets (set in the dashboard as *Secret*, NOT here): GH_TOKEN (contents
+# read+write AND issues:write) and BREVO_API_KEY (email). Secrets survive git
+# deploys; plaintext vars below are re-applied from this file on every deploy.
 [vars]
 GH_OWNER = "Biomar-digital"
 GH_REPO = "copmapny-timeline"
 GH_BRANCH = "claude/confident-curie-gudwtz"
-# Email notifications (Resend). NOTIFY_EMAIL is where alerts are sent; RESEND_FROM
-# must be a verified Resend sender (or the onboarding address while testing).
+# Email notifications via Brevo. NOTIFY_EMAIL is where admin alerts go; BREVO_FROM
+# must be a verified Brevo sender on the authenticated biomar.com domain.
 NOTIFY_EMAIL = "marketing@biomar.com"
-RESEND_FROM = "BioMar Policies <onboarding@resend.dev>"
+BREVO_FROM = "BioMar Policy Library <marketing@biomar.com>"
