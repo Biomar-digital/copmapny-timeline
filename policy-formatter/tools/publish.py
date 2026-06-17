@@ -120,6 +120,8 @@ def main():
                     meta_args += ["--no-cover-year"]
                 if p.get("lead_title"):
                     meta_args += ["--lead-title"]
+                if p.get("body_size"):
+                    meta_args += ["--body-size", str(p["body_size"])]
                 if ed.get("approval_date"):
                     meta_args += ["--approval-date", ed["approval_date"]]
                 if ed.get("version"):

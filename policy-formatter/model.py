@@ -65,6 +65,7 @@ class Policy:
     signatures: bool = True   # include the board signatures page
     cover_year: bool = True   # show the year on the cover (some originals omit it)
     lead_title: bool = False  # repeat the title as a lead heading on page 1 of body
+    body_size: float = 11     # body point size (e.g. the Code of Conduct uses 10)
 
 
 def _para_images(item):

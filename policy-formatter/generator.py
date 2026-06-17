@@ -45,7 +45,7 @@ BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
 BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
 # Document title repeated as a lead heading on the first content page (some
 # originals, e.g. the Code of Conduct, open the body with the title in large bold).
-LEAD_TITLE = ParagraphStyle("LeadTitle", fontName=B.F_BOLD, fontSize=18, leading=21,
+LEAD_TITLE = ParagraphStyle("LeadTitle", fontName=B.F_BOLD, fontSize=19, leading=22,
                             textColor=B.BIOMAR_BLUE, spaceAfter=11, spaceBefore=0)
 BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
                         leftIndent=16, bulletIndent=2, spaceAfter=6)
@@ -709,7 +709,29 @@ def _frame(top):
                  leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
 
 
+def _set_body_size(size):
+    """Rebuild the body/​bullet/​column paragraph styles for a given point size so
+    a policy can match its original's density (e.g. the Code of Conduct is set at
+    10pt, the rest at the default 11pt). Spacing and leading scale with the size."""
+    global BODY, BODY_LEFT, BODY_BOLD, BULLET, COL_BODY, COL_BULLET, COL_BODY_BOLD
+    BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=size,
+                          leading=size * 16 / 11.0, textColor=B.BIOMAR_BLUE,
+                          alignment=TA_JUSTIFY, spaceAfter=size * 11.4 / 11.0,
+                          splitLongWords=0, hyphenationLang="",
+                          allowWidows=0, allowOrphans=0)
+    BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
+    BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
+    BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
+                            leftIndent=16, bulletIndent=2, spaceAfter=size * 6 / 11.0)
+    COL_BODY = ParagraphStyle("ColBody", parent=BODY_LEFT, fontSize=size,
+                              leading=size * 13 / 10.0, spaceAfter=size * 8 / 10.0)
+    COL_BULLET = ParagraphStyle("ColBullet", parent=COL_BODY, alignment=TA_LEFT,
+                                leftIndent=14, bulletIndent=2, spaceAfter=size * 5 / 10.0)
+    COL_BODY_BOLD = ParagraphStyle("ColBodyBold", parent=COL_BODY, fontName=B.F_DEMI)
+
+
 def build_pdf(policy, out_path):
+    _set_body_size(getattr(policy, "body_size", 11) or 11)
     doc = BaseDocTemplate(
         out_path, pagesize=(B.PAGE_W, B.PAGE_H),
         leftMargin=B.MARGIN_L, rightMargin=B.MARGIN_R,
