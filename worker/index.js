@@ -210,14 +210,34 @@ async function ghCreateIssue(env, title, body, labels) {
   const d = await r.json();
   return { ok: true, number: d.number, url: d.html_url };
 }
-async function sendEmail(env, subject, html) {
-  if (!env.RESEND_API_KEY || !env.NOTIFY_EMAIL) return { ok: false, skipped: true };
-  const r = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: env.RESEND_FROM || "BioMar Policies <onboarding@resend.dev>", to: [env.NOTIFY_EMAIL], subject, html }),
-  });
-  return { ok: r.ok, status: r.status };
+// Send an email via Brevo (preferred) or Resend, to `to` (defaults to the admin
+// NOTIFY_EMAIL). Credentials live only in Worker secrets, never in the repo.
+async function sendEmail(env, subject, html, to) {
+  const recipient = to || env.NOTIFY_EMAIL;
+  if (!recipient) return { ok: false, skipped: true };
+  // Parse "Name <addr>" or a bare address for the sender.
+  const fromRaw = env.BREVO_FROM || env.RESEND_FROM || `BioMar Policies <${env.NOTIFY_EMAIL || "onboarding@resend.dev"}>`;
+  const m = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(fromRaw);
+  const fromName = m ? (m[1] || "BioMar Policies") : "BioMar Policies";
+  const fromAddr = m ? m[2] : fromRaw;
+
+  if (env.BREVO_API_KEY) {
+    const r = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ sender: { name: fromName, email: fromAddr }, to: [{ email: recipient }], subject, htmlContent: html }),
+    });
+    return { ok: r.ok, status: r.status };
+  }
+  if (env.RESEND_API_KEY) {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: fromRaw, to: [recipient], subject, html }),
+    });
+    return { ok: r.ok, status: r.status };
+  }
+  return { ok: false, skipped: true };
 }
 
 function missingEnv(env) { return ["GH_TOKEN", "GH_OWNER", "GH_REPO", "GH_BRANCH"].filter(k => !env[k]); }
@@ -553,11 +573,27 @@ async function handlePending(request, env, user) {
     if (target === undefined) return json({ error: "Unknown action." }, 400);
     for (let i = 0; i < 3; i++) {
       const { list, sha } = await ghGetList(env, PENDING_FILE).catch(() => ({ list: [], sha: null }));
+      const affected = list.filter(it => it.policy === policy);
       const next = action === "approve"
         ? list.filter(it => it.policy !== policy)
         : list.map(it => it.policy === policy ? { ...it, status: target, updated_at: Date.now() } : it);
       const r = await ghPutList(env, PENDING_FILE, next, sha, `Pending ${action} on ${policy}`);
-      if (r.ok) { await recordEvent(env, "change_" + action, `${user.name}: ${action} on ${policy}`, policy, user.name); return json({ ok: true }); }
+      if (r.ok) {
+        await recordEvent(env, "change_" + action, `${user.name}: ${action} on ${policy}`, policy, user.name);
+        // Notify the requester(s) by email when their change is ready to review.
+        if (action === "review") {
+          for (const it of affected) {
+            if (!it.email) continue;
+            await sendEmail(env,
+              `Your change request is ready for review — ${it.title || policy}`,
+              `<p>Hi ${escapeHtml(it.author || "")},</p>` +
+              `<p>The change you requested on <b>${escapeHtml(it.title || policy)}</b> has been made and is ready for your review.</p>` +
+              `<p>Open the BioMar Policy Library, check the document and either approve the change or request another round.</p>`,
+              it.email).catch(() => {});
+          }
+        }
+        return json({ ok: true });
+      }
       if (r.status === 409 || r.status === 422) continue;
       return json({ error: `Update failed (${r.status}).` }, 502);
     }
