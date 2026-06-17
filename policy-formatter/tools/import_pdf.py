@@ -38,6 +38,33 @@ def _clean(s):
     return CTRL.sub("", s or "")
 
 
+def _clean_runs(runs):
+    """Normalise [text, bold] run fragments the way block text is cleaned, so a
+    paragraph keeps its run-in bold label (e.g. a bold lead phrase + plain text)."""
+    out = []
+    for rt, rb in runs:
+        ct = re.sub(r"[ \t]*\n[ \t]*", " ", CTRL.sub("", rt))
+        ct = re.sub(r" {2,}", " ", ct)
+        if ct.strip() or ct == " ":
+            out.append([ct, rb])
+    if out:
+        out[0][0] = out[0][0].lstrip()
+        out[-1][0] = out[-1][0].rstrip()
+    return [(t, b) for t, b in out if t]
+
+
+def _add_runs(para, runs, fallback):
+    """Add text to a paragraph preserving a run-in bold label; full-bold and
+    full-regular paragraphs collapse to a single run."""
+    if runs and any(b for _, b in runs) and not all(b for _, b in runs):
+        for rt, rb in runs:
+            para.add_run(rt).bold = rb
+    else:
+        r = para.add_run(fallback)
+        if runs and all(b for _, b in runs):
+            r.bold = True
+
+
 def _is_vcard_table(rows):
     flat = " ".join((c or "") for r in rows for c in r)
     return ("Approval date" in flat) or ("Owner" in flat and "Approver" in flat)
@@ -81,15 +108,23 @@ def extract_items(pdf):
                 continue
             parts, sizes = [], []
             bchars = tchars = 0
+            runs = []                       # [text, bold] for run-in bold labels
             for ln in b["lines"]:
                 for sp in ln["spans"]:
                     parts.append(sp["text"])
                     sizes.append(round(sp["size"], 1))
                     n = len(sp["text"].strip())
                     tchars += n
-                    if (sp["flags"] & 16) or any(k in sp["font"] for k in ("Bold", "Demi", "Semibold", "Black")):
+                    sb = bool((sp["flags"] & 16) or any(k in sp["font"] for k in ("Bold", "Demi", "Semibold", "Black")))
+                    if sb:
                         bchars += n
+                    if runs and runs[-1][1] == sb:
+                        runs[-1][0] += sp["text"]
+                    else:
+                        runs.append([sp["text"], sb])
                 parts.append("\n")
+                if runs:
+                    runs[-1][0] += "\n"
             # Mark the block bold only when most of its text is bold, so a
             # paragraph with a few emphasised words is not fully bolded.
             bold = tchars > 0 and bchars >= 0.6 * tchars
@@ -97,7 +132,7 @@ def extract_items(pdf):
             if not s or s == "BioMar Group" or any(b0 in s for b0 in BOILER):
                 continue
             size = Counter(sizes).most_common(1)[0][0] if sizes else 11.0
-            tblocks.append((rb.y0, s, size, bold, rb.x0, rb.x1))
+            tblocks.append((rb.y0, s, size, bold, rb.x0, rb.x1, _clean_runs(runs)))
 
         # Two-column detection: narrow blocks split across the left and right
         # halves -> emit a single "columns" item; otherwise normal blocks.
@@ -111,13 +146,13 @@ def extract_items(pdf):
             right.sort(key=lambda t: t[0])
             for tb in tblocks:
                 if id(tb) not in nid:
-                    page_items.append((tb[0], "block", (tb[1], tb[2], tb[3], tb[4])))
-            lc = [(tb[1], tb[2], tb[3], tb[4]) for tb in left]
-            rc = [(tb[1], tb[2], tb[3], tb[4]) for tb in right]
+                    page_items.append((tb[0], "block", (tb[1], tb[2], tb[3], tb[4], tb[6])))
+            lc = [(tb[1], tb[2], tb[3], tb[4], tb[6]) for tb in left]
+            rc = [(tb[1], tb[2], tb[3], tb[4], tb[6]) for tb in right]
             page_items.append((ytop, "columns", (lc, rc)))
         else:
             for tb in tblocks:
-                page_items.append((tb[0], "block", (tb[1], tb[2], tb[3], tb[4])))
+                page_items.append((tb[0], "block", (tb[1], tb[2], tb[3], tb[4], tb[6])))
 
         # content images (skip the logo / header / footer / full-page artwork)
         for im in page.get_image_info(xrefs=True):
@@ -166,7 +201,7 @@ def build_docx(pdf, out):
             head_counts[p[1]] += 1
         elif k == "columns":
             for col in p:
-                for cs, csize, cbold, _cx in col:
+                for cs, csize, cbold, _cx, _cr in col:
                     if csize > body + 0.4 and cbold:
                         head_counts[csize] += 1
     head_sizes = sorted(head_counts, reverse=True)
@@ -187,7 +222,7 @@ def build_docx(pdf, out):
             for ci, col in enumerate(p):
                 cell = tbl.rows[0].cells[ci]
                 first = True
-                for cs, csize, cbold, _cx in col:
+                for cs, csize, cbold, _cx, cruns in col:
                     ss = _clean(re.sub(r"[ \t]*\n[ \t]*", " ", cs).strip())
                     ss = re.sub(r" {2,}", " ", ss)
                     if not ss:
@@ -202,7 +237,7 @@ def build_docx(pdf, out):
                         para.style = "List Bullet"
                         para.add_run(re.sub(r"^[\s••\-▪◦]+", "", ss))
                     else:
-                        para.add_run(ss)
+                        _add_runs(para, cruns, ss)
             doc.add_paragraph("")
             continue
         if k == "image":
@@ -231,7 +266,7 @@ def build_docx(pdf, out):
             doc.add_paragraph("")
             continue
 
-        s, size, bold, _x0 = p
+        s, size, bold, _x0, sruns = p
         s = _clean(re.sub(r"[ \t]*\n[ \t]*", " ", s).strip())
         s = re.sub(r" {2,}", " ", s)
         if not s:
@@ -262,11 +297,11 @@ def build_docx(pdf, out):
             # Merge a block that is the continuation of the previous paragraph
             # (previous didn't end a sentence and this one starts lower-case).
             if last_para is not None and s[:1].islower() and not re.search(r"[.:;!?»\")]\s*$", last_para.text):
-                last_para.runs[-1].text = last_para.runs[-1].text + " " + s
+                last_para.add_run(" ")
+                _add_runs(last_para, sruns, s)
             else:
                 last_para = doc.add_paragraph()
-                run = last_para.add_run(s)
-                run.bold = bool(bold)        # preserve bold (e.g. the bold intro)
+                _add_runs(last_para, sruns, s)
     doc.save(out)
 
 

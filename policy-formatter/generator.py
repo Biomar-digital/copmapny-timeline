@@ -85,6 +85,19 @@ def _fmt(text, number=True, widow=True):
     return escape(t)
 
 
+def _body_markup(b):
+    """Markup for a Body block, wrapping any run-in bold label in <b>…</b>."""
+    runs = getattr(b, "runs", None)
+    if not runs:
+        return _fmt(b.text)
+    n = len(runs)
+    out = []
+    for i, (t, bd) in enumerate(runs):
+        seg = _fmt(t, number=(i == 0), widow=(i == n - 1))
+        out.append("<b>" + seg + "</b>" if bd else seg)
+    return "".join(out)
+
+
 def _band(r):
     """A full-width row whose non-empty cells are all identical (a merged
     title/section row), e.g. 'Table 1: ...' or '2. The general meeting'."""
@@ -386,6 +399,8 @@ def _col_flowables(blocks):
             out.append(Paragraph(escape(sb.text), H1 if sb.level == 1 else H2))
         elif isinstance(sb, Bullet):
             out.append(Paragraph(_fmt(sb.text), COL_BULLET, bulletText="•"))
+        elif getattr(sb, "runs", None):
+            out.append(Paragraph(_body_markup(sb), COL_BODY))
         elif getattr(sb, "bold", False):
             out.append(Paragraph(_fmt(sb.text), COL_BODY_BOLD))
         else:
@@ -482,14 +497,29 @@ def _story(policy):
     # content page (e.g. the Code of Conduct); opt in per policy.
     if getattr(policy, "lead_title", False):
         flow.append(Paragraph(escape(policy.title), LEAD_TITLE))
-    for b in policy.blocks:
+    # A supplier declaration (intro text + signature box) sits on its own page in
+    # the original, with the content after it starting fresh. Break around it.
+    blocks = policy.blocks
+    sig_i = next((i for i, b in enumerate(blocks)
+                  if isinstance(b, TableBlock) and _is_signature_form(b)), None)
+    dec_i = None
+    if sig_i is not None:
+        j = sig_i - 1
+        while j >= 0 and isinstance(blocks[j], Body):
+            j -= 1
+        dec_i = j + 1
+    for i, b in enumerate(blocks):
+        if i == dec_i:
+            flow.append(PageBreak())
         if isinstance(b, Heading):
             flow.append(Paragraph(escape(b.text), H1 if b.level == 1 else H2))
         elif isinstance(b, Body):
             # Justify normal running text; left-align short lines and anything
             # with a URL/long token so justification doesn't stretch the spaces.
             justify = len(b.text) >= 90 and "://" not in b.text
-            if getattr(b, "bold", False):
+            if getattr(b, "runs", None):
+                flow.append(Paragraph(_body_markup(b), BODY if justify else BODY_LEFT))
+            elif getattr(b, "bold", False):
                 flow.append(Paragraph(_fmt(b.text), BODY_BOLD))
             else:
                 flow.append(Paragraph(_fmt(b.text), BODY if justify else BODY_LEFT))
@@ -506,6 +536,8 @@ def _story(policy):
             flow.extend(_image_flowables(b))
         elif isinstance(b, Columns):
             flow.extend(_columns_flowables(b))
+        if i == sig_i:
+            flow.append(PageBreak())     # definitions/refs start on the next page
     return flow
 
 

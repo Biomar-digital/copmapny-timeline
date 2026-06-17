@@ -28,6 +28,7 @@ class Heading:
 class Body:
     text: str
     bold: bool = False
+    runs: list = None        # optional [(text, bold)] for run-in bold labels
 
 @dataclass
 class Bullet:
@@ -151,6 +152,17 @@ def _classify(text: str, style: str):
     return "body", 0
 
 
+def _body_from_runs(item, text):
+    """Build a Body, keeping per-run bold (a run-in bold label + plain text) when
+    the paragraph mixes bold and regular; otherwise collapse to a bold flag."""
+    rlist = [(r.text, bool(r.bold)) for r in item.runs if r.text and (r.text.strip() or r.text == " ")]
+    anyb = any(b for _, b in rlist)
+    allb = bool(rlist) and all(b for _, b in rlist)
+    if anyb and not allb:
+        return Body(text=text, runs=rlist)
+    return Body(text=text, bold=allb)
+
+
 def parse_docx(path: str, title: Optional[str] = None,
                year: Optional[str] = None, **meta) -> Policy:
     doc = docx.Document(path)
@@ -176,7 +188,7 @@ def parse_docx(path: str, title: Optional[str] = None,
                         elif kind == "bullet":
                             sub.append(Bullet(text=t))
                         else:
-                            sub.append(Body(text=t))
+                            sub.append(_body_from_runs(para, t))
                     cols.append(sub)
                 if any(cols):
                     blocks.append(Columns(cols=cols))
@@ -213,9 +225,7 @@ def parse_docx(path: str, title: Optional[str] = None,
         elif kind == "bullet":
             blocks.append(Bullet(text=text))
         else:
-            runs = [r for r in item.runs if r.text.strip()]
-            bold = bool(runs) and all(r.bold for r in runs)
-            blocks.append(Body(text=text, bold=bold))
+            blocks.append(_body_from_runs(item, text))
 
     if title is None:
         title = doc_title or "Policy"
