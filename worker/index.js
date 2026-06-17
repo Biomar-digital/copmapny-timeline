@@ -447,7 +447,8 @@ async function handleRequests(request, env, user) {
   await recordEvent(env, kind === "new" ? "request_new" : "request_change", `${author}: ${issueTitle}`, policy || "", author);
   if (kind === "change" && policy) {
     await appendItem(env, PENDING_FILE,
-      { id: crypto.randomUUID(), policy, request_id: id, title: issueTitle, status: "change_pending", created_at: Date.now() },
+      { id: crypto.randomUUID(), policy, request_id: id, title: issueTitle, status: "change_pending",
+        author, email, created_at: Date.now() },
       `Track pending change on ${policy}`).catch(() => {});
   }
   return json({ ok: true, id, issue: issue.ok ? issue.number : null, warnings }, 201);
@@ -579,6 +580,17 @@ async function handlePending(request, env, user) {
   return json({ error: "Method not allowed." }, 405);
 }
 
+// ===================================================== /api/my-requests
+// The requester's own change requests + their current status, for the visitor
+// notification bell ("your change is ready for review").
+async function handleMyRequests(request, env, user) {
+  if (request.method !== "GET") return json({ error: "Method not allowed." }, 405);
+  const list = await readPending(env);
+  const mine = list.filter(it => it && it.email && user.email &&
+    it.email.toLowerCase() === user.email.toLowerCase());
+  return json({ requests: mine });
+}
+
 // ==================================================================== gate
 
 const PUBLIC_ASSETS = new Set(["/login", "/login.html", "/login.js", "/login.css", "/styles.css", "/favicon.png", "/favicon.ico"]);
@@ -623,6 +635,7 @@ export default {
       if (path === "/api/requests") return handleRequests(request, env, user);
       if (path === "/api/wallet") return handleWallet(request, env, user);
       if (path === "/api/pending") return handlePending(request, env, user);
+      if (path === "/api/my-requests") return handleMyRequests(request, env, user);
       return json({ error: "Not found." }, 404);
     }
 

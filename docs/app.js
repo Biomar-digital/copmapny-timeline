@@ -642,7 +642,50 @@ async function setupAccount() {
     location.href = "/login";
   });
   if (IS_ADMIN) setupAdmin();
+  else setupVisitorBell();
   render();
+}
+
+// ---- visitor notification bell (status of their own change requests) ----
+
+function statusLabel(s) {
+  return s === "pending_review" ? "Ready for your review"
+    : s === "change_pending" ? "In progress" : s;
+}
+
+async function myRequests() {
+  try { return (await (await fetch("api/my-requests", { cache: "no-store" })).json()).requests || []; }
+  catch { return []; }
+}
+
+async function setupVisitorBell() {
+  const bell = document.getElementById("bellBtn");
+  if (!bell) return;
+  bell.hidden = false;
+  bell.title = "My change requests";
+  bell.addEventListener("click", openMyRequests);
+  const reqs = await myRequests();
+  const ready = reqs.filter(r => r.status === "pending_review").length;
+  const b = document.getElementById("bellBadge");
+  if (ready > 0) { b.hidden = false; b.textContent = ready > 99 ? "99+" : ready; } else b.hidden = true;
+}
+
+async function openMyRequests() {
+  const reqs = await myRequests();
+  let dlg = document.getElementById("myReqs");
+  if (!dlg) { dlg = document.createElement("dialog"); dlg.id = "myReqs"; dlg.className = "vh-dialog chooser"; document.body.appendChild(dlg); }
+  dlg.innerHTML = `<div class="vh-box chooser-box">
+      <h3>My change requests</h3>
+      ${reqs.length ? reqs.map(r => `
+        <div class="myreq myreq-${esc(r.status)}">
+          <span class="myreq-title">${esc(r.title || r.policy)}</span>
+          <span class="myreq-status">${esc(statusLabel(r.status))}</span>
+        </div>`).join("")
+      : '<p class="chooser-hint">You have no open change requests.</p>'}
+      <button type="button" class="btn ghost chooser-x">Close</button>
+    </div>`;
+  dlg.querySelector(".chooser-x").addEventListener("click", () => dlg.close());
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
 }
 
 async function setupAdmin() {
