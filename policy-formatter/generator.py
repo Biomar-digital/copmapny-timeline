@@ -709,12 +709,12 @@ def _draw_version_card(c, policy):
     c.line(cx + 14, head_y - 10, right - 14, head_y - 10)   # under headers
     c.line(DIVIDER, cy + 10, DIVIDER, head_y - 10)          # column divider
 
-    # The "Approval date" row only belongs on the signed (board-approved)
-    # variant; an unsigned copy shows just the version line (with its own date).
+    # Version line carries its date; the "Approval date" row is shown whenever
+    # the policy has an approval date (both signed and unsigned variants).
     vdate = policy.approval_date or getattr(policy, "version_date", "") or "—"
     rows_l = [(policy.version, vdate)]
-    if policy.signatures:
-        rows_l.append(("Approval date:", policy.approval_date or "—"))
+    if policy.approval_date:
+        rows_l.append(("Approval date:", policy.approval_date))
     rows_r = [("Owner:", policy.owner or "—"),
               ("Approver:", policy.approver or "Executive Committee")]
     ry = head_y - 27
