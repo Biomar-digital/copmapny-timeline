@@ -584,12 +584,13 @@ async function handlePending(request, env, user) {
 const PUBLIC_ASSETS = new Set(["/login", "/login.html", "/login.js", "/login.css", "/styles.css", "/favicon.png", "/favicon.ico"]);
 function isPublicAsset(path) { return PUBLIC_ASSETS.has(path) || path.startsWith("/assets/"); }
 
-// Serve a static asset, but force revalidation of HTML/JS/CSS so a deploy is
-// picked up immediately (avoids stale app.js after updates).
+// Serve a static asset, but force revalidation of HTML/JS/CSS and the generated
+// PDFs/JSON so a deploy (re-rendered documents included) is picked up
+// immediately instead of serving a stale cached copy under the same filename.
 async function serveAsset(request, env) {
   const res = await env.ASSETS.fetch(request);
   const path = new URL(request.url).pathname;
-  if (path === "/" || path === "/login" || /\.(html|js|css)$/.test(path)) {
+  if (path === "/" || path === "/login" || /\.(html|js|css|pdf|json)$/.test(path)) {
     const h = new Headers(res.headers);
     h.set("Cache-Control", "no-cache, must-revalidate");
     return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
