@@ -15,10 +15,11 @@
     "policy": "animal-welfare-policy",
     "request_id": "2401a197-f9b7-4fe3-be3a-56e27cdd4c64",
     "title": "Change: animal-welfare-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Andres Bernadou",
     "email": "anber@biomar.com",
-    "created_at": 1781703720312
+    "created_at": 1781703720312,
+    "updated_at": 1781704600000
   },
   {
     "id": "0a22465c-eb5f-42bf-a1d5-cc2778b60c58",
