@@ -261,6 +261,48 @@ async function loadAnnotations() {
   renderSidebar();
 }
 
+// ---- unified edit request (annotations + comment + file) -----------------
+
+async function sendRequest() {
+  const btn = document.getElementById("reqSend");
+  const status = document.getElementById("reqStatus");
+  const comment = document.getElementById("reqComment").value.trim();
+  const fileInput = document.getElementById("reqFile");
+  const file = fileInput.files[0] || null;
+  if (!comment && !file && annotations.length === 0) {
+    status.textContent = "Add a highlight, a comment or a file first.";
+    return;
+  }
+  btn.disabled = true; status.textContent = "Sending…";
+
+  // Fold the highlights into the request details so the AI sees the exact
+  // quoted passages alongside the free-text comment.
+  const annText = annotations.map(a =>
+    `• p.${a.page} “${(a.quote || "").slice(0, 200)}” → ${a.text}`).join("\n");
+  const details = [comment, annText && "Highlights:\n" + annText]
+    .filter(Boolean).join("\n\n") || "(see highlights on the document)";
+
+  const fd = new FormData();
+  fd.append("kind", "change");
+  fd.append("policy", POLICY);
+  fd.append("edition", EDITION);
+  fd.append("details", details);
+  fd.append("annotation_count", String(annotations.length));
+  if (file) fd.append("file", file);
+  try {
+    const r = await fetch("api/requests", { method: "POST", body: fd });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || ("HTTP " + r.status));
+    status.textContent = "Sent — the team will review your changes.";
+    document.getElementById("reqComment").value = "";
+    fileInput.value = ""; document.getElementById("reqFileName").textContent = "Attach a document (optional)";
+  } catch (e) {
+    status.textContent = "Could not send: " + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 // ---- init ----------------------------------------------------------------
 
 async function init() {
@@ -272,6 +314,11 @@ async function init() {
   selBtn.addEventListener("click", openComposer);
   document.getElementById("cSave").addEventListener("click", saveNote);
   document.getElementById("cCancel").addEventListener("click", closeComposer);
+  document.getElementById("reqSend").addEventListener("click", sendRequest);
+  document.getElementById("reqFile").addEventListener("change", e => {
+    const f = e.target.files[0];
+    document.getElementById("reqFileName").textContent = f ? f.name : "Attach a document (optional)";
+  });
   document.addEventListener("mouseup", () => setTimeout(onSelection, 0));
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeComposer(); });
 

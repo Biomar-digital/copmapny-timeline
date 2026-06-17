@@ -29,6 +29,18 @@
       </div>
       <div id="annList" class="rv-annlist"></div>
       <p id="annEmpty" class="rv-empty">No annotations yet. Select a line in the document and click <b>Add note</b>.</p>
+
+      <div class="rv-submit">
+        <h3>Send these edits</h3>
+        <p class="rv-submit-hint">Your highlights above, a comment and an optional file are sent together as one change request the AI can use.</p>
+        <textarea id="reqComment" rows="3" placeholder="Describe the change you want…"></textarea>
+        <label class="rv-file">
+          <input type="file" id="reqFile" accept=".doc,.docx,.pdf,.txt,.rtf,.odt" />
+          <span id="reqFileName">Attach a document (optional)</span>
+        </label>
+        <button id="reqSend" class="btn primary" type="button">Send for review</button>
+        <span id="reqStatus" class="vh-cstatus"></span>
+      </div>
     </aside>
   </div>
 

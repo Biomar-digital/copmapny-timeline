@@ -108,7 +108,13 @@ const SCHEMA = [
      id TEXT PRIMARY KEY, type TEXT, summary TEXT, ref TEXT, actor TEXT, created_at INTEGER NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS inbox_state (user_id TEXT PRIMARY KEY, last_seen INTEGER NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS wallet (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, label TEXT, image TEXT NOT NULL, created_at INTEGER NOT NULL)`,
-  `CREATE TABLE IF NOT EXISTS pending_change (id TEXT PRIMARY KEY, policy TEXT NOT NULL, request_id TEXT, title TEXT, created_at INTEGER NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS pending_change (id TEXT PRIMARY KEY, policy TEXT NOT NULL, request_id TEXT, title TEXT, status TEXT NOT NULL DEFAULT 'change_pending', updated_at INTEGER, created_at INTEGER NOT NULL)`,
+];
+
+// Additive migrations for DBs created before a column existed (ignore errors).
+const MIGRATIONS = [
+  "ALTER TABLE pending_change ADD COLUMN status TEXT NOT NULL DEFAULT 'change_pending'",
+  "ALTER TABLE pending_change ADD COLUMN updated_at INTEGER",
 ];
 
 let schemaPromise = null;
@@ -116,6 +122,7 @@ function ensureSchema(env) {
   if (!schemaPromise) {
     schemaPromise = (async () => {
       for (const stmt of SCHEMA) await env.DB.prepare(stmt).run();
+      for (const m of MIGRATIONS) { try { await env.DB.prepare(m).run(); } catch { /* column exists */ } }
       if (env.AUTH_USER && env.AUTH_PASS) {
         const admin = await env.DB.prepare("SELECT id FROM users WHERE role='admin' LIMIT 1").first();
         if (!admin) {
@@ -515,11 +522,41 @@ async function handleWallet(request, env, user) {
 
 async function handlePending(request, env, user) {
   if (request.method === "GET") {
+    // Effective status per policy: 'change_pending' wins over 'pending_review'.
     const { results } = await env.DB.prepare(
-      "SELECT policy, COUNT(*) AS n FROM pending_change GROUP BY policy").all();
+      `SELECT policy,
+              CASE WHEN SUM(status='change_pending')>0 THEN 'change_pending'
+                   ELSE 'pending_review' END AS status,
+              COUNT(*) AS n
+         FROM pending_change GROUP BY policy`).all();
     return json({ pending: results || [] });
   }
-  if (request.method === "DELETE") {
+  // Status transitions. 'review' (changes done -> awaiting the requester's
+  // review) is admin-only; 'approve' (accept) and 'reopen' (ask for another
+  // round) close or re-open the request.
+  if (request.method === "POST") {
+    let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
+    const policy = safePolicyId(p.policy);
+    const action = String(p.action || "");
+    if (!policy) return json({ error: "Invalid policy." }, 400);
+    if (action === "review") {
+      if (user.role !== "admin") return json({ error: "Forbidden." }, 403);
+      await env.DB.prepare("UPDATE pending_change SET status='pending_review', updated_at=? WHERE policy=?")
+        .bind(Date.now(), policy).run();
+      await recordEvent(env, "change_review", `${user.name}: changes ready for review on ${policy}`, policy, user.name);
+    } else if (action === "reopen") {
+      await env.DB.prepare("UPDATE pending_change SET status='change_pending', updated_at=? WHERE policy=?")
+        .bind(Date.now(), policy).run();
+      await recordEvent(env, "change_reopen", `${user.name}: requested another round on ${policy}`, policy, user.name);
+    } else if (action === "approve") {
+      await env.DB.prepare("DELETE FROM pending_change WHERE policy=?").bind(policy).run();
+      await recordEvent(env, "change_approved", `${user.name}: approved changes on ${policy}`, policy, user.name);
+    } else {
+      return json({ error: "Unknown action." }, 400);
+    }
+    return json({ ok: true });
+  }
+  if (request.method === "DELETE") {                 // legacy "mark resolved"
     if (user.role !== "admin") return json({ error: "Forbidden." }, 403);
     let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
     const policy = safePolicyId(p.policy);

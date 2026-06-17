@@ -95,6 +95,20 @@ body.review { background: #e9eff5; }
 .rv-empty { color: #6b87a4; font-size: 12.5px; line-height: 1.6; margin-top: 12px; }
 .rv-loaderr { max-width: 1240px; margin: 0 auto; padding: 16px 20px; color: #b4233a; }
 
+.rv-submit { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--crisp); }
+.rv-submit h3 { margin: 0 0 4px; font-size: 13px; color: var(--navy); }
+.rv-submit-hint { margin: 0 0 8px; font-size: 11px; color: #7c93ab; line-height: 1.5; }
+.rv-submit textarea {
+  width: 100%; box-sizing: border-box; resize: vertical; font: inherit; font-size: 12.5px;
+  padding: 8px; border: 1px solid var(--crisp); border-radius: 8px; color: #2f4a6b;
+}
+.rv-file {
+  display: flex; align-items: center; gap: 8px; margin: 8px 0; padding: 8px 10px;
+  border: 1px dashed var(--crisp); border-radius: 8px; cursor: pointer; font-size: 12px; color: #6b87a4;
+}
+.rv-file input { display: none; }
+.rv-submit .btn.primary { width: 100%; margin-top: 2px; }
+
 @media (max-width: 880px) {
   .rv-wrap { grid-template-columns: 1fr; }
   .rv-side { position: static; max-height: none; }

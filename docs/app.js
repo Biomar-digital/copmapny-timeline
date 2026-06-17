@@ -55,7 +55,7 @@ function card(p) {
   const multi = docs.length > 1;
   el.innerHTML = `
     <div>
-      <h2 class="title">${esc(p.title)}${PENDING.has(p.id) ? ' <span class="pending-badge">Change pending</span>' : ""}</h2>
+      <h2 class="title">${esc(p.title)}${statusBadge(p.id)}</h2>
       <div class="tags">
         <span class="tag lang">${esc(p.language || "English")}</span>
         <span class="tag">${esc(ed.version || "Version 1")}</span>
@@ -74,19 +74,53 @@ function card(p) {
       <button type="button" class="btn history">Request change or edit</button>
     </div>`;
   el.querySelector(".history").addEventListener("click", () => openHistory(p));
-  const pb = el.querySelector(".pending-badge");
-  if (pb && IS_ADMIN) {
-    pb.classList.add("clickable");
-    pb.title = "Mark resolved";
-    pb.addEventListener("click", async () => {
-      if (!confirm(`Mark the change request for "${p.title}" as resolved?`)) return;
-      try {
-        await fetch("api/pending", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ policy: p.id }) });
-        PENDING.delete(p.id); render();
-      } catch (e) { alert("Could not update: " + e.message); }
+  wireStatusActions(el, p);
+  return el;
+}
+
+// ---- change-request status badge + actions -------------------------------
+
+function statusBadge(id) {
+  const st = PENDING.get(id);
+  if (st === "change_pending") return ' <span class="pending-badge change">Change pending</span>';
+  if (st === "pending_review") return ' <span class="pending-badge review">Pending for review</span>';
+  return "";
+}
+
+function wireStatusActions(el, p) {
+  const st = PENDING.get(p.id);
+  if (!st) return;
+  const badge = el.querySelector(".pending-badge");
+  const actions = el.querySelector(".actions");
+
+  // Admin can mark the change "done" -> moves it to the requester for review.
+  if (st === "change_pending" && IS_ADMIN) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn ghost"; b.textContent = "Mark changes done → review";
+    b.addEventListener("click", () => pendingAction(p.id, "review"));
+    actions.appendChild(b);
+  }
+  // Anyone reviewing can approve or ask for another round once changes are done.
+  if (st === "pending_review") {
+    const ap = document.createElement("button");
+    ap.type = "button"; ap.className = "btn primary"; ap.textContent = "Approve changes";
+    ap.addEventListener("click", () => {
+      if (confirm(`Approve the changes to "${p.title}"? This clears the request.`)) pendingAction(p.id, "approve");
+    });
+    const re = document.createElement("button");
+    re.type = "button"; re.className = "btn ghost"; re.textContent = "Request another round";
+    re.addEventListener("click", () => pendingAction(p.id, "reopen"));
+    actions.appendChild(ap); actions.appendChild(re);
+  }
+  if (badge && IS_ADMIN) {
+    badge.classList.add("clickable");
+    badge.title = "Clear request";
+    badge.addEventListener("click", async () => {
+      if (!confirm(`Clear the change request for "${p.title}"?`)) return;
+      await fetch("api/pending", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ policy: p.id }) });
+      await loadPendingChanges();
     });
   }
-  return el;
 }
 
 // ---- Version history modal -----------------------------------------------
@@ -475,15 +509,23 @@ function openHistory(p) {
 let POLICIES = [];
 let SEARCH = "";
 let CHIP = null; // { type: "owner"|"approver", value }
-let PENDING = new Set(); // policy ids with an open change request
+let PENDING = new Map(); // policy id -> "change_pending" | "pending_review"
 let IS_ADMIN = false;
 
 async function loadPendingChanges() {
   try {
     const d = await (await fetch("api/pending", { cache: "no-store" })).json();
-    PENDING = new Set((d.pending || []).map(x => x.policy));
-  } catch { PENDING = new Set(); }
+    PENDING = new Map((d.pending || []).map(x => [x.policy, x.status || "change_pending"]));
+  } catch { PENDING = new Map(); }
   render();
+}
+
+async function pendingAction(policy, action) {
+  await fetch("api/pending", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ policy, action }),
+  });
+  await loadPendingChanges();
 }
 
 function render() {
