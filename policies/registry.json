@@ -430,6 +430,21 @@
             {
               "label": "Policy",
               "language": "English",
+              "source": "human-rights-policy__Policy__Version_2.docx",
+              "board_approval": false
+            }
+          ]
+        },
+        {
+          "version": "Version 2.1",
+          "date": "2026-06",
+          "approval_date": "18-06-2026",
+          "notes": "p.5 Modern Slavery Policy: 'Australia and UK' → 'Only UK and AUS' (issue #7)",
+          "requested_by": "Jeppe Andersen",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
               "source": "human-rights-policy__Policy.docx",
               "board_approval": false
             }
