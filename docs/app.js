@@ -555,12 +555,17 @@ let SEARCH = "";
 let CHIP = null; // { type: "owner"|"approver", value }
 let PENDING = new Map(); // policy id -> "change_pending" | "pending_review"
 let IS_ADMIN = false;
+let STATUS_FILTER = null; // null = all; else "change_pending" | "pending_review" | "approved"
+
+// A policy with no open change request is "approved" (up to date).
+function policyStatus(p) { return PENDING.get(p.id) || "approved"; }
 
 async function loadPendingChanges() {
   try {
     const d = await (await fetch("api/pending", { cache: "no-store" })).json();
     PENDING = new Map((d.pending || []).map(x => [x.policy, x.status || "change_pending"]));
   } catch { PENDING = new Map(); }
+  renderStatusFilter();
   render();
 }
 
@@ -577,6 +582,7 @@ function render() {
   const f = SEARCH.trim().toLowerCase();
   let shown = POLICIES.filter(p => {
     if (CHIP && (p[CHIP.type] || "") !== CHIP.value) return false;
+    if (STATUS_FILTER && policyStatus(p) !== STATUS_FILTER) return false;
     if (!f) return true;
     return p.title.toLowerCase().includes(f) || (p.owner || "").toLowerCase().includes(f) ||
       (p.approver || "").toLowerCase().includes(f) || (p.language || "").toLowerCase().includes(f) ||
@@ -604,6 +610,29 @@ function render() {
   document.getElementById("empty").hidden = shown.length > 0;
   document.getElementById("count").textContent =
     `${shown.length} of ${POLICIES.length} policies`;
+}
+
+function renderStatusFilter() {
+  const el = document.getElementById("statusfilter");
+  if (!el) return;
+  const defs = [
+    ["change_pending", "Change pending"],
+    ["pending_review", "Pending for review"],
+    ["approved", "Up to date"],
+  ];
+  const count = (s) => POLICIES.filter(p => policyStatus(p) === s).length;
+  const isActive = (val) => val === "__all" ? STATUS_FILTER === null : STATUS_FILTER === val;
+  const btn = (val, label, n) =>
+    `<button type="button" class="sfilter sf-${esc(val)}${isActive(val) ? " active" : ""}" data-val="${esc(val)}">${esc(label)} <span class="sf-count">${n}</span></button>`;
+  el.innerHTML =
+    '<span class="chips-label">Status</span>' +
+    btn("__all", "All", POLICIES.length) +
+    defs.map(([v, l]) => btn(v, l, count(v))).join("");
+  el.querySelectorAll(".sfilter").forEach(b => b.addEventListener("click", () => {
+    const v = b.dataset.val;
+    STATUS_FILTER = (v === "__all" || STATUS_FILTER === v) ? null : v;
+    renderStatusFilter(); render();
+  }));
 }
 
 function renderChips() {
@@ -785,6 +814,7 @@ async function init() {
     document.getElementById("meta").textContent =
       `${POLICIES.length} policies · Last update: ${data.updated || ""}`;
     renderChips();
+    renderStatusFilter();
     render();
     document.getElementById("search").addEventListener("input", e => { SEARCH = e.target.value; render(); });
     const connectBtn = document.getElementById("connectBtn");

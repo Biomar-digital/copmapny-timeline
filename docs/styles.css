@@ -133,6 +133,27 @@ main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 60px; }
 .chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
 .chip.clear { color: var(--ocean); border-style: dashed; }
 
+/* Status filter row (above the list) */
+.statusfilter { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: -4px 0 18px; }
+.sfilter {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--line); background: #fff; color: var(--navy); border-radius: 20px;
+  padding: 5px 11px 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+}
+.sfilter::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.sfilter.sf-change_pending::before { background: #f5c518; }
+.sfilter.sf-pending_review::before { background: var(--navy); }
+.sfilter.sf-approved::before { background: #2e9e6b; }
+.sfilter.sf-__all::before { display: none; }
+.sfilter:hover { background: var(--bg); border-color: var(--sky); }
+.sfilter.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+.sfilter.active::before { box-shadow: 0 0 0 2px rgba(255,255,255,.55); }
+.sf-count {
+  font-size: 11px; font-weight: 700; background: var(--bg); color: #6b87a4;
+  border-radius: 10px; padding: 1px 7px; min-width: 16px; text-align: center;
+}
+.sfilter.active .sf-count { background: rgba(255,255,255,.22); color: #fff; }
+
 .list { display: grid; grid-template-columns: 1fr; gap: 14px; }
 .family-head {
   margin: 10px 2px 0; padding-bottom: 6px; border-bottom: 2px solid var(--sky);
