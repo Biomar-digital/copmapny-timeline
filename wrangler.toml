@@ -10,6 +10,12 @@ directory = "./docs"
 binding = "ASSETS"
 run_worker_first = true
 
+# Cron sweep: emails requesters when a change they asked for is marked
+# pending_review in policies/pending.json. Runs from Cloudflare so the send
+# originates from an egress already authorised in Brevo (CI runner IPs are not).
+[triggers]
+crons = ["*/2 * * * *"]
+
 # Accounts + sessions + notification events (two-role auth, signup/approval).
 [[d1_databases]]
 binding = "DB"

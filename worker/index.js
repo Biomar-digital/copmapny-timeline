@@ -710,4 +710,35 @@ export default {
     }
     return serveAsset(request, env);
   },
+
+  // Cron sweep: when the AI ships a requested change it sets that entry to
+  // pending_review in policies/pending.json. Email is sent from here (Cloudflare)
+  // rather than from CI because Cloudflare's egress is already authorised in
+  // Brevo, whereas CI runners use rotating IPs. Each notified entry is flagged so
+  // the mail goes out exactly once.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(notifyReadyForReview(env));
+  },
 };
+
+async function notifyReadyForReview(env) {
+  if (missingEnv(env).length) return;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { list, sha } = await ghGetList(env, PENDING_FILE).catch(() => ({ list: [], sha: null }));
+    const pending = list.filter(it => it && it.status === "pending_review" && !it.notified && it.email);
+    if (!pending.length) return;
+    let sentAny = false;
+    for (const it of pending) {
+      const r = await sendEmail(env, `[BioMar Policy Library] Ready for your review — ${it.title || it.policy}`,
+        emailHtml("Your change is ready for review",
+          `The change you requested on "${it.title || it.policy}" has been made and is ready for your review. Check the document and either approve it or request another round.`,
+          [["Document", escapeHtml(it.title || it.policy)]]), it.email).catch(() => ({ ok: false }));
+      if (r && r.ok) { it.notified = true; sentAny = true; }
+    }
+    if (!sentAny) return;                       // sending failed; retry next cron tick
+    const w = await ghPutList(env, PENDING_FILE, list, sha, "Mark review notifications sent");
+    if (w.ok) { await recordEvent(env, "review_notified", `Notified ${pending.length} requester(s)`, "", "cron"); return; }
+    if (w.status === 409 || w.status === 422) continue;   // someone else wrote; re-read and retry
+    return;
+  }
+}
