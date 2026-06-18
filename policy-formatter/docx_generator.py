@@ -8,15 +8,19 @@ It will not be pixel-identical to the PDF (Word lays out columns and fonts
 differently), but it is a faithful, editable copy of the same content.
 """
 from io import BytesIO
+import os
+import tempfile
 
 from docx import Document
-from docx.shared import Pt, RGBColor, Emu
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Pt, RGBColor, Emu, Mm, Cm
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.section import WD_SECTION
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
 import model as M
+import brand as B
 
 NAVY = RGBColor(0x1C, 0x40, 0x76)
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
@@ -25,6 +29,7 @@ FONT = "Avenir Next LT Pro"          # Word substitutes if the licensed font is 
 FOOTER = ("BioMar Group A/S · Kalkværksvej 16, 15. · 8000 Aarhus C · "
           "Denmark · Tel +45 86 20 49 70 · www.biomar.com")
 EMU_PER_PT = 12700
+PAGE_W_PT, PAGE_H_PT = 595.276, 841.890   # A4, matching the PDF
 
 
 def _set_cell_bg(cell, hex_color):
@@ -150,15 +155,72 @@ def _render_into_cell(cell, blk, size, first):
             _run(p, blk.text, bold=blk.bold, size=size - 1)
 
 
-def _title_page(doc, policy):
-    for _ in range(3):
-        doc.add_paragraph()
-    p = doc.add_paragraph()
-    _run(p, policy.title, bold=True, size=30)
-    if policy.cover_year and policy.year:
-        p2 = doc.add_paragraph()
-        _run(p2, str(policy.year), bold=True, size=20, color=GREY)
-    doc.add_page_break()
+def _zero_margins(section):
+    section.page_width = Mm(210); section.page_height = Mm(297)
+    for a in ("top_margin", "bottom_margin", "left_margin", "right_margin",
+              "header_distance", "footer_distance"):
+        setattr(section, a, Pt(0))
+
+
+def _normal_margins(section):
+    section.page_width = Mm(210); section.page_height = Mm(297)
+    section.top_margin = Pt(B.MARGIN_TOP - 60)
+    section.bottom_margin = Pt(B.MARGIN_BOTTOM)
+    section.left_margin = Pt(B.MARGIN_L)
+    section.right_margin = Pt(B.MARGIN_R)
+    section.header_distance = Pt(18)
+    section.footer_distance = Pt(20)
+
+
+def _cover_image_page(doc, pdf_path):
+    """Embed page 1 of the rendered PDF as a full-bleed cover image (identical
+    branding: background, logo, light-blue title, year, address)."""
+    try:
+        import fitz
+        d = fitz.open(pdf_path)
+        pix = d[0].get_pixmap(dpi=200)
+        tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+        pix.save(tmp.name)
+        d.close()
+    except Exception:
+        return False
+    sec = doc.sections[0]
+    _zero_margins(sec)
+    p = doc.paragraphs[0] if doc.paragraphs else doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(0); p.paragraph_format.space_after = Pt(0)
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.add_run().add_picture(tmp.name, width=Mm(210))
+    try:
+        os.unlink(tmp.name)
+    except OSError:
+        pass
+    return True
+
+
+def _content_furniture(section, policy):
+    """Running header with the BioMar logo (top-right) + title, and a footer with
+    a thin rule above the company address — mirroring the PDF page furniture."""
+    section.header.is_linked_to_previous = False
+    section.footer.is_linked_to_previous = False
+    h = section.header.paragraphs[0]
+    h.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    _run(h, "BioMar Group", bold=True, size=8, color=NAVY)
+    h.add_run().add_break()
+    _run(h, policy.title, size=8, color=NAVY)
+    # logo, floated to the right of the header
+    if os.path.exists(B.LOGO):
+        tabs = h.paragraph_format.tab_stops
+        tabs.add_tab_stop(Pt(PAGE_W_PT - B.MARGIN_L - B.MARGIN_R - 34), WD_TAB_ALIGNMENT.RIGHT)
+        hr = h.add_run(); hr.add_tab()
+        hr.add_picture(B.LOGO, height=Cm(1.25))
+    f = section.footer.paragraphs[0]
+    f.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    pPr = f._p.get_or_add_pPr()
+    pbdr = OxmlElement("w:pBdr"); top = OxmlElement("w:top")
+    top.set(qn("w:val"), "single"); top.set(qn("w:sz"), "4")
+    top.set(qn("w:space"), "6"); top.set(qn("w:color"), "C3E4EF")
+    pbdr.append(top); pPr.append(pbdr)
+    _run(f, FOOTER, size=7.5, color=GREY)
 
 
 def _version_card(doc, policy):
@@ -194,7 +256,7 @@ def _version_card(doc, policy):
     _run(rp, policy.approver or "Executive Committee", size=9)
 
 
-def build_docx(policy, out_path):
+def build_docx(policy, out_path, pdf_path=None):
     doc = Document()
     # Base style
     normal = doc.styles["Normal"]
@@ -202,16 +264,23 @@ def build_docx(policy, out_path):
     normal.font.size = Pt(policy.body_size or 11)
     normal.font.color.rgb = NAVY
 
-    section = doc.sections[0]
-    # Running header: group + title (small navy)
-    h = section.header.paragraphs[0]
-    _run(h, f"BioMar Group   ·   {policy.title}", size=8, color=GREY)
-    # Footer: address line
-    f = section.footer.paragraphs[0]
-    f.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    _run(f, FOOTER, size=7.5, color=GREY)
+    # Cover: page 1 of the PDF as a full-bleed image when available, else a
+    # styled text title page as a fallback.
+    have_cover = bool(pdf_path) and _cover_image_page(doc, pdf_path)
+    if not have_cover:
+        _normal_margins(doc.sections[0])
+        for _ in range(3):
+            doc.add_paragraph()
+        _run(doc.add_paragraph(), policy.title, bold=True, size=30)
+        if policy.cover_year and policy.year:
+            _run(doc.add_paragraph(), str(policy.year), bold=True, size=20, color=GREY)
 
-    _title_page(doc, policy)
+    # New section for the body, with the running header/footer furniture.
+    doc.add_section(WD_SECTION.NEW_PAGE)
+    body_sec = doc.sections[-1]
+    _normal_margins(body_sec)
+    _content_furniture(body_sec, policy)
+
     if policy.lead_title:
         _heading(doc, policy.title, 1)
     _render_blocks(doc, policy.blocks, size=policy.body_size or 11)

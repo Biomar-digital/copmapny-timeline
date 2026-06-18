@@ -77,7 +77,7 @@ def main(argv=None):
 
     if args.docx_out:
         from docx_generator import build_docx
-        build_docx(policy, args.docx_out)
+        build_docx(policy, args.docx_out, pdf_path=out)
         print(f"  ↳ word: {args.docx_out}")
 
     using_avenir = B.register_fonts()
