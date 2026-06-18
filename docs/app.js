@@ -575,7 +575,8 @@ function showEdition(p, idx) {
 
 let POLICIES = [];
 let SEARCH = "";
-let CHIP = null; // { type: "owner"|"approver", value }
+let OWNER_FILTER = "";    // "" = all
+let APPROVER_FILTER = ""; // "" = all
 let PENDING = new Map(); // policy id -> "change_pending" | "pending_review"
 let IS_ADMIN = false;
 let STATUS_FILTER = null; // null = all; else "change_pending" | "pending_review" | "approved"
@@ -672,7 +673,8 @@ function render() {
   const list = document.getElementById("list");
   const f = SEARCH.trim().toLowerCase();
   let shown = POLICIES.filter(p => {
-    if (CHIP && (p[CHIP.type] || "") !== CHIP.value) return false;
+    if (OWNER_FILTER && (p.owner || "") !== OWNER_FILTER) return false;
+    if (APPROVER_FILTER && (p.approver || "") !== APPROVER_FILTER) return false;
     if (STATUS_FILTER && policyStatus(p) !== STATUS_FILTER) return false;
     if (!f) return true;
     return p.title.toLowerCase().includes(f) || (p.owner || "").toLowerCase().includes(f) ||
@@ -729,20 +731,19 @@ function renderStatusFilter() {
 function renderChips() {
   const el = document.getElementById("chips");
   const uniq = (k) => [...new Set(POLICIES.map(p => p[k]).filter(Boolean))].sort();
-  const chip = (type, val) =>
-    `<button type="button" class="chip${CHIP && CHIP.type === type && CHIP.value === val ? " active" : ""}" data-type="${esc(type)}" data-val="${esc(val)}">${esc(val)}</button>`;
-  const owners = uniq("owner"), approvers = uniq("approver");
+  const opts = (vals, sel) => `<option value="">All</option>` +
+    vals.map(v => `<option value="${esc(v)}"${v === sel ? " selected" : ""}>${esc(v)}</option>`).join("");
+  const active = OWNER_FILTER || APPROVER_FILTER;
   el.innerHTML =
-    '<span class="chips-label">Owner</span>' + owners.map(o => chip("owner", o)).join("") +
-    '<span class="chips-sep"></span><span class="chips-label">Approver</span>' + approvers.map(a => chip("approver", a)).join("") +
-    (CHIP ? '<button type="button" class="chip clear" data-type="" data-val="">Clear ✕</button>' : "");
-  el.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
-    const t = b.dataset.type, v = b.dataset.val;
-    if (!t) CHIP = null;
-    else if (CHIP && CHIP.type === t && CHIP.value === v) CHIP = null;
-    else CHIP = { type: t, value: v };
-    renderChips(); render();
-  }));
+    `<label class="fdrop"><span class="fdrop-label">Owner</span>
+       <select id="ownerSel" class="fselect">${opts(uniq("owner"), OWNER_FILTER)}</select></label>
+     <label class="fdrop"><span class="fdrop-label">Approver</span>
+       <select id="approverSel" class="fselect">${opts(uniq("approver"), APPROVER_FILTER)}</select></label>` +
+    (active ? `<button type="button" id="filterClear" class="chip clear">Clear ✕</button>` : "");
+  el.querySelector("#ownerSel").addEventListener("change", e => { OWNER_FILTER = e.target.value; renderChips(); render(); });
+  el.querySelector("#approverSel").addEventListener("change", e => { APPROVER_FILTER = e.target.value; renderChips(); render(); });
+  const clr = el.querySelector("#filterClear");
+  if (clr) clr.addEventListener("click", () => { OWNER_FILTER = ""; APPROVER_FILTER = ""; renderChips(); render(); });
 }
 
 // ---- account + admin (bell / approvals) ----
