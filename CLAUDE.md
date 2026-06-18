@@ -44,9 +44,15 @@
   every edition with its `version`, `notes` (summary of what changed) and
   `requested_by` (who asked for it).
 - **Mint a new version at approval, not on apply.** While a change is in
-  `pending_review` the current edition's `version` stays as-is. When you approve,
-  append a NEW edition: bump the **decimal** (Version 2 → 2.1; reserve integer
-  bumps for major changes / board re-approval), set `date`, leave `approval_date`
-  until signed, and fill `notes` (the change summary) + `requested_by`. Keep the
-  prior edition and its PDF — `publish.py` renders a new PDF per edition, so the
-  old one is preserved automatically. Then re-run `publish.py` and commit.
+  `pending_review` the current edition's `version` stays as-is. On approval, run:
+  `python policy-formatter/tools/mint_version.py <policy_id> --summary "..."
+  --requested-by "Name" --prev-source-ref <commit-before-the-change>~1`.
+  It bumps the **decimal** (Version 2 → 2.1; reserve integer bumps for major
+  changes / board re-approval), appends a new edition (today's date + approval
+  date + `notes` summary + `requested_by`), and **freezes the previous edition**
+  by repointing it at a versioned copy of its pre-change source recovered from
+  git (`--prev-source-ref`), so the old version keeps rendering the old content.
+  `publish.py` renders a new PDF/Word per edition, so both coexist in the version
+  story. Always pass `--prev-source-ref` (or apply edits to a source copy) — if
+  the live source was overwritten in place, the previous version cannot be frozen
+  from the working tree. Use `--dry-run` first to preview.
