@@ -50,15 +50,17 @@ jobs:
                   headers={"api-key": KEY, "Content-Type": "application/json", "Accept": "application/json"})
               try:
                   r = urllib.request.urlopen(req, timeout=30); print("sent to", to, "->", r.status)
+                  return True
               except urllib.error.HTTPError as e:
                   print("ERROR sending to", to, e.code, e.read().decode()[:300])
+                  return False
 
           changed = False
           for it in data:
               if it.get("status") == "pending_review" and not it.get("notified") and it.get("email"):
-                  send(it["email"], it.get("title") or it.get("policy"))
-                  it["notified"] = True
-                  changed = True
+                  if send(it["email"], it.get("title") or it.get("policy")):
+                      it["notified"] = True
+                      changed = True
           if changed:
               json.dump(data, open(path, "w"), indent=2); open(path, "a").write("\n")
               print("marked notified entries")
