@@ -56,6 +56,7 @@ def main(argv=None):
     ap.add_argument("policy_id")
     ap.add_argument("--summary", required=True, help="Short changelog for the new version")
     ap.add_argument("--requested-by", dest="requested_by", required=True, help="Who requested the change")
+    ap.add_argument("--approved-by", dest="approved_by", default="", help="Who approved the change")
     ap.add_argument("--version", help="Explicit new version label (default: decimal bump)")
     ap.add_argument("--approval-date", dest="approval_date",
                     default=datetime.date.today().strftime("%d-%m-%Y"))
@@ -114,6 +115,7 @@ def main(argv=None):
         "approval_date": args.approval_date,
         "notes": args.summary,
         "requested_by": args.requested_by,
+        "approved_by": args.approved_by or args.requested_by,
         "documents": [dict(d) for d in docs],
     }
     eds.append(new_ed)

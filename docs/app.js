@@ -195,52 +195,48 @@ function fmtTime(iso) {
     { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-function editionRow(p, ed, isLatest) {
-  const appr = ed.approval_date
-    ? `<span><b>Approved:</b> ${esc(ed.approval_date)}</span>` : "";
-  const gen = ed.generated_at
-    ? `<span><b>Generated:</b> ${esc(ed.generated_at)}</span>` : "";
-  const notes = ed.notes
-    ? `<p class="vh-notes">${esc(ed.notes)}</p>` : "";
-  const reqBy = ed.requested_by
-    ? `<p class="vh-reqby"><b>Requested by:</b> ${esc(ed.requested_by)}</p>` : "";
+function metaItem(k, v) {
+  return v ? `<div class="vh-mitem"><span class="vh-mk">${esc(k)}</span><span class="vh-mv">${v}</span></div>` : "";
+}
+
+function editionPanel(p, ed, isLatest) {
+  const docsHtml = (ed.documents || []).map(doc => `
+    <div class="vh-doc">
+      <span class="vh-doclabel">${esc(doc.label)}</span>
+      ${doc.files.approval ? `<a class="vh-dl" href="${esc(doc.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">Signed PDF ↗</a>` : ""}
+      <a class="vh-dl" href="${esc(doc.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">${doc.files.approval ? "Unsigned PDF" : "PDF"} ↗</a>
+      ${doc.files.word ? `<a class="vh-dl word" href="${esc(doc.files.word)}" download title="Editable Word (.docx) copy">Word ↓</a>` : ""}
+      <a class="vh-dl" href="${esc(annHref(p, ed, doc.files.non_approval))}" title="See the comments &amp; highlights captured on this version">Highlights ↗</a>
+    </div>`).join("");
   return `
-    <li class="vh-item${isLatest ? " current" : ""}">
-      <div class="vh-head">
-        <span class="vh-version">${esc(ed.version || "Version 1")}</span>
-        <span class="tag">${prettyDate(ed.date)}</span>
-        ${isLatest ? '<span class="vh-current">Current</span>' : ""}
-      </div>
-      <div class="vh-meta">${appr}${gen}</div>
-      ${notes}
-      ${reqBy}
-      <div class="vh-docs">
-        ${(ed.documents || []).map(doc => `
-          <div class="vh-doc">
-            <span class="vh-doclabel">${esc(doc.label)}</span>
-            ${doc.files.approval ? `
-              <a href="${esc(doc.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">Signed ↗</a>` : ""}
-            <a href="${esc(doc.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">${doc.files.approval ? "Unsigned" : "PDF"} ↗</a>
-            ${doc.files.word ? `<a href="${esc(doc.files.word)}" download title="Editable Word (.docx) copy">Word ↓</a>` : ""}
-            <a href="${esc(annHref(p, ed, doc.files.non_approval))}" title="See the comments &amp; highlights captured on this version">Highlights ↗</a>
-          </div>`).join("")}
-      </div>
-      <div class="vh-sign" data-key="${esc(edKey(ed))}">
-        <div class="vh-siglist"></div>
-        <button type="button" class="btn vh-signbtn">🖋 Sign this version</button>
-      </div>
-      <div class="vh-comments" data-key="${esc(edKey(ed))}">
-        <div class="vh-clabel">Comments</div>
-        <div class="vh-clist"><p class="vh-cempty">Loading…</p></div>
-        <div class="vh-cform">
-          <textarea class="vh-ctext" rows="2" placeholder="Add a comment for the team / AI…"></textarea>
-          <div class="vh-crow">
-            <button type="button" class="btn vh-cadd">Add comment</button>
-            <span class="vh-cstatus"></span>
-          </div>
+    <div class="vh-ed-head">
+      <span class="vh-version">${esc(ed.version || "Version 1")}</span>
+      ${isLatest ? '<span class="vh-current">Current</span>' : '<span class="vh-archived">Archived</span>'}
+    </div>
+    <div class="vh-meta-grid">
+      ${metaItem("Published", prettyDate(ed.date))}
+      ${metaItem("Approved", ed.approval_date ? esc(ed.approval_date) : "")}
+      ${metaItem("Requested by", ed.requested_by ? esc(ed.requested_by) : "")}
+      ${metaItem("Approved by", ed.approved_by ? esc(ed.approved_by) : "")}
+    </div>
+    ${ed.notes ? `<div class="vh-changelog"><span class="vh-cl-label">What changed in this version</span><p>${esc(ed.notes)}</p></div>` : ""}
+    <div class="vh-docs-wrap"><div class="vh-sec-label">Documents</div><div class="vh-docs">${docsHtml}</div></div>
+    <div class="vh-sign" data-key="${esc(edKey(ed))}">
+      <div class="vh-sec-label">Signatures on this version</div>
+      <div class="vh-siglist"></div>
+      <button type="button" class="btn vh-signbtn">🖋 Sign this version</button>
+    </div>
+    <div class="vh-comments" data-key="${esc(edKey(ed))}">
+      <div class="vh-sec-label">Comments on this version</div>
+      <div class="vh-clist"><p class="vh-cempty">Loading…</p></div>
+      <div class="vh-cform">
+        <textarea class="vh-ctext" rows="2" placeholder="Add a comment for the team / AI…"></textarea>
+        <div class="vh-crow">
+          <button type="button" class="btn vh-cadd">Add comment</button>
+          <span class="vh-cstatus"></span>
         </div>
       </div>
-    </li>`;
+    </div>`;
 }
 
 // ---- comments API ----
@@ -549,11 +545,28 @@ function openHistory(p) {
   const last = p.editions.length - 1;
   dlg.querySelector(".vh-title").textContent = `${p.title} — version history`;
   dlg.querySelector(".vh-sub").textContent =
-    `${p.editions.length} edition${p.editions.length !== 1 ? "s" : ""} · Owner: ${p.owner || "—"}`;
-  dlg.querySelector(".vh-list").innerHTML =
-    p.editions.map((ed, i) => editionRow(p, ed, i === last)).reverse().join("");
+    `${p.editions.length} version${p.editions.length !== 1 ? "s" : ""} · Owner: ${p.owner || "—"} · Approver: ${p.approver || "—"}`;
+  // One tab per version, newest first.
+  const tabs = dlg.querySelector(".vh-tabs");
+  tabs.innerHTML = p.editions.map((ed, i) => i).reverse().map(i => {
+    const ed = p.editions[i];
+    return `<button type="button" class="vh-tab" data-i="${i}">
+      <span class="vh-tab-v">${esc(ed.version || "Version 1")}</span>
+      <span class="vh-tab-d">${esc(prettyDate(ed.date))}${i === last ? " · current" : ""}</span>
+    </button>`;
+  }).join("");
+  tabs.querySelectorAll(".vh-tab").forEach(b =>
+    b.addEventListener("click", () => showEdition(p, +b.dataset.i)));
+  showEdition(p, last);
   if (typeof dlg.showModal === "function") dlg.showModal();
   else dlg.setAttribute("open", "");
+}
+
+function showEdition(p, idx) {
+  const dlg = document.getElementById("history");
+  dlg.querySelectorAll(".vh-tab").forEach(b => b.classList.toggle("active", +b.dataset.i === idx));
+  const ed = p.editions[idx];
+  dlg.querySelector(".vh-panel").innerHTML = editionPanel(p, ed, idx === p.editions.length - 1);
   wireComments(p.id);
   loadComments(p.id);
   wireSign(p);

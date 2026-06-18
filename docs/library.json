@@ -1,6 +1,6 @@
 {
   "brand": "BioMar Group",
-  "updated": "2026-06-18 08:22:26 UTC",
+  "updated": "2026-06-18 08:27:02 UTC",
   "policies": [
     {
       "id": "diversity-policy",
@@ -16,7 +16,8 @@
           "approval_date": "",
           "notes": "Initial publication.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -45,7 +46,8 @@
           "approval_date": "19-05-2026",
           "notes": "Initial publication.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -74,7 +76,8 @@
           "approval_date": "13-05-2026",
           "notes": "Initial publication.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -103,7 +106,8 @@
           "approval_date": "20-01-2026",
           "notes": "Initial publication.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -122,7 +126,8 @@
           "approval_date": "20-01-2026",
           "notes": "Board-approved edition (imported from official PDF).",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -151,7 +156,8 @@
           "approval_date": "",
           "notes": "Initial publication.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -180,7 +186,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -208,7 +215,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -236,7 +244,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -264,7 +273,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -292,7 +302,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -320,7 +331,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -348,7 +360,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -376,7 +389,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -404,7 +418,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -432,7 +447,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -460,7 +476,8 @@
           "approval_date": "28-04-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -488,7 +505,8 @@
           "approval_date": "08-05-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -516,7 +534,8 @@
           "approval_date": "03-03-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "English",
@@ -544,7 +563,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -562,7 +582,8 @@
           "approval_date": "18-06-2026",
           "notes": "p.5 Modern Slavery Policy: 'Australia and UK' → 'Only UK and AUS' (issue #7)",
           "requested_by": "Jeppe Andersen",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "Jeppe Andersen",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -590,7 +611,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -618,7 +640,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -646,7 +669,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -674,7 +698,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -702,7 +727,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -730,7 +756,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -758,7 +785,8 @@
           "approval_date": "20-01-2026",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -786,7 +814,8 @@
           "approval_date": "25-02-2022",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -814,7 +843,8 @@
           "approval_date": "",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -842,7 +872,8 @@
           "approval_date": "",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -870,7 +901,8 @@
           "approval_date": "",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -898,7 +930,8 @@
           "approval_date": "",
           "notes": "Imported from official PDF.",
           "requested_by": "",
-          "generated_at": "2026-06-18 08:22:26 UTC",
+          "approved_by": "",
+          "generated_at": "2026-06-18 08:27:02 UTC",
           "documents": [
             {
               "label": "Policy",

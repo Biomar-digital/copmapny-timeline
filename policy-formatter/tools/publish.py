@@ -159,6 +159,7 @@ def main():
                 "approval_date": ed.get("approval_date", ""),
                 "notes": ed.get("notes", ""),
                 "requested_by": ed.get("requested_by", ""),
+                "approved_by": ed.get("approved_by", ""),
                 "generated_at": today,
                 "documents": docs_out,
             })
