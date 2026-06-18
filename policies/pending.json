@@ -1,16 +1,5 @@
 [
   {
-    "id": "seed-hr-1",
-    "policy": "human-rights-policy",
-    "request_id": "a9cce091-b388-44ee-be5f-ad3930bf5845",
-    "title": "Change: human-rights-policy",
-    "status": "pending_review",
-    "created_at": 1781699169137,
-    "updated_at": 1781703422015,
-    "email": "jepan@biomar.com",
-    "author": "Jeppe Andersen"
-  },
-  {
     "id": "7bd31a2b-594c-4698-873e-dc8aa43adaab",
     "policy": "animal-welfare-policy",
     "request_id": "2401a197-f9b7-4fe3-be3a-56e27cdd4c64",
