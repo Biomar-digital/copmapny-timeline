@@ -16,8 +16,8 @@ from docx.shared import Pt, RGBColor, Emu, Mm, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.section import WD_SECTION
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
+from docx.oxml import OxmlElement, parse_xml
+from docx.oxml.ns import qn, nsdecls
 
 import model as M
 import brand as B
@@ -164,11 +164,13 @@ def _zero_margins(section):
 
 def _normal_margins(section):
     section.page_width = Mm(210); section.page_height = Mm(297)
-    section.top_margin = Pt(B.MARGIN_TOP - 60)
+    # Top margin clears the big page-anchored logo (bottom at ~147pt), so body
+    # text begins below it just like the PDF content pages.
+    section.top_margin = Pt(146)
     section.bottom_margin = Pt(B.MARGIN_BOTTOM)
     section.left_margin = Pt(B.MARGIN_L)
     section.right_margin = Pt(B.MARGIN_R)
-    section.header_distance = Pt(18)
+    section.header_distance = Pt(34)
     section.footer_distance = Pt(20)
 
 
@@ -197,22 +199,48 @@ def _cover_image_page(doc, pdf_path):
     return True
 
 
+def _float_image(run, image_path, x_pt, y_pt, w_pt, h_pt):
+    """Place an image as a page-anchored floating picture (top-left origin),
+    matching the PDF's absolute logo position."""
+    run.add_picture(image_path, width=Emu(_e(w_pt)), height=Emu(_e(h_pt)))
+    drawing = run._r.find(qn("w:drawing"))
+    inline = drawing.find(qn("wp:inline"))
+    extent = inline.find(qn("wp:extent"))
+    cx, cy = extent.get("cx"), extent.get("cy")
+    graphic = inline.find(qn("a:graphic"))
+    anchor = parse_xml(
+        f'<wp:anchor {nsdecls("wp", "a", "r", "pic")} behindDoc="0" distT="0" distB="0" '
+        f'distL="0" distR="0" simplePos="0" locked="0" layoutInCell="1" allowOverlap="1" '
+        f'relativeHeight="2"><wp:simplePos x="0" y="0"/>'
+        f'<wp:positionH relativeFrom="page"><wp:posOffset>{_e(x_pt)}</wp:posOffset></wp:positionH>'
+        f'<wp:positionV relativeFrom="page"><wp:posOffset>{_e(y_pt)}</wp:posOffset></wp:positionV>'
+        f'<wp:extent cx="{cx}" cy="{cy}"/><wp:wrapNone/>'
+        f'<wp:docPr id="201" name="BioMar logo"/></wp:anchor>')
+    anchor.append(graphic)
+    drawing.replace(inline, anchor)
+
+
+def _e(pt):
+    return int(round(pt * EMU_PER_PT))
+
+
 def _content_furniture(section, policy):
-    """Running header with the BioMar logo (top-right) + title, and a footer with
-    a thin rule above the company address — mirroring the PDF page furniture."""
+    """Running header (BioMar Group + title top-left, big logo top-right) and a
+    footer with a thin rule above the company address — matching the PDF exactly."""
     section.header.is_linked_to_previous = False
     section.footer.is_linked_to_previous = False
     h = section.header.paragraphs[0]
     h.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    _run(h, "BioMar Group", bold=True, size=8, color=NAVY)
+    h.paragraph_format.space_after = Pt(0)
+    _run(h, "BioMar Group", size=8, color=NAVY)
     h.add_run().add_break()
     _run(h, policy.title, size=8, color=NAVY)
-    # logo, floated to the right of the header
+    # Big logo, page-anchored top-right at the PDF's coordinates (136x130pt,
+    # 16.6pt from the right edge, 16.7pt from the top).
     if os.path.exists(B.LOGO):
-        tabs = h.paragraph_format.tab_stops
-        tabs.add_tab_stop(Pt(PAGE_W_PT - B.MARGIN_L - B.MARGIN_R - 34), WD_TAB_ALIGNMENT.RIGHT)
-        hr = h.add_run(); hr.add_tab()
-        hr.add_picture(B.LOGO, height=Cm(1.25))
+        _float_image(h.add_run(), B.LOGO,
+                     x_pt=PAGE_W_PT - B.LOGO_W - 16.6, y_pt=B.LOGO_TOP,
+                     w_pt=B.LOGO_W, h_pt=B.LOGO_H)
     f = section.footer.paragraphs[0]
     f.alignment = WD_ALIGN_PARAGRAPH.CENTER
     pPr = f._p.get_or_add_pPr()
@@ -220,7 +248,7 @@ def _content_furniture(section, policy):
     top.set(qn("w:val"), "single"); top.set(qn("w:sz"), "4")
     top.set(qn("w:space"), "6"); top.set(qn("w:color"), "C3E4EF")
     pbdr.append(top); pPr.append(pbdr)
-    _run(f, FOOTER, size=7.5, color=GREY)
+    _run(f, FOOTER, size=8, color=NAVY)
 
 
 def _version_card(doc, policy):
