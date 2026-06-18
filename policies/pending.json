@@ -40,6 +40,7 @@
     "author": "Jeppe Andersen",
     "email": "jepan@biomar.com",
     "created_at": 1781764452438,
-    "updated_at": 1781770800000
+    "updated_at": 1781770800000,
+    "notified": true
   }
 ]
