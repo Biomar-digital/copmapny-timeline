@@ -30,6 +30,13 @@ const PDF_LABELS = {
   },
 };
 
+function wordLink(doc) {
+  if (!doc.files || !doc.files.word) return "";
+  return `
+      <a class="btn word" href="${esc(doc.files.word)}" download title="Editable Word (.docx) copy — same content and branding as the PDF">
+        Word <span class="arrow">↓</span></a>`;
+}
+
 function docLinks(doc, multi) {
   const pfx = multi ? esc(doc.label) + " · " : "";
   if (doc.files.approval) {
@@ -37,11 +44,13 @@ function docLinks(doc, multi) {
       <a class="btn primary" href="${esc(doc.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">
         ${pfx}${PDF_LABELS.approval.label} <span class="arrow">↗</span></a>
       <a class="btn ghost" href="${esc(doc.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">
-        ${pfx}${PDF_LABELS.non_approval.label} <span class="arrow">↗</span></a>`;
+        ${pfx}${PDF_LABELS.non_approval.label} <span class="arrow">↗</span></a>
+      ${wordLink(doc)}`;
   }
   return `
       <a class="btn primary" href="${esc(doc.files.non_approval)}" target="_blank" rel="noopener">
-        ${multi ? esc(doc.label) : "Download PDF"} <span class="arrow">↗</span></a>`;
+        ${multi ? esc(doc.label) : "Download PDF"} <span class="arrow">↗</span></a>
+      ${wordLink(doc)}`;
 }
 
 function card(p) {
@@ -212,6 +221,7 @@ function editionRow(p, ed, isLatest) {
             ${doc.files.approval ? `
               <a href="${esc(doc.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">Signed ↗</a>` : ""}
             <a href="${esc(doc.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">${doc.files.approval ? "Unsigned" : "PDF"} ↗</a>
+            ${doc.files.word ? `<a href="${esc(doc.files.word)}" download title="Editable Word (.docx) copy">Word ↓</a>` : ""}
             <a href="${esc(annHref(p, ed, doc.files.non_approval))}" title="See the comments &amp; highlights captured on this version">Highlights ↗</a>
           </div>`).join("")}
       </div>

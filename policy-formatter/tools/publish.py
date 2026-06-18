@@ -37,10 +37,12 @@ def _slug(s):
     return re.sub(r"[^A-Za-z0-9]+", "_", s).strip("_")
 
 
-def _gen(source, title, year, date, name_base, tag, extra):
+def _gen(source, title, year, date, name_base, tag, extra, docx_out=None):
     out = os.path.join(FILES, f"{name_base}_{date}_{tag}.pdf")
     cmd = [sys.executable, os.path.join(PF, "format_policy.py"), source,
            "--title", title, "--year", year, "--date", date, "-o", out] + extra
+    if docx_out:
+        cmd += ["--docx", docx_out]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         raise RuntimeError(f"{title} [{tag}]: {r.stderr[-400:]}")
@@ -139,7 +141,11 @@ def main():
                 # the back card so the two are distinguishable; standalone
                 # documents keep it.
                 unsigned_extra = ["--no-signatures"] + (["--has-signed"] if doc.get("board_approval") else [])
-                files = {"non_approval": _gen(src, cover_title, year, date, name_base, "non-approval", meta_args + unsigned_extra)}
+                # Editable Word copy generated alongside the unsigned PDF.
+                word_abs = os.path.join(FILES, f"{name_base}_{date}.docx")
+                files = {"non_approval": _gen(src, cover_title, year, date, name_base, "non-approval",
+                                              meta_args + unsigned_extra, docx_out=word_abs)}
+                files["word"] = os.path.relpath(word_abs, os.path.join(REPO, "docs"))
                 if doc.get("board_approval"):
                     files["approval"] = _gen(src, cover_title, year, date, name_base, "approval", meta_args)
                 docs_out.append({

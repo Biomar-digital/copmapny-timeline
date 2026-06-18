@@ -47,6 +47,8 @@ def main(argv=None):
     ap.add_argument("--has-signed", dest="has_signed", action="store_true",
                     help="This unsigned render has a signed sibling, so omit the back card")
     ap.add_argument("--date", help="Date tag in the file name (default: current YYYY-MM)")
+    ap.add_argument("--docx", dest="docx_out",
+                    help="Also write an editable BioMar-branded Word copy to this path")
     args = ap.parse_args(argv)
 
     if not os.path.exists(args.input):
@@ -72,6 +74,11 @@ def main(argv=None):
         out = os.path.join(os.path.dirname(args.input) or ".",
                            f"{slug}_{date}_{tag}.pdf")
     build_pdf(policy, out)
+
+    if args.docx_out:
+        from docx_generator import build_docx
+        build_docx(policy, args.docx_out)
+        print(f"  ↳ word: {args.docx_out}")
 
     using_avenir = B.register_fonts()
     print(f"✓ {out}")

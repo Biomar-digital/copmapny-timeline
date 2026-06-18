@@ -223,6 +223,8 @@ main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 60px; }
 .btn.primary:hover { background: #163461; }
 .btn.ghost { background: #fff; color: var(--navy); }
 .btn.ghost:hover { background: var(--bg); }
+.btn.word { background: #fff; color: #2b579a; border-color: #2b579a; }
+.btn.word:hover { background: #eef3fb; }
 .btn .arrow { font-size: 12px; opacity: .8; }
 .btn.history {
   background: #fff; color: var(--ocean); border-color: var(--line);
