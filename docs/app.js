@@ -570,13 +570,81 @@ let STATUS_FILTER = null; // null = all; else "change_pending" | "pending_review
 // A policy with no open change request is "approved" (up to date).
 function policyStatus(p) { return PENDING.get(p.id) || "approved"; }
 
+let QUEUE = []; // admin-only: full pending entries (requester, title, status, dates)
+
 async function loadPendingChanges() {
   try {
     const d = await (await fetch("api/pending", { cache: "no-store" })).json();
     PENDING = new Map((d.pending || []).map(x => [x.policy, x.status || "change_pending"]));
-  } catch { PENDING = new Map(); }
+    QUEUE = d.queue || [];
+  } catch { PENDING = new Map(); QUEUE = []; }
   renderStatusFilter();
+  renderQueueButton();
   render();
+  if (document.getElementById("queue")?.open) renderQueue();
+}
+
+function renderQueueButton() {
+  const b = document.getElementById("queueBtn");
+  if (!b) return;
+  const open = QUEUE.filter(it => it.status && it.status !== "approved").length;
+  b.hidden = !(IS_ADMIN && open > 0);
+  const c = document.getElementById("queueCount");
+  if (c) c.textContent = open;
+}
+
+const QSTATUS = {
+  change_pending: { label: "Change pending", cls: "change" },
+  pending_review: { label: "Pending for review", cls: "review" },
+};
+
+function openQueue() {
+  renderQueue();
+  const dlg = document.getElementById("queue");
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+}
+
+function renderQueue() {
+  const wrap = document.getElementById("queueList");
+  const sub = document.getElementById("queueSub");
+  if (!wrap) return;
+  const order = { change_pending: 0, pending_review: 1 };
+  const items = QUEUE.filter(it => it.status && it.status !== "approved")
+    .slice().sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9) ||
+      (a.created_at || 0) - (b.created_at || 0));
+  sub.textContent = `${items.length} open request${items.length !== 1 ? "s" : ""}`;
+  if (!items.length) { wrap.innerHTML = `<p class="vh-cempty">Nothing pending review. 🎉</p>`; return; }
+  wrap.innerHTML = items.map((it, i) => {
+    const p = POLICIES.find(x => x.id === it.policy);
+    const s = QSTATUS[it.status] || { label: it.status, cls: "change" };
+    const when = it.created_at ? fmtTime(new Date(it.created_at).toISOString()) : "";
+    const who = esc(it.author || "—") + (it.email ? ` · ${esc(it.email)}` : "");
+    return `<div class="queue-item" data-i="${i}">
+      <div class="queue-main">
+        <div class="queue-top">
+          <span class="queue-policy">${esc(p ? p.title : it.policy)}</span>
+          <span class="pending-badge ${s.cls}">${esc(s.label)}</span>
+        </div>
+        <div class="queue-meta">Requested by ${who}${when ? " · " + esc(when) : ""}</div>
+      </div>
+      <div class="queue-actions">
+        <button type="button" class="btn ghost" data-act="edit" data-i="${i}">Open editor</button>
+        ${it.status === "change_pending"
+          ? `<button type="button" class="btn primary" data-act="review" data-i="${i}">Mark done → review</button>`
+          : `<button type="button" class="btn primary" data-act="approve" data-i="${i}">Approve</button>
+             <button type="button" class="btn ghost" data-act="reopen" data-i="${i}">Another round</button>`}
+      </div>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll("[data-act]").forEach(btn => btn.addEventListener("click", async () => {
+    const it = items[+btn.dataset.i];
+    const p = POLICIES.find(x => x.id === it.policy);
+    const act = btn.dataset.act;
+    if (act === "edit") { if (p) openEditChooser(p); return; }
+    if (act === "approve" && !confirm(`Approve the changes to "${p ? p.title : it.policy}"? This clears the request.`)) return;
+    btn.disabled = true;
+    await pendingAction(it.policy, act);   // reloads pending + re-renders the queue
+  }));
 }
 
 async function pendingAction(policy, action) {
@@ -835,6 +903,12 @@ async function init() {
         else connectDlg.setAttribute("open", "");
       });
     }
+    const queueBtn = document.getElementById("queueBtn");
+    if (queueBtn) queueBtn.addEventListener("click", openQueue);
+    const queueClose = document.getElementById("queueClose");
+    if (queueClose) queueClose.addEventListener("click", () => {
+      const d = document.getElementById("queue"); if (d.close) d.close(); else d.removeAttribute("open");
+    });
     document.getElementById("newReqBtn").addEventListener("click", () => openRequest("new"));
     document.getElementById("reqClose").addEventListener("click",
       () => { const d = document.getElementById("request"); if (d.close) d.close(); });

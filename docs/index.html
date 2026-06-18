@@ -32,6 +32,7 @@
     <div class="toolbar">
       <input id="search" type="search" placeholder="Search policies…" autocomplete="off" />
       <span class="count" id="count"></span>
+      <button type="button" id="queueBtn" class="btn reqbtn" hidden>Review queue <span class="qbadge" id="queueCount">0</span></button>
       <button type="button" id="newReqBtn" class="btn reqbtn">+ Request a new policy</button>
       <button type="button" id="connectBtn" class="btn connect" hidden>
         <span class="dot"></span> Connect an AI agent
@@ -48,6 +49,19 @@
     <span>BioMar Group A/S · Kalkværksvej 16, 15. · 8000 Aarhus C · Denmark · www.biomar.com</span>
     <span class="hint" id="adminHint" hidden>Create &amp; edit policies by connecting Claude Code to this repository.</span>
   </footer>
+
+  <dialog id="queue" class="vh-dialog">
+    <div class="vh-box">
+      <header class="vh-bar">
+        <div>
+          <h2 class="vh-title">Review queue</h2>
+          <p class="vh-sub" id="queueSub"></p>
+        </div>
+        <button type="button" value="close" class="vh-close" id="queueClose" aria-label="Close">×</button>
+      </header>
+      <div id="queueList" class="queue-list"></div>
+    </div>
+  </dialog>
 
   <dialog id="history" class="vh-dialog">
     <form method="dialog" class="vh-box">

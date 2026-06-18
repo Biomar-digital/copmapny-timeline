@@ -580,7 +580,12 @@ async function handlePending(request, env, user) {
       const st = it.status || "change_pending";
       if (!(it.policy in byp) || st === "change_pending") byp[it.policy] = st;
     }
-    return json({ pending: Object.entries(byp).map(([policy, status]) => ({ policy, status })) });
+    // Admins also get the full per-request list for the review queue (it carries
+    // requester name/email/title, which non-admins should not see).
+    const queue = user && user.role === "admin"
+      ? list.filter(it => it && it.policy && it.status !== "approved")
+      : undefined;
+    return json({ pending: Object.entries(byp).map(([policy, status]) => ({ policy, status })), queue });
   }
   // Status transitions, persisted to the repo so the AI and the dashboard share
   // one source of truth. 'review' (changes shipped) is admin-only.
