@@ -193,6 +193,8 @@ function editionRow(p, ed, isLatest) {
     ? `<span><b>Generated:</b> ${esc(ed.generated_at)}</span>` : "";
   const notes = ed.notes
     ? `<p class="vh-notes">${esc(ed.notes)}</p>` : "";
+  const reqBy = ed.requested_by
+    ? `<p class="vh-reqby"><b>Requested by:</b> ${esc(ed.requested_by)}</p>` : "";
   return `
     <li class="vh-item${isLatest ? " current" : ""}">
       <div class="vh-head">
@@ -202,6 +204,7 @@ function editionRow(p, ed, isLatest) {
       </div>
       <div class="vh-meta">${appr}${gen}</div>
       ${notes}
+      ${reqBy}
       <div class="vh-docs">
         ${(ed.documents || []).map(doc => `
           <div class="vh-doc">
@@ -209,6 +212,7 @@ function editionRow(p, ed, isLatest) {
             ${doc.files.approval ? `
               <a href="${esc(doc.files.approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.approval.tip)}">Signed ↗</a>` : ""}
             <a href="${esc(doc.files.non_approval)}" target="_blank" rel="noopener" title="${esc(PDF_LABELS.non_approval.tip)}">${doc.files.approval ? "Unsigned" : "PDF"} ↗</a>
+            <a href="${esc(annHref(p, ed, doc.files.non_approval))}" title="See the comments &amp; highlights captured on this version">Highlights ↗</a>
           </div>`).join("")}
       </div>
       <div class="vh-sign" data-key="${esc(edKey(ed))}">
