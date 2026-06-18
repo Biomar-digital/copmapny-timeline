@@ -23,7 +23,7 @@ jobs:
           ref: claude/confident-curie-gudwtz
       - name: Send "ready for review" emails (Brevo)
         env:
-          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY2 }}
         run: |
           python3 - <<'PY'
           import json, os, urllib.request, urllib.error
