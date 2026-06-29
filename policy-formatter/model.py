@@ -136,6 +136,20 @@ def _clean(text: str) -> str:
     return text.replace("\t", " ").replace("​", "").strip()
 
 
+def _cell_text(cell) -> str:
+    """Join a table cell's paragraphs, marking 'List Paragraph' items with a
+    leading bullet so the generator can render them as a bulleted list inside the
+    cell (the source keeps these as real list items; flattening loses them)."""
+    out = []
+    for p in cell.paragraphs:
+        t = _clean(p.text)
+        if not t:
+            continue
+        style = (p.style.name if p.style else "").lower()
+        out.append("• " + t if "list" in style else t)
+    return "\n".join(out)
+
+
 def _heading_like(text: str) -> bool:
     # A heading is short and does not end like a running sentence. Incoming
     # Word files are often mis-styled (whole paragraphs tagged Heading 1, or
@@ -196,7 +210,7 @@ def parse_docx(path: str, title: Optional[str] = None,
                 if any(cols):
                     blocks.append(Columns(cols=cols))
                 continue
-            rows = [[_clean(c.text) for c in row.cells] for row in item.rows]
+            rows = [[_cell_text(c) for c in row.cells] for row in item.rows]
             rows = [r for r in rows if any(r)]
             if rows:
                 blocks.append(TableBlock(rows=rows))

@@ -66,6 +66,9 @@ CELL_H = ParagraphStyle("CellH", parent=CELL, fontName=B.F_DEMI,
 CELL_SEC = ParagraphStyle("CellSec", parent=CELL, fontName=B.F_DEMI,
                           textColor=B.WHITE)                            # section band row
 CELL_C = ParagraphStyle("CellC", parent=CELL, alignment=TA_CENTER)     # short marks (√, —)
+CELL_BULLET = ParagraphStyle("CellBullet", parent=CELL, leftIndent=10,
+                             firstLineIndent=-8, spaceBefore=1.5)        # in-cell bullet
+CELL_GAP = ParagraphStyle("CellGap", parent=CELL, spaceBefore=3.5)      # paragraph gap in a cell
 
 
 _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
@@ -189,14 +192,40 @@ def _header_rows(rows, ncols, hdr):
              [Paragraph(escape(x), CELL_H) if x else "" for x in h1]], style)
 
 
+_REC = re.compile(r"(The [Cc]ommittee recommends)")
+def _bold_rec(markup):
+    """Render 'The Committee recommends' in Demi (bold) inside recommendation cells."""
+    return _REC.sub(rf'<font name="{B.F_DEMI}">\1</font>', markup)
+
+
+def _cell_flowables(c):
+    """A multi-paragraph cell: first line keeps its clause number, '• ' lines
+    become hanging bullets, other lines are spaced continuation paragraphs."""
+    out = []
+    for i, line in enumerate([ln.strip() for ln in c.split("\n") if ln.strip()]):
+        if line.startswith("• "):
+            out.append(Paragraph("•&nbsp;&nbsp;" + _bold_rec(_fmt(line[2:], number=False, widow=False)), CELL_BULLET))
+        else:
+            out.append(Paragraph(_bold_rec(_fmt(line, number=(i == 0), widow=False)),
+                                  CELL if i == 0 else CELL_GAP))
+    return out
+
+
 def _body_cells(r, ncols):
     """Return (cells, is_band) for one body row."""
     if _band(r):
         txt = [c for c in r if c.strip()][0]
         return [Paragraph(escape(txt), CELL_SEC)] + [""] * (ncols - 1), True
-    return [Paragraph(escape(c) if len(c.strip()) <= 2 else _fmt(c, widow=False),
-                      CELL_C if len(c.strip()) <= 2 else CELL)
-            for c in r], False
+    cells = []
+    for c in r:
+        s = c.strip()
+        if len(s) <= 2:
+            cells.append(Paragraph(escape(c), CELL_C) if s else "")
+        elif "\n" in c:
+            cells.append(_cell_flowables(c))
+        else:
+            cells.append(Paragraph(_bold_rec(_fmt(c, widow=False)), CELL))
+    return cells, False
 
 
 def _assemble(head_data, head_style, body_rows, colw, ncols, repeat,
