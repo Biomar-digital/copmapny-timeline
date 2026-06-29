@@ -125,7 +125,9 @@ def main():
                 except ValueError:
                     vd = date
                 meta_args += ["--version-date", vd]
-                if p.get("cover_year") is False:
+                # Covers carry no year by default (removed across all documents);
+                # a policy can opt back in with "cover_year": true.
+                if not p.get("cover_year"):
                     meta_args += ["--no-cover-year"]
                 if p.get("lead_title"):
                     meta_args += ["--lead-title"]

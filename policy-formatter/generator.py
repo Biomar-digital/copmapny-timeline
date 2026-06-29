@@ -847,11 +847,12 @@ def build_pdf(policy, out_path):
     ])
 
     # cover | content (first page starts high so the H1 matches the template,
-    # later pages start below the logo) | [signatures] | back cover.
+    # later pages start below the logo) | back cover. The board signatures page
+    # has been removed from all documents (board composition changed); the
+    # "with approval information" variant keeps only the approver/owner/approval
+    # card on the back cover, driven by policy.signatures.
     story = ([NextPageTemplate("content_first"), PageBreak(),
               NextPageTemplate("content")] + _story(policy))
-    if policy.signatures:
-        story += [NextPageTemplate("signatures"), PageBreak(), Spacer(1, 0.1)]
     story += [NextPageTemplate("back"), PageBreak(), Spacer(1, 0.1)]
     doc.build(story)
     return out_path
