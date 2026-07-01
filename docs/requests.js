@@ -90,7 +90,7 @@ function requestCard(r) {
       </div>
       <div class="req-when">${esc(fmtTime(r.created_at))}</div>
     </div>
-    <div class="req-meta">Requested by <b>${esc(r.author || "—")}</b>${r.email ? ` · ${esc(r.email)}` : ""}${r.edition ? ` · ${esc(r.edition)}` : ""}${r.kind === "new" ? ` · Versions: <b>${r.needs_variants ? "Signed + Unsigned" : "Single"}</b>` : ""}${r.issue ? ` · issue #${esc(r.issue)}` : ""}</div>
+    <div class="req-meta">Requested by <b>${esc(r.author || "—")}</b>${r.email ? ` · ${esc(r.email)}` : ""}${r.edition ? ` · ${esc(r.edition)}` : ""}${r.kind === "new" && r.versions ? ` · Versions: <b>${esc(r.versions)}</b>` : ""}${r.issue ? ` · issue #${esc(r.issue)}` : ""}</div>
     ${comment ? `<div class="req-comment"><div class="req-sec">Comment</div><p>${esc(comment)}</p></div>` : ""}
     ${hl}
     <div class="req-cmt" data-policy="${esc(r.policy)}" data-edition="${esc(r.edition || "")}"></div>

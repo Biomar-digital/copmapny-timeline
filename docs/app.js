@@ -330,7 +330,8 @@ function openRequest(mode, policy) {
     : `Policy: ${policy ? policy.title : "—"}`;
   document.getElementById("reqTitleField").style.display = isNew ? "" : "none";
   document.getElementById("reqVariantsField").style.display = isNew ? "" : "none";
-  const needsVar = document.getElementById("reqNeedsVariants"); if (needsVar) needsVar.checked = false;
+  const ws = document.getElementById("reqWantSigned"); if (ws) ws.checked = true;
+  const wu = document.getElementById("reqWantUnsigned"); if (wu) wu.checked = false;
   document.getElementById("reqDetailsLabel").textContent =
     isNew ? "What should this policy cover? *" : "What change do you need? *";
   document.getElementById("reqDocTitle").value = "";
@@ -359,7 +360,10 @@ async function submitRequest() {
   fd.set("details", details);
   if (mode === "new") {
     fd.set("title", docTitle);
-    fd.set("needs_variants", document.getElementById("reqNeedsVariants").checked ? "1" : "");
+    const wantSigned = document.getElementById("reqWantSigned").checked;
+    const wantUnsigned = document.getElementById("reqWantUnsigned").checked;
+    const versions = [wantSigned && "Signed", wantUnsigned && "Unsigned"].filter(Boolean).join(" + ") || "Signed";
+    fd.set("versions", versions);
   }
   else { fd.set("policy", dlg.dataset.policy || ""); fd.set("title", dlg.dataset.title || ""); }
   if (fileEl.files && fileEl.files[0]) fd.set("file", fileEl.files[0]);
