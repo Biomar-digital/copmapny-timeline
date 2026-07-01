@@ -391,6 +391,8 @@ async function handleAdmin(request, env, path, user) {
       // In pending.json → its live status; otherwise a new-policy ask or a
       // change that's no longer pending (approved/cleared) → "done".
       rec.current_status = byReq[rec.id] || (rec.kind === "new" ? "new_policy" : "done");
+      // Attach the AI self-review report if one was produced.
+      rec.self_review = await ghGetJson(env, `${REQUESTS_DIR}/${e.name}/self_review.json`);
       out.push(rec);
     }
     out.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));

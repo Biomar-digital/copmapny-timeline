@@ -1,0 +1,57 @@
+{
+  "request_id": "fa2a2883-86c3-4f1d-b21c-d78ee8b6ac63",
+  "policy": "human-rights-policy",
+  "generated_at": "2026-07-01 11:56 UTC",
+  "overall": "pass",
+  "summary": "8 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "6 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Unsigned)",
+      "status": "pass",
+      "detail": "produced: Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "39/39 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:h1",
+      "label": "p.5 Modern Slavery reads 'Only UK and AUS'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:h2",
+      "label": "Ethics Committee / 60 days wording present (p.4)",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}

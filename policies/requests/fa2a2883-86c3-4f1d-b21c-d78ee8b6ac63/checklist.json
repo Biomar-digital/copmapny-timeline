@@ -1,0 +1,6 @@
+[
+  {"id":"h1","label":"p.5 Modern Slavery reads 'Only UK and AUS'","page":5,
+   "present":["Only UK and AUS"],"absent":["Australia and UK"]},
+  {"id":"h2","label":"Ethics Committee / 60 days wording present (p.4)","page":4,
+   "present":["Ethics Committee","60 days"],"absent":["Schouw & Co","90 day"]}
+]

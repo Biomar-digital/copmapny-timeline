@@ -67,6 +67,21 @@ function detailBlocks(details) {
   return { comment, highlights };
 }
 
+const SR_ICON = { pass: "✓", fail: "✕", attention: "!", info: "·" };
+const SR_BADGE = { pass: "AI self-check passed", fail: "AI self-check found issues", attention: "AI self-check — review" };
+
+function selfReview(rep) {
+  if (!rep || !rep.checks) return "";
+  const cls = rep.overall === "pass" ? "sr-pass" : rep.overall === "fail" ? "sr-fail" : "sr-warn";
+  const rows = rep.checks.map((c) =>
+    `<li class="sr-${esc(c.status)}"><span class="sr-i">${SR_ICON[c.status] || "·"}</span>
+       <span class="sr-l">${esc(c.label)}</span>${c.detail ? `<span class="sr-d">${esc(c.detail)}</span>` : ""}</li>`).join("");
+  return `<div class="req-sr ${cls}">
+    <div class="sr-head"><span class="sr-badge">${esc(SR_BADGE[rep.overall] || "AI self-check")}</span>
+      <span class="sr-sum">${esc(rep.summary || "")}${rep.generated_at ? " · " + esc(rep.generated_at) : ""}</span></div>
+    <ul class="sr-list">${rows}</ul></div>`;
+}
+
 function requestCard(r) {
   const p = policyById(r.policy);
   const s = STATUS[r.current_status] || { label: r.current_status || "—", cls: "change" };
@@ -80,6 +95,7 @@ function requestCard(r) {
   const hl = highlights.length
     ? `<div class="req-hl"><div class="req-sec">Highlights on the document (${highlights.length})</div>
         <ul>${highlights.map((h) => `<li>${esc(h)}</li>`).join("")}</ul></div>` : "";
+  const sr = selfReview(r.self_review);
   return `<article class="req-card${r.kind === "new" ? " req-new" : ""}" data-status="${esc(r.current_status)}">
     ${r.kind === "new" ? '<div class="req-newbanner">✦ New policy requested</div>' : ""}
     <div class="req-head">
@@ -93,6 +109,7 @@ function requestCard(r) {
     <div class="req-meta">Requested by <b>${esc(r.author || "—")}</b>${r.email ? ` · ${esc(r.email)}` : ""}${r.edition ? ` · ${esc(r.edition)}` : ""}${r.kind === "new" && r.versions ? ` · Versions: <b>${esc(r.versions)}</b>` : ""}${r.issue ? ` · issue #${esc(r.issue)}` : ""}</div>
     ${comment ? `<div class="req-comment"><div class="req-sec">Comment</div><p>${esc(comment)}</p></div>` : ""}
     ${hl}
+    ${sr}
     <div class="req-cmt" data-policy="${esc(r.policy)}" data-edition="${esc(r.edition || "")}"></div>
     <div class="req-actions">
       ${rev ? `<a class="btn primary" href="${esc(rev)}">🔍 View highlighted document</a>` : ""}

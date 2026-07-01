@@ -1,0 +1,45 @@
+{
+  "request_id": "21e2a25c-a6e2-4672-8798-5e69d8081fd8",
+  "policy": "diversity-policy",
+  "generated_at": "2026-07-01 11:56 UTC",
+  "overall": "pass",
+  "summary": "6 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "6 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Signed + Unsigned)",
+      "status": "pass",
+      "detail": "produced: Signed + Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "35/35 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    }
+  ]
+}

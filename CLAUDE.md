@@ -7,6 +7,17 @@
   against the original (render to PNG and look), or check the data, then commit.
   Re-rendered documents must be compared page-by-page to the official PDF in
   `/tmp/refpdfs/` before being considered correct.
+- **Self-review before pending_review.** After applying a change, run the
+  automatic self-check and only move the request to `pending_review` if it does
+  not fail. Write the atomic requirements to
+  `policies/requests/<id>/checklist.json` (each: `{id,label,page?,present:[],
+  absent:[]}`), then:
+  `python policy-formatter/tools/self_review.py --policy <id> --request <id>
+  [--versions "Signed + Unsigned"]`. It checks outputs exist, variants match,
+  metadata is complete, **all source content is present (catches dropped
+  sections)**, no ligatures, plus every checklist assertion — and writes
+  `self_review.json`, which is shown to the human reviewer on the Requests page.
+  If it reports `fail`, fix and re-run; do not hand off a failing change.
 
 ## Layout / fidelity reference
 
