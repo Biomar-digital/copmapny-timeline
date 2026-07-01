@@ -64,6 +64,26 @@
     </div>
   </dialog>
 
+  <dialog id="compare" class="vh-dialog cmp-dialog">
+    <div class="vh-box">
+      <header class="vh-bar">
+        <div>
+          <h2 class="vh-title" id="cmpTitle">What changed</h2>
+          <p class="vh-sub" id="cmpSub"></p>
+        </div>
+        <div class="cmp-head-actions">
+          <label class="cmp-toggle"><input type="checkbox" id="cmpOnlyChanges" checked /> Only changes</label>
+          <button type="button" value="close" class="vh-close" id="cmpClose" aria-label="Close">×</button>
+        </div>
+      </header>
+      <div class="cmp-cols">
+        <div class="cmp-colhead" id="cmpOldHead">Previous</div>
+        <div class="cmp-colhead" id="cmpNewHead">Current</div>
+      </div>
+      <div class="cmp-body" id="cmpBody"></div>
+    </div>
+  </dialog>
+
   <dialog id="history" class="vh-dialog">
     <form method="dialog" class="vh-box">
       <header class="vh-bar">

@@ -184,6 +184,12 @@ def main():
         f.write("window.LIBRARY = " + json.dumps(data, ensure_ascii=False) + ";\n")
     print(f"\nwrote {os.path.relpath(LIBRARY, REPO)}  ({len(out_policies)} policies)")
 
+    # Refresh the side-by-side version diffs (docs/diffs.json).
+    try:
+        subprocess.run([sys.executable, os.path.join(HERE, "diff_versions.py")], check=False)
+    except Exception as e:
+        print("  (diff_versions skipped:", e, ")")
+
 
 if __name__ == "__main__":
     main()

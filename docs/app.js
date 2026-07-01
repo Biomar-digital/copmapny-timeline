@@ -203,7 +203,12 @@ function metaItem(k, v) {
   return v ? `<div class="vh-mitem"><span class="vh-mk">${esc(k)}</span><span class="vh-mv">${v}</span></div>` : "";
 }
 
-function editionPanel(p, ed, isLatest) {
+function editionPanel(p, ed, idx) {
+  const isLatest = idx === p.editions.length - 1;
+  const prev = idx > 0 ? p.editions[idx - 1] : null;
+  const cmpBtn = prev
+    ? `<button type="button" class="btn cmp-btn" data-cmp="${esc(p.id)}|${esc(ed.version || "")}__${esc(prev.version || "")}">
+         ⇆ See what changed vs ${esc(prev.version || "previous")}</button>` : "";
   const docsHtml = (ed.documents || []).map(doc => `
     <div class="vh-doc">
       <span class="vh-doclabel">${esc(doc.label)}</span>
@@ -224,6 +229,7 @@ function editionPanel(p, ed, isLatest) {
       ${metaItem("Approved by", ed.approved_by ? esc(ed.approved_by) : "")}
     </div>
     ${ed.notes ? `<div class="vh-changelog"><span class="vh-cl-label">What changed in this version</span><p>${esc(ed.notes)}</p></div>` : ""}
+    ${cmpBtn ? `<div class="vh-cmp-row">${cmpBtn}</div>` : ""}
     <div class="vh-docs-wrap"><div class="vh-sec-label">Documents</div><div class="vh-docs">${docsHtml}</div></div>
     <div class="vh-sign" data-key="${esc(edKey(ed))}">
       <div class="vh-sec-label">Signatures on this version</div>
@@ -579,11 +585,66 @@ function showEdition(p, idx) {
   const dlg = document.getElementById("history");
   dlg.querySelectorAll(".vh-tab").forEach(b => b.classList.toggle("active", +b.dataset.i === idx));
   const ed = p.editions[idx];
-  dlg.querySelector(".vh-panel").innerHTML = editionPanel(p, ed, idx === p.editions.length - 1);
+  dlg.querySelector(".vh-panel").innerHTML = editionPanel(p, ed, idx);
+  const cb = dlg.querySelector(".cmp-btn");
+  if (cb) cb.addEventListener("click", () => {
+    const [pid, key] = cb.dataset.cmp.split("|");
+    openCompare(pid, key);
+  });
   wireComments(p.id);
   loadComments(p.id);
   wireSign(p);
   loadSignatures(p.id);
+}
+
+// ---- side-by-side version compare -----------------------------------------
+
+let DIFFS = null;
+
+async function loadDiffs() {
+  if (DIFFS) return DIFFS;
+  try { DIFFS = await (await fetch("diffs.json", { cache: "no-store" })).json(); }
+  catch { DIFFS = {}; }
+  return DIFFS;
+}
+
+function diffCol(tokens) {
+  return (tokens || []).map(([w, fl]) =>
+    fl ? `<mark>${esc(w)}</mark>` : esc(w)).join(" ");
+}
+
+function renderDiff(diff, onlyChanges) {
+  const rows = diff.rows.filter(r => !onlyChanges || r.t !== "eq");
+  if (!rows.length) return `<p class="cmp-empty">No text differences in the body.</p>`;
+  return rows.map(r => `
+    <div class="cmp-row cmp-${esc(r.t)}">
+      <div class="cmp-cell l">${diffCol(r.l)}</div>
+      <div class="cmp-cell r">${diffCol(r.r)}</div>
+    </div>`).join("");
+}
+
+async function openCompare(policyId, key) {
+  const dlg = document.getElementById("compare");
+  const body = document.getElementById("cmpBody");
+  body.innerHTML = `<p class="cmp-empty">Loading…</p>`;
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  await loadDiffs();
+  const diff = (DIFFS[policyId] || {})[key];
+  const p = POLICIES.find(x => x.id === policyId);
+  if (!diff) {
+    document.getElementById("cmpTitle").textContent = "What changed";
+    body.innerHTML = `<p class="cmp-empty">No pre-computed diff for these versions yet.</p>`;
+    return;
+  }
+  document.getElementById("cmpTitle").textContent = `${p ? p.title : policyId} — what changed`;
+  document.getElementById("cmpSub").textContent =
+    `${diff.old} → ${diff.new} · ${diff.changed} change${diff.changed !== 1 ? "s" : ""}`;
+  document.getElementById("cmpOldHead").textContent = diff.old;
+  document.getElementById("cmpNewHead").textContent = diff.new;
+  const only = document.getElementById("cmpOnlyChanges");
+  const draw = () => { body.innerHTML = renderDiff(diff, only.checked); };
+  only.onchange = draw;
+  draw();
 }
 
 let POLICIES = [];
@@ -948,6 +1009,10 @@ async function init() {
     const queueClose = document.getElementById("queueClose");
     if (queueClose) queueClose.addEventListener("click", () => {
       const d = document.getElementById("queue"); if (d.close) d.close(); else d.removeAttribute("open");
+    });
+    const cmpClose = document.getElementById("cmpClose");
+    if (cmpClose) cmpClose.addEventListener("click", () => {
+      const d = document.getElementById("compare"); if (d.close) d.close(); else d.removeAttribute("open");
     });
     document.getElementById("newReqBtn").addEventListener("click", () => openRequest("new"));
     document.getElementById("reqClose").addEventListener("click",
