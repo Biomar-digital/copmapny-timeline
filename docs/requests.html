@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BioMar · Requests</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="favicon.png" />
+</head>
+<body>
+  <header class="masthead">
+    <div class="mast-inner">
+      <div>
+        <a href="index.html" class="back-link">← Library</a>
+        <h1 class="mast-title">Change requests</h1>
+        <p class="mast-sub" id="meta">All requests submitted by users — details, highlights, comments and attachments.</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div id="statusfilter" class="statusfilter"></div>
+    <div id="list" class="req-list"></div>
+    <p id="empty" class="empty" hidden>No requests yet.</p>
+    <p id="error" class="empty" hidden></p>
+  </main>
+
+  <script src="library-data.js"></script>
+  <script src="requests.js"></script>
+</body>
+</html>

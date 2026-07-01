@@ -480,3 +480,35 @@ main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 60px; }
   .card { grid-template-columns: 1fr; }
   .actions { min-width: 0; }
 }
+
+/* ---- Requests page ---- */
+.masthead { background: var(--navy); color: #fff; padding: 22px 0; }
+.mast-inner { max-width: 900px; margin: 0 auto; padding: 0 22px; }
+.back-link { color: var(--crisp); text-decoration: none; font-size: 12.5px; font-weight: 600; }
+.back-link:hover { text-decoration: underline; }
+.mast-title { margin: 8px 0 3px; font-size: 22px; font-weight: 800; }
+.mast-sub { margin: 0; font-size: 13px; color: var(--crisp); }
+main { max-width: 900px; margin: 0 auto; padding: 22px; }
+.req-list { display: flex; flex-direction: column; gap: 14px; }
+.req-card { border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; background: #fff; }
+.req-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.req-title { font-weight: 800; color: var(--navy); font-size: 15px; margin-right: 8px; }
+.req-when { font-size: 12px; color: #6b87a4; white-space: nowrap; }
+.req-meta { margin-top: 6px; font-size: 12.5px; color: #43607f; }
+.req-variant { display: inline-block; font-size: 11px; font-weight: 700; color: var(--navy);
+  background: var(--crisp); border-radius: 20px; padding: 2px 9px; margin-left: 4px; }
+.req-kind { display: inline-block; font-size: 11px; font-weight: 700; color: #5a4a00;
+  background: #f5c518; border-radius: 20px; padding: 2px 9px; margin-left: 4px; }
+.req-sec { font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px; color: #6b87a4; font-weight: 700; margin: 12px 0 5px; }
+.req-comment p { margin: 0; font-size: 13.5px; color: var(--navy); line-height: 1.55; white-space: pre-wrap; }
+.req-hl ul { margin: 0; padding-left: 18px; }
+.req-hl li { font-size: 12.5px; color: #43607f; line-height: 1.5; margin-bottom: 3px; }
+.req-cbubble { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 11px; margin-bottom: 7px; }
+.req-cbubble b { color: var(--navy); font-size: 12.5px; }
+.req-ctime { font-size: 11px; color: #6b87a4; margin-left: 6px; }
+.req-cbubble p { margin: 4px 0 0; font-size: 13px; color: #43607f; }
+.req-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+.pending-badge.done { background: #2e9e6b; color: #fff; }
+.pending-badge.newp { background: var(--crisp); color: var(--navy); }
+.sfilter.sf-done::before { background: #2e9e6b; }
+.sfilter.sf-new_policy::before { background: var(--sky); }

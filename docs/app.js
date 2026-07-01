@@ -763,6 +763,8 @@ async function setupAccount() {
   try { me = (await (await fetch("api/auth/me", { cache: "no-store" })).json()).user; } catch {}
   if (!me) return;
   IS_ADMIN = me.role === "admin";
+  const reqLink = document.getElementById("requestsLink");
+  if (reqLink) reqLink.hidden = !IS_ADMIN;
   document.getElementById("acctName").textContent = me.name;
   const logout = document.getElementById("logoutBtn");
   logout.hidden = false;

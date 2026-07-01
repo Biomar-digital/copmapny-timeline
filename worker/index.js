@@ -81,6 +81,12 @@ function bytesToB64(bytes) {
   for (let i = 0; i < bytes.length; i += chunk) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
   return btoa(bin);
 }
+function b64ToBytes(b64) {
+  const bin = atob((b64 || "").replace(/\s/g, ""));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
 
 // ==================================================================== cookies
 
@@ -183,6 +189,19 @@ async function ghGetList(env, path) {
   let list = []; try { list = JSON.parse(b64decode(data.content)); } catch { list = []; }
   if (!Array.isArray(list)) list = [];
   return { list, sha: data.sha };
+}
+async function ghListDir(env, path) {
+  const r = await fetch(`${contentsUrl(env, path)}?ref=${encodeURIComponent(env.GH_BRANCH)}`, { headers: ghHeaders(env) });
+  if (r.status === 404) return [];
+  if (!r.ok) throw new Error(`GitHub list ${r.status}`);
+  const data = await r.json();
+  return Array.isArray(data) ? data : [];
+}
+async function ghGetJson(env, path) {
+  const r = await fetch(`${contentsUrl(env, path)}?ref=${encodeURIComponent(env.GH_BRANCH)}`, { headers: ghHeaders(env) });
+  if (!r.ok) return null;
+  const data = await r.json();
+  try { return JSON.parse(b64decode(data.content)); } catch { return null; }
 }
 async function ghPutList(env, path, list, sha, message) {
   const body = { message, content: b64encode(JSON.stringify(list, null, 2) + "\n"), branch: env.GH_BRANCH };
@@ -353,6 +372,43 @@ async function handleAdmin(request, env, path, user) {
     await env.DB.prepare("UPDATE users SET status=? WHERE id=?").bind(status, id).run();
     await recordEvent(env, "account_" + status, `${u.name} ${status}`, u.email, user.name);
     return json({ ok: true });
+  }
+
+  // Full change/new-policy requests with their details + current status, for
+  // the admin "Requests" page (comments and highlights load separately).
+  if (path === "/api/admin/requests" && request.method === "GET") {
+    let entries; try { entries = await ghListDir(env, REQUESTS_DIR); } catch { entries = []; }
+    const pending = await readPending(env);
+    const byReq = {}; for (const it of pending) if (it.request_id) byReq[it.request_id] = it.status;
+    const out = [];
+    for (const e of entries) {
+      if (e.type !== "dir") continue;
+      const rec = await ghGetJson(env, `${REQUESTS_DIR}/${e.name}/request.json`);
+      if (!rec) continue;
+      // In pending.json → its live status; otherwise a new-policy ask or a
+      // change that's no longer pending (approved/cleared) → "done".
+      rec.current_status = byReq[rec.id] || (rec.kind === "new" ? "new_policy" : "done");
+      out.push(rec);
+    }
+    out.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+    return json({ requests: out });
+  }
+
+  // Download a file attached to a request (kept in the repo, not web-served).
+  if (path === "/api/admin/requests/file" && request.method === "GET") {
+    const fp = new URL(request.url).searchParams.get("path") || "";
+    if (!fp.startsWith(REQUESTS_DIR + "/") || fp.includes("..")) return json({ error: "Invalid path." }, 400);
+    const r = await fetch(`${contentsUrl(env, fp)}?ref=${encodeURIComponent(env.GH_BRANCH)}`, { headers: ghHeaders(env) });
+    if (!r.ok) return json({ error: "Not found." }, 404);
+    const data = await r.json();
+    const name = fp.split("/").pop();
+    const ext = (name.split(".").pop() || "").toLowerCase();
+    const ct = ext === "pdf" ? "application/pdf"
+      : ext === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      : "application/octet-stream";
+    return new Response(b64ToBytes(data.content), {
+      headers: { "Content-Type": ct, "Content-Disposition": `attachment; filename="${name}"`, "Cache-Control": "no-store" },
+    });
   }
 
   if (path === "/api/admin/inbox" && request.method === "GET") {
