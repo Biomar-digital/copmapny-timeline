@@ -14,11 +14,52 @@
 - Re-render pipeline: `policies/registry.json` → `policy-formatter/tools/publish.py`
   → `docs/files/*.pdf` + `docs/library.json`.
 - Per-policy switches in `registry.json`: `pdf` (serve the original verbatim),
-  `cover_year`, `lead_title`, `body_size`, `footer_note`, `version_date`.
+  `cover_year` (default OFF — covers carry no year; opt in with `true`),
+  `lead_title`, `body_size`, `footer_note`, `version_date`, and on a document
+  `board_approval: true` (renders BOTH an approval and a non-approval variant).
 - Design-heavy pieces (position statements, Responsible Sourcing) are served as
   the original PDF via `tools/use_original.py`.
-- Unsigned variants: no "Version history / Approval date"; show only the
-  Owner / Approver card. Signed variants get the full version card + board page.
+- **No board signatures page** (removed globally — board composition changes).
+  The two variants differ only by the back-cover card: "with approval
+  information" (approval) shows the approver / owner / approval-date card; the
+  "without approval information" (non-approval) shows no card.
+
+## Editing & formatting playbook (any agent must be able to do this)
+
+Everything needed lives in the repo — no backend. The loop is: edit the source
+→ regenerate → **render to PNG and eyeball** → commit.
+
+- **Pipeline:** `policies/sources/*.docx` → `policy-formatter/model.py`
+  (Word → blocks: `Heading`, `Body`, `Bullet`, `TableBlock`, `ImageBlock`,
+  `Columns`) → `generator.py` (branded PDF) and `docx_generator.py` (branded,
+  editable Word whose cover is page 1 of the PDF, plus logo header + footer).
+  `tools/publish.py` reads `registry.json` and regenerates every PDF + `.docx`
+  into `docs/files/` and refreshes `docs/library.json`.
+- **Regenerate one doc while iterating:** `python policy-formatter/format_policy.py
+  <source.docx> --title "…" --no-cover-year --owner "…" --approver "…"
+  --approval-date "dd-mm-yyyy" --no-signatures -o /tmp/x.pdf`. Full library:
+  `python policy-formatter/tools/publish.py`.
+- **Editing sources:** use `python-docx`. Body clauses are one paragraph
+  ("3.1 text"); the generator renders a leading clause number in bold. Bullets =
+  paragraphs whose style name contains "List" (`List Paragraph`/`List Bullet`).
+  **Bullets inside table cells** are preserved (model marks list items, generator
+  renders hanging bullets) — so lists in recommendation tables render correctly.
+- **Importing an official PDF** (`tools/import_pdf.py`) is a starting point but
+  its heuristics DROP content (e.g. it silently lost Articles 3.2 / 11.5 / 11.6).
+  ALWAYS verify: extract the original's numbered items and diff against the
+  rebuilt source; for regular legal docs a purpose-built parser is safer. Also
+  normalise ligatures (ﬁ→fi, ﬂ→fl).
+- **Registry `editions`:** each edition has `version`, `date` (YYYY-MM →
+  filenames), `approval_date`, `approver`/owner (policy-level), `notes`,
+  `requested_by`, `approved_by`, and `documents` (each with `source`,
+  `board_approval`). Approver bodies live in the policy `approver` field.
+- **Commit hygiene:** `publish.py` rewrites every file (PDF timestamps), so after
+  a targeted change restore the untouched churn
+  (`for f in $(git diff --name-only docs/files/); do case "$f" in *ThisDoc*) : ;;
+  *) git checkout -- "$f";; esac; done`) and commit only the affected files.
+- **Change-request variants:** a request carries `variant` = `Signed`,
+  `Unsigned`, or `Both` (in `request.json`). `Both` = apply the change to both
+  the approval and non-approval variants.
 
 ## Review workflow
 
