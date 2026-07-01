@@ -660,11 +660,13 @@ function wireSyncScroll() {
   const L = document.getElementById("cmpScrollL"), R = document.getElementById("cmpScrollR");
   if (!L || !R) return;
   let lock = false;
+  // Lock 1:1 by pixels — same speed — so the pages stay aligned (both columns
+  // are the same width and the pages are the same A4 size). Clamp to the target's
+  // range so the shorter document just stops at its end.
   const sync = (a, b) => {
     if (lock) return;
     lock = true;
-    const ratio = a.scrollTop / ((a.scrollHeight - a.clientHeight) || 1);
-    b.scrollTop = ratio * ((b.scrollHeight - b.clientHeight) || 1);
+    b.scrollTop = Math.min(a.scrollTop, b.scrollHeight - b.clientHeight);
     requestAnimationFrame(() => { lock = false; });
   };
   L.addEventListener("scroll", () => sync(L, R));
