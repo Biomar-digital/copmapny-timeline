@@ -329,6 +329,8 @@ function openRequest(mode, policy) {
     ? "Describe the policy you need and optionally attach a draft."
     : `Policy: ${policy ? policy.title : "—"}`;
   document.getElementById("reqTitleField").style.display = isNew ? "" : "none";
+  document.getElementById("reqVariantsField").style.display = isNew ? "" : "none";
+  const needsVar = document.getElementById("reqNeedsVariants"); if (needsVar) needsVar.checked = false;
   document.getElementById("reqDetailsLabel").textContent =
     isNew ? "What should this policy cover? *" : "What change do you need? *";
   document.getElementById("reqDocTitle").value = "";
@@ -355,7 +357,10 @@ async function submitRequest() {
   const fd = new FormData();
   fd.set("kind", mode === "new" ? "new" : "change");
   fd.set("details", details);
-  if (mode === "new") fd.set("title", docTitle);
+  if (mode === "new") {
+    fd.set("title", docTitle);
+    fd.set("needs_variants", document.getElementById("reqNeedsVariants").checked ? "1" : "");
+  }
   else { fd.set("policy", dlg.dataset.policy || ""); fd.set("title", dlg.dataset.title || ""); }
   if (fileEl.files && fileEl.files[0]) fd.set("file", fileEl.files[0]);
 

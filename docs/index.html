@@ -92,6 +92,13 @@
           <label>Policy title</label>
           <input id="reqDocTitle" type="text" placeholder="e.g. Travel &amp; Expenses Policy" />
         </div>
+        <div class="rq-field rq-check" id="reqVariantsField">
+          <label class="rq-checkline">
+            <input id="reqNeedsVariants" type="checkbox" />
+            This policy needs both a <b>signed</b> (with approval) and an <b>unsigned</b> version
+          </label>
+          <span class="rq-hint">Leave unchecked for a single version (still shows the approver/owner card).</span>
+        </div>
         <div class="rq-field">
           <label id="reqDetailsLabel">Details *</label>
           <textarea id="reqDetails" rows="4" placeholder="Describe the change or the new policy you need…"></textarea>

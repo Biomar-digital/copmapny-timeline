@@ -502,6 +502,8 @@ async function handleRequests(request, env, user) {
   const edition = String(form.get("edition") || "").slice(0, 200);
   // Which variant the change applies to: "Signed", "Unsigned", "Both", or "".
   const variant = String(form.get("variant") || "").slice(0, 40);
+  // New-policy requests can flag that the policy needs a signed + unsigned pair.
+  const needsVariants = kind === "new" && String(form.get("needs_variants") || "") === "1";
   const details = String(form.get("details") || "").trim().slice(0, MAX_TEXT);
   if (!author) return json({ error: "Your name is required." }, 400);
   if (!details) return json({ error: "Please describe your request." }, 400);
@@ -522,12 +524,13 @@ async function handleRequests(request, env, user) {
     if (!r.ok) return json({ error: `Could not store the uploaded file (${r.status}).` }, 502);
   }
 
-  const record = { id, kind, status: "open", title: kind === "new" ? title : (policy || title), policy, edition, variant, author, email, details, upload: uploadPath, created_at: new Date().toISOString() };
+  const record = { id, kind, status: "open", title: kind === "new" ? title : (policy || title), policy, edition, variant, needs_variants: needsVariants, author, email, details, upload: uploadPath, created_at: new Date().toISOString() };
   const heading = kind === "new" ? "New policy request" : "Policy change request";
   const issueTitle = kind === "new" ? `New policy: ${title}` : `Change: ${policy || title}`;
   const issueBody =
     `**${heading}**\n\n- **Requested by:** ${author}${email ? ` (${email})` : ""}\n` +
     (kind === "new" ? `- **Proposed title:** ${title}\n` : `- **Policy:** ${policy || "—"}\n`) +
+    (kind === "new" ? `- **Versions:** ${needsVariants ? "signed + unsigned" : "single"}\n` : "") +
     (edition ? `- **Edition:** ${edition}\n` : "") +
     (variant ? `- **Variant:** ${variant}${variant === "Both" ? " (apply to signed and unsigned)" : ""}\n` : "") +
     (uploadPath ? `- **Attached document:** \`${uploadPath}\`\n` : "") +
@@ -542,6 +545,7 @@ async function handleRequests(request, env, user) {
     emailHtml(heading, `${author} submitted a ${kind === "new" ? "new policy" : "change"} request.`, [
       ["Requested by", escapeHtml(author) + (email ? ` (${escapeHtml(email)})` : "")],
       kind === "new" ? ["Proposed title", escapeHtml(title)] : ["Policy", escapeHtml(policy || "—")],
+      kind === "new" ? ["Versions", needsVariants ? "Signed + Unsigned" : "Single"] : null,
       edition ? ["Edition", escapeHtml(edition)] : null,
       variant ? ["Variant", escapeHtml(variant) + (variant === "Both" ? " (signed + unsigned)" : "")] : null,
       uploadPath ? ["Attached", escapeHtml(uploadPath.split("/").pop())] : null,
