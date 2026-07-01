@@ -133,6 +133,25 @@ function openEditChooser(p) {
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
 }
 
+// Approve after reviewing: open the compare view first (what changed), with an
+// Approve button inside. Falls back to a plain confirm if there's no prior
+// version to compare against.
+function approveWithReview(p) {
+  const eds = p.editions || [];
+  const doApprove = () => {
+    const d = document.getElementById("compare"); if (d && d.close) d.close();
+    pendingAction(p.id, "approve");
+  };
+  if (eds.length >= 2) {
+    const key = `${eds[eds.length - 1].version}__${eds[eds.length - 2].version}`;
+    openCompare(p.id, key, { onApprove: () => {
+      if (confirm(`Approve the changes to "${p.title}"? This clears the request.`)) doApprove();
+    } });
+  } else if (confirm(`Approve the changes to "${p.title}"? This clears the request.`)) {
+    pendingAction(p.id, "approve");
+  }
+}
+
 // ---- change-request status badge + actions -------------------------------
 
 function statusBadge(id) {
@@ -158,10 +177,8 @@ function wireStatusActions(el, p) {
   // Anyone reviewing can approve or ask for another round once changes are done.
   if (st === "pending_review") {
     const ap = document.createElement("button");
-    ap.type = "button"; ap.className = "btn primary"; ap.textContent = "Approve changes";
-    ap.addEventListener("click", () => {
-      if (confirm(`Approve the changes to "${p.title}"? This clears the request.`)) pendingAction(p.id, "approve");
-    });
+    ap.type = "button"; ap.className = "btn primary"; ap.textContent = "Review & approve";
+    ap.addEventListener("click", () => approveWithReview(p));
     const re = document.createElement("button");
     re.type = "button"; re.className = "btn ghost"; re.textContent = "Request another round";
     re.addEventListener("click", () => pendingAction(p.id, "reopen"));
@@ -623,29 +640,50 @@ function renderDiff(diff, onlyChanges) {
     </div>`).join("");
 }
 
-function edPdf(p, version) {
-  const ed = (p.editions || []).find(e => (e.version || "") === version);
-  const doc = ed && (ed.documents || [])[0];
-  return doc ? (doc.files.non_approval || doc.files.approval) : null;
+function pageCol(pages, side) {
+  return (pages || []).map(pg => {
+    const hls = (pg.rects || []).map(r =>
+      `<div class="cmp-hl ${side}" style="left:${(r.x * 100).toFixed(2)}%;top:${(r.y * 100).toFixed(2)}%;width:${(r.w * 100).toFixed(2)}%;height:${(r.h * 100).toFixed(2)}%"></div>`).join("");
+    return `<div class="cmp-page"><img src="${esc(pg.img)}" loading="lazy" />${hls}</div>`;
+  }).join("");
 }
 
-function docsView(oldPdf, newPdf) {
-  const frame = (src) => src
-    ? `<iframe class="cmp-frame" src="${esc(src)}#toolbar=0&view=FitH" title="document"></iframe>`
-    : `<div class="cmp-empty">Not available</div>`;
-  return `<div class="cmp-docrow"><div class="cmp-doccell">${frame(oldPdf)}</div><div class="cmp-doccell r">${frame(newPdf)}</div></div>`;
+function docsView(diff) {
+  if (!diff || !diff.pages_new) return `<div class="cmp-empty">Rendered pages not available for these versions.</div>`;
+  return `<div class="cmp-docrow">
+    <div class="cmp-doccell l" id="cmpScrollL">${pageCol(diff.pages_old, "old")}</div>
+    <div class="cmp-doccell r" id="cmpScrollR">${pageCol(diff.pages_new, "new")}</div>
+  </div>`;
 }
 
-async function openCompare(policyId, key) {
+function wireSyncScroll() {
+  const L = document.getElementById("cmpScrollL"), R = document.getElementById("cmpScrollR");
+  if (!L || !R) return;
+  let lock = false;
+  const sync = (a, b) => {
+    if (lock) return;
+    lock = true;
+    const ratio = a.scrollTop / ((a.scrollHeight - a.clientHeight) || 1);
+    b.scrollTop = ratio * ((b.scrollHeight - b.clientHeight) || 1);
+    requestAnimationFrame(() => { lock = false; });
+  };
+  L.addEventListener("scroll", () => sync(L, R));
+  R.addEventListener("scroll", () => sync(R, L));
+}
+
+async function openCompare(policyId, key, opts = {}) {
   const dlg = document.getElementById("compare");
   const body = document.getElementById("cmpBody");
+  const footer = document.getElementById("cmpFooter");
+  const appBtn = document.getElementById("cmpApprove");
+  if (opts.onApprove) { footer.hidden = false; appBtn.onclick = opts.onApprove; }
+  else footer.hidden = true;
   body.innerHTML = `<p class="cmp-empty">Loading…</p>`;
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
   await loadDiffs();
   const diff = (DIFFS[policyId] || {})[key];
   const p = POLICIES.find(x => x.id === policyId);
   const [newVer, oldVer] = key.split("__");
-  const oldPdf = p && edPdf(p, oldVer), newPdf = p && edPdf(p, newVer);
   document.getElementById("cmpTitle").textContent = `${p ? p.title : policyId} — what changed`;
   document.getElementById("cmpSub").textContent = diff
     ? `${diff.old} → ${diff.new} · ${diff.changed} change${diff.changed !== 1 ? "s" : ""}`
@@ -663,7 +701,7 @@ async function openCompare(policyId, key) {
     bDocs.classList.toggle("active", mode === "docs");
     onlyWrap.style.display = mode === "changes" ? "" : "none";
     dlg.classList.toggle("cmp-docsmode", mode === "docs");
-    if (mode === "docs") body.innerHTML = docsView(oldPdf, newPdf);
+    if (mode === "docs") { body.innerHTML = docsView(diff); wireSyncScroll(); }
     else body.innerHTML = diff ? renderDiff(diff, only.checked)
       : `<p class="cmp-empty">No text diff yet — switch to Documents to see both PDFs.</p>`;
   };

@@ -579,8 +579,20 @@ main { max-width: 900px; margin: 0 auto; padding: 22px; }
 .cmp-segbtn { border: none; background: transparent; color: #cfe0ee; font-family: inherit;
   font-size: 12.5px; font-weight: 700; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
 .cmp-segbtn.active { background: #fff; color: var(--navy); }
-.cmp-docrow { display: grid; grid-template-columns: 1fr 1fr; height: 74vh; }
-.cmp-doccell { min-width: 0; }
+
+/* Compare documents: synced page images with change highlights */
+.cmp-docrow { display: grid; grid-template-columns: 1fr 1fr; height: 76vh; }
+.cmp-doccell { min-width: 0; overflow-y: auto; overflow-x: hidden; background: #eef3f8; padding: 12px; }
 .cmp-doccell.r { border-left: 1px solid var(--line); }
-.cmp-frame { width: 100%; height: 100%; border: 0; }
-.cmp-dialog.cmp-docsmode .cmp-body { max-height: 74vh; padding: 0; }
+.cmp-page { position: relative; margin: 0 auto 12px; max-width: 92%; box-shadow: 0 1px 6px rgba(28,64,118,.14); }
+.cmp-page img { display: block; width: 100%; height: auto; }
+.cmp-hl { position: absolute; border-radius: 2px; box-sizing: border-box; }
+.cmp-hl.new { background: rgba(255,214,0,.32); outline: 2px solid rgba(224,150,0,.9); }
+.cmp-hl.old { background: rgba(214,69,69,.20); outline: 2px solid rgba(214,69,69,.85); }
+.cmp-dialog.cmp-docsmode .cmp-body { max-height: 76vh; padding: 0; overflow: hidden; }
+
+/* Compare footer (approve after review) */
+.cmp-footer { display: flex; align-items: center; justify-content: flex-end; gap: 14px;
+  padding: 12px 18px; border-top: 1px solid var(--line); background: var(--bg); }
+.cmp-foot-hint { font-size: 12.5px; color: #6b87a4; }
+.cmp-footer .btn.primary { padding: 9px 18px; }
