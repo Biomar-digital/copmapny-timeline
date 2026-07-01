@@ -573,3 +573,14 @@ main { max-width: 900px; margin: 0 auto; padding: 22px; }
 .cmp-cell.l mark { background: #f6c6c6; color: #7a1e1e; border-radius: 3px; padding: 0 2px; }
 .cmp-cell.r mark { background: #b6e6c6; color: #14522f; border-radius: 3px; padding: 0 2px; }
 .cmp-empty { padding: 24px; text-align: center; color: #6b87a4; font-size: 13px; }
+
+/* Compare: segmented control + documents (real PDFs) view */
+.cmp-seg { display: inline-flex; background: rgba(255,255,255,.15); border-radius: 8px; padding: 2px; }
+.cmp-segbtn { border: none; background: transparent; color: #cfe0ee; font-family: inherit;
+  font-size: 12.5px; font-weight: 700; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
+.cmp-segbtn.active { background: #fff; color: var(--navy); }
+.cmp-docrow { display: grid; grid-template-columns: 1fr 1fr; height: 74vh; }
+.cmp-doccell { min-width: 0; }
+.cmp-doccell.r { border-left: 1px solid var(--line); }
+.cmp-frame { width: 100%; height: 100%; border: 0; }
+.cmp-dialog.cmp-docsmode .cmp-body { max-height: 74vh; padding: 0; }

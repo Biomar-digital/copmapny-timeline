@@ -72,7 +72,11 @@
           <p class="vh-sub" id="cmpSub"></p>
         </div>
         <div class="cmp-head-actions">
-          <label class="cmp-toggle"><input type="checkbox" id="cmpOnlyChanges" checked /> Only changes</label>
+          <div class="cmp-seg">
+            <button type="button" id="cmpModeChanges" class="cmp-segbtn active">Changes</button>
+            <button type="button" id="cmpModeDocs" class="cmp-segbtn">Documents</button>
+          </div>
+          <label class="cmp-toggle" id="cmpOnlyWrap"><input type="checkbox" id="cmpOnlyChanges" checked /> Only changes</label>
           <button type="button" value="close" class="vh-close" id="cmpClose" aria-label="Close">×</button>
         </div>
       </header>

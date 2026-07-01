@@ -623,6 +623,19 @@ function renderDiff(diff, onlyChanges) {
     </div>`).join("");
 }
 
+function edPdf(p, version) {
+  const ed = (p.editions || []).find(e => (e.version || "") === version);
+  const doc = ed && (ed.documents || [])[0];
+  return doc ? (doc.files.non_approval || doc.files.approval) : null;
+}
+
+function docsView(oldPdf, newPdf) {
+  const frame = (src) => src
+    ? `<iframe class="cmp-frame" src="${esc(src)}#toolbar=0&view=FitH" title="document"></iframe>`
+    : `<div class="cmp-empty">Not available</div>`;
+  return `<div class="cmp-docrow"><div class="cmp-doccell">${frame(oldPdf)}</div><div class="cmp-doccell r">${frame(newPdf)}</div></div>`;
+}
+
 async function openCompare(policyId, key) {
   const dlg = document.getElementById("compare");
   const body = document.getElementById("cmpBody");
@@ -631,19 +644,33 @@ async function openCompare(policyId, key) {
   await loadDiffs();
   const diff = (DIFFS[policyId] || {})[key];
   const p = POLICIES.find(x => x.id === policyId);
-  if (!diff) {
-    document.getElementById("cmpTitle").textContent = "What changed";
-    body.innerHTML = `<p class="cmp-empty">No pre-computed diff for these versions yet.</p>`;
-    return;
-  }
+  const [newVer, oldVer] = key.split("__");
+  const oldPdf = p && edPdf(p, oldVer), newPdf = p && edPdf(p, newVer);
   document.getElementById("cmpTitle").textContent = `${p ? p.title : policyId} — what changed`;
-  document.getElementById("cmpSub").textContent =
-    `${diff.old} → ${diff.new} · ${diff.changed} change${diff.changed !== 1 ? "s" : ""}`;
-  document.getElementById("cmpOldHead").textContent = diff.old;
-  document.getElementById("cmpNewHead").textContent = diff.new;
+  document.getElementById("cmpSub").textContent = diff
+    ? `${diff.old} → ${diff.new} · ${diff.changed} change${diff.changed !== 1 ? "s" : ""}`
+    : `${oldVer} → ${newVer}`;
+  document.getElementById("cmpOldHead").textContent = diff ? diff.old : oldVer;
+  document.getElementById("cmpNewHead").textContent = diff ? diff.new : newVer;
+
   const only = document.getElementById("cmpOnlyChanges");
-  const draw = () => { body.innerHTML = renderDiff(diff, only.checked); };
+  const onlyWrap = document.getElementById("cmpOnlyWrap");
+  const bChanges = document.getElementById("cmpModeChanges");
+  const bDocs = document.getElementById("cmpModeDocs");
+  let mode = "changes";
+  const draw = () => {
+    bChanges.classList.toggle("active", mode === "changes");
+    bDocs.classList.toggle("active", mode === "docs");
+    onlyWrap.style.display = mode === "changes" ? "" : "none";
+    dlg.classList.toggle("cmp-docsmode", mode === "docs");
+    if (mode === "docs") body.innerHTML = docsView(oldPdf, newPdf);
+    else body.innerHTML = diff ? renderDiff(diff, only.checked)
+      : `<p class="cmp-empty">No text diff yet — switch to Documents to see both PDFs.</p>`;
+  };
   only.onchange = draw;
+  bChanges.onclick = () => { mode = "changes"; draw(); };
+  bDocs.onclick = () => { mode = "docs"; draw(); };
+  mode = diff ? "changes" : "docs";
   draw();
 }
 
