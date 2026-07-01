@@ -64,15 +64,17 @@ def _editions(p):
 
 def _documents(ed):
     """Documents within an edition; legacy editions get a single document.
-    Legacy single-source editions keep the board approval page (board_approval
-    defaults to True) so existing policies are unchanged."""
+    The signed/unsigned pair is opt-in: `board_approval` defaults to False, so a
+    policy shows a single PDF (which still carries the approver/owner/approval
+    card). Set `board_approval: true` only where a separate with/without-approval
+    pair is genuinely required."""
     if ed.get("documents"):
         return ed["documents"]
     return [{
         "label": "Policy",
         "language": None,
         "source": ed["source"],
-        "board_approval": ed.get("board_approval", True),
+        "board_approval": ed.get("board_approval", False),
     }]
 
 
