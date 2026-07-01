@@ -114,8 +114,8 @@ def build_pair(policy_id, title, old_ed, new_ed):
     sm = difflib.SequenceMatcher(None, ot, nt)
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
         if tag == "equal":
-            for k in range(i1, i2):
-                rows.append({"t": "eq", "l": [[ot[k], 0]], "r": [[nt[k], 0]]})
+            for off in range(i2 - i1):
+                rows.append({"t": "eq", "l": [[ot[i1 + off], 0]], "r": [[nt[j1 + off], 0]]})
         elif tag == "delete":
             for k in range(i1, i2):
                 rows.append({"t": "del", "l": [[ot[k], 1]], "r": []})

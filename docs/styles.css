@@ -548,7 +548,8 @@ main { max-width: 900px; margin: 0 auto; padding: 22px; }
 .sr-d { color: #6b87a4; }
 
 /* Version compare (split screen) */
-.cmp-dialog { width: min(1100px, 96vw); max-width: 96vw; }
+.cmp-dialog { width: 98vw; max-width: 98vw; }
+.cmp-dialog .vh-box { width: 100%; }
 .cmp-head-actions { display: flex; align-items: center; gap: 14px; }
 .cmp-toggle { color: #fff; font-size: 12.5px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
 .vh-cmp-row { margin-top: 14px; }
@@ -560,7 +561,7 @@ main { max-width: 900px; margin: 0 auto; padding: 22px; }
 .cmp-colhead { padding: 9px 16px; font-weight: 800; font-size: 12.5px; color: var(--navy);
   text-transform: uppercase; letter-spacing: .3px; }
 .cmp-colhead + .cmp-colhead { border-left: 1px solid var(--line); }
-.cmp-body { max-height: 68vh; overflow: auto; padding: 0 0 10px; }
+.cmp-body { max-height: 78vh; overflow: auto; padding: 0 0 10px; }
 .cmp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
 .cmp-cell { padding: 6px 16px; font-size: 13px; line-height: 1.5; color: #43607f;
   border-bottom: 1px solid #eef3f8; white-space: pre-wrap; word-break: break-word; }
@@ -581,15 +582,15 @@ main { max-width: 900px; margin: 0 auto; padding: 22px; }
 .cmp-segbtn.active { background: #fff; color: var(--navy); }
 
 /* Compare documents: synced page images with change highlights */
-.cmp-docrow { display: grid; grid-template-columns: 1fr 1fr; height: 76vh; }
+.cmp-docrow { display: grid; grid-template-columns: 1fr 1fr; height: 84vh; }
 .cmp-doccell { min-width: 0; overflow-y: auto; overflow-x: hidden; background: #eef3f8; padding: 12px; }
 .cmp-doccell.r { border-left: 1px solid var(--line); }
-.cmp-page { position: relative; margin: 0 auto 12px; max-width: 92%; box-shadow: 0 1px 6px rgba(28,64,118,.14); }
+.cmp-page { position: relative; margin: 0 auto 12px; max-width: 97%; box-shadow: 0 1px 6px rgba(28,64,118,.14); }
 .cmp-page img { display: block; width: 100%; height: auto; }
 .cmp-hl { position: absolute; border-radius: 2px; box-sizing: border-box; }
 .cmp-hl.new { background: rgba(255,214,0,.32); outline: 2px solid rgba(224,150,0,.9); }
 .cmp-hl.old { background: rgba(214,69,69,.20); outline: 2px solid rgba(214,69,69,.85); }
-.cmp-dialog.cmp-docsmode .cmp-body { max-height: 76vh; padding: 0; overflow: hidden; }
+.cmp-dialog.cmp-docsmode .cmp-body { max-height: 84vh; padding: 0; overflow: hidden; }
 
 /* Compare footer (approve after review) */
 .cmp-footer { display: flex; align-items: center; justify-content: flex-end; gap: 14px;
