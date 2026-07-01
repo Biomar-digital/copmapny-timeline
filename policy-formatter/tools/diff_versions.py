@@ -115,7 +115,10 @@ def build_pair(policy_id, title, old_ed, new_ed):
     pages_old = render_pages(od, policy_id, old_ed["version"], "old")
     pages_new = render_pages(nd, policy_id, new_ed["version"], "new")
 
-    rows = []
+    def mv(s):   # normalise for move-matching: ignore a reintroduced bullet
+        return re.sub(r"^[•\-•]\s*", "", s).strip()
+
+    rows = []   # each del/ins/chg row carries _op = (side, page_index, old_text, new_text)
     sm = difflib.SequenceMatcher(None, ot, nt)
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
         if tag == "equal":
@@ -123,35 +126,52 @@ def build_pair(policy_id, title, old_ed, new_ed):
                 rows.append({"t": "eq", "l": [[ot[i1 + off], 0]], "r": [[nt[j1 + off], 0]]})
         elif tag == "delete":
             for k in range(i1, i2):
-                rows.append({"t": "del", "l": [[ot[k], 1]], "r": []})
-                for rc in rects_for(od[ob[k][0]], ot[k]):
-                    pages_old[ob[k][0]]["rects"].append(rc)
+                rows.append({"t": "del", "l": [[ot[k], 1]], "r": [], "_op": ("old", ob[k][0], ot[k], "")})
         elif tag == "insert":
             for k in range(j1, j2):
-                rows.append({"t": "ins", "l": [], "r": [[nt[k], 1]]})
-                for rc in rects_for(nd[nb[k][0]], nt[k]):
-                    pages_new[nb[k][0]]["rects"].append(rc)
+                rows.append({"t": "ins", "l": [], "r": [[nt[k], 1]], "_op": ("new", nb[k][0], "", nt[k])})
         else:
             oc, nc = list(range(i1, i2)), list(range(j1, j2))
             for k in range(max(len(oc), len(nc))):
                 lo = ot[oc[k]] if k < len(oc) else ""
                 nw = nt[nc[k]] if k < len(nc) else ""
                 if lo and nw:
-                    la, lb, cha, chb = word_flags(lo, nw)
-                    rows.append({"t": "chg", "l": la, "r": lb})
-                    for rc in rects_for(od[ob[oc[k]][0]], lo):
-                        pages_old[ob[oc[k]][0]]["rects"].append(rc)
-                    for rc in rects_for(nd[nb[nc[k]][0]], nw):
-                        pages_new[nb[nc[k]][0]]["rects"].append(rc)
+                    la, lb, _, _ = word_flags(lo, nw)
+                    rows.append({"t": "chg", "l": la, "r": lb,
+                                 "_op": ("both", ob[oc[k]][0], lo, nw), "_np": nb[nc[k]][0]})
                 elif lo:
-                    rows.append({"t": "del", "l": [[lo, 1]], "r": []})
-                    for rc in rects_for(od[ob[oc[k]][0]], lo):
-                        pages_old[ob[oc[k]][0]]["rects"].append(rc)
+                    rows.append({"t": "del", "l": [[lo, 1]], "r": [], "_op": ("old", ob[oc[k]][0], lo, "")})
                 else:
-                    rows.append({"t": "ins", "l": [], "r": [[nw, 1]]})
-                    for rc in rects_for(nd[nb[nc[k]][0]], nw):
-                        pages_new[nb[nc[k]][0]]["rects"].append(rc)
-    changed = sum(1 for r in rows if r["t"] != "eq")
+                    rows.append({"t": "ins", "l": [], "r": [[nw, 1]], "_op": ("new", nb[nc[k]][0], "", nw)})
+
+    # Move detection: a deleted line whose (normalised) text reappears as an
+    # inserted line elsewhere is a MOVE, not a change — pair them and neutralise.
+    ins_by = {}
+    for r in rows:
+        if r["t"] == "ins":
+            ins_by.setdefault(mv(r["_op"][3]), []).append(r)
+    for r in rows:
+        if r["t"] == "del":
+            lst = ins_by.get(mv(r["_op"][2]))
+            if lst:
+                other = lst.pop(0)
+                r["t"] = "mov"; other["t"] = "mov"
+
+    # Boxes only for real changes (not eq, not moved).
+    for r in rows:
+        if r["t"] not in ("del", "ins", "chg"):
+            continue
+        side, pg, lo, nw = r["_op"]
+        if lo:
+            for rc in rects_for(od[pg], lo):
+                pages_old[pg]["rects"].append(rc)
+        if nw:
+            npg = r.get("_np", pg)
+            for rc in rects_for(nd[npg], nw):
+                pages_new[npg]["rects"].append(rc)
+    for r in rows:
+        r.pop("_op", None); r.pop("_np", None)
+    changed = sum(1 for r in rows if r["t"] in ("del", "ins", "chg"))
     return {"old": old_ed["version"], "new": new_ed["version"],
             "changed": changed, "rows": rows,
             "pages_old": pages_old, "pages_new": pages_new}

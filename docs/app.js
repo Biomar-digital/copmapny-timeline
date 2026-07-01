@@ -631,8 +631,8 @@ function diffCol(tokens) {
 }
 
 function renderDiff(diff, onlyChanges) {
-  const rows = diff.rows.filter(r => !onlyChanges || r.t !== "eq");
-  if (!rows.length) return `<p class="cmp-empty">No text differences in the body.</p>`;
+  const rows = diff.rows.filter(r => !onlyChanges || (r.t !== "eq" && r.t !== "mov"));
+  if (!rows.length) return `<p class="cmp-empty">No text changes in the body (formatting or moved content only).</p>`;
   return rows.map(r => `
     <div class="cmp-row cmp-${esc(r.t)}">
       <div class="cmp-cell l">${diffCol(r.l)}</div>
