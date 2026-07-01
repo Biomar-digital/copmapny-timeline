@@ -101,6 +101,10 @@ function editTargets(p) {
       out.push({ label: base + (d.files.approval ? "Unsigned" : "PDF"), file: d.files.non_approval, variant: d.files.approval ? "Unsigned" : "", ed });
     if (d.files && d.files.approval)
       out.push({ label: base + "Signed", file: d.files.approval, variant: "Signed", ed });
+    // When both signed and unsigned exist, offer a "Both" option: the requester
+    // marks up the unsigned copy and the change is applied to both variants.
+    if (d.files && d.files.approval && d.files.non_approval)
+      out.push({ label: base + "Both (signed + unsigned)", file: d.files.non_approval, variant: "Both", ed });
   });
   return out;
 }
@@ -119,7 +123,7 @@ function openEditChooser(p) {
   if (!dlg) { dlg = document.createElement("dialog"); dlg.id = "editChooser"; dlg.className = "vh-dialog chooser"; document.body.appendChild(dlg); }
   dlg.innerHTML = `<div class="vh-box chooser-box">
       <h3>Which version do you want to edit?</h3>
-      <p class="chooser-hint">You'll open the live PDF to add highlights, a comment and a file, then send.</p>
+      <p class="chooser-hint">Pick Signed or Unsigned — or "Both", and the change will be applied to both versions. You'll open the live PDF to add highlights, a comment and a file, then send.</p>
       <div class="chooser-list">${targets.map((t, i) => `<button type="button" class="btn primary" data-i="${i}">${esc(t.label)} ↗</button>`).join("")}</div>
       <button type="button" class="btn ghost chooser-x">Cancel</button>
     </div>`;

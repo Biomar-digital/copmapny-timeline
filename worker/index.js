@@ -441,6 +441,8 @@ async function handleRequests(request, env, user) {
   const title = String(form.get("title") || "").trim().slice(0, 300);
   const policy = safePolicyId(form.get("policy")) || "";
   const edition = String(form.get("edition") || "").slice(0, 200);
+  // Which variant the change applies to: "Signed", "Unsigned", "Both", or "".
+  const variant = String(form.get("variant") || "").slice(0, 40);
   const details = String(form.get("details") || "").trim().slice(0, MAX_TEXT);
   if (!author) return json({ error: "Your name is required." }, 400);
   if (!details) return json({ error: "Please describe your request." }, 400);
@@ -461,13 +463,14 @@ async function handleRequests(request, env, user) {
     if (!r.ok) return json({ error: `Could not store the uploaded file (${r.status}).` }, 502);
   }
 
-  const record = { id, kind, status: "open", title: kind === "new" ? title : (policy || title), policy, edition, author, email, details, upload: uploadPath, created_at: new Date().toISOString() };
+  const record = { id, kind, status: "open", title: kind === "new" ? title : (policy || title), policy, edition, variant, author, email, details, upload: uploadPath, created_at: new Date().toISOString() };
   const heading = kind === "new" ? "New policy request" : "Policy change request";
   const issueTitle = kind === "new" ? `New policy: ${title}` : `Change: ${policy || title}`;
   const issueBody =
     `**${heading}**\n\n- **Requested by:** ${author}${email ? ` (${email})` : ""}\n` +
     (kind === "new" ? `- **Proposed title:** ${title}\n` : `- **Policy:** ${policy || "—"}\n`) +
     (edition ? `- **Edition:** ${edition}\n` : "") +
+    (variant ? `- **Variant:** ${variant}${variant === "Both" ? " (apply to signed and unsigned)" : ""}\n` : "") +
     (uploadPath ? `- **Attached document:** \`${uploadPath}\`\n` : "") +
     `- **Request record:** \`${REQUESTS_DIR}/${id}/request.json\`\n\n---\n\n${details}\n`;
   const issue = await ghCreateIssue(env, issueTitle, issueBody, ["policy-request", kind === "new" ? "new-policy" : "change-request"]);
@@ -481,6 +484,7 @@ async function handleRequests(request, env, user) {
       ["Requested by", escapeHtml(author) + (email ? ` (${escapeHtml(email)})` : "")],
       kind === "new" ? ["Proposed title", escapeHtml(title)] : ["Policy", escapeHtml(policy || "—")],
       edition ? ["Edition", escapeHtml(edition)] : null,
+      variant ? ["Variant", escapeHtml(variant) + (variant === "Both" ? " (signed + unsigned)" : "")] : null,
       uploadPath ? ["Attached", escapeHtml(uploadPath.split("/").pop())] : null,
       ["Details", `<span style="white-space:pre-wrap">${escapeHtml(details)}</span>`],
       issue.ok ? ["Issue", `<a href="${issue.url}">#${issue.number}</a>`] : null,

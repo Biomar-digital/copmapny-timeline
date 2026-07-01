@@ -287,6 +287,7 @@ async function sendRequest() {
   fd.append("kind", "change");
   fd.append("policy", POLICY);
   fd.append("edition", EDITION);
+  fd.append("variant", VARIANT);
   fd.append("details", details);
   fd.append("annotation_count", String(annotations.length));
   if (file) fd.append("file", file);
