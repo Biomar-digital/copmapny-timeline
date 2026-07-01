@@ -53,6 +53,109 @@ function docLinks(doc, multi) {
       ${wordLink(doc)}`;
 }
 
+// ---- UX helpers: toasts, confirm, skeletons, preview, stepper --------------
+
+function toast(msg, type = "ok") {
+  const c = document.getElementById("toasts");
+  if (!c) return;
+  const t = document.createElement("div");
+  t.className = "toast " + type;
+  t.innerHTML = `<span class="toast-i">${type === "err" ? "✕" : type === "info" ? "i" : "✓"}</span><span>${esc(msg)}</span>`;
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add("show"));
+  setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 300); }, 3400);
+}
+
+function confirmDialog(message, opts = {}) {
+  return new Promise(resolve => {
+    let dlg = document.getElementById("confirmDlg");
+    if (!dlg) { dlg = document.createElement("dialog"); dlg.id = "confirmDlg"; dlg.className = "vh-dialog confirm-dlg"; document.body.appendChild(dlg); }
+    dlg.innerHTML = `<div class="vh-box confirm-box">
+      <p class="confirm-msg">${esc(message)}</p>
+      <div class="confirm-actions">
+        <button type="button" class="btn ghost" data-a="0">${esc(opts.cancel || "Cancel")}</button>
+        <button type="button" class="btn ${opts.danger ? "danger" : "primary"}" data-a="1">${esc(opts.ok || "Confirm")}</button>
+      </div></div>`;
+    const done = v => { if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); resolve(v); };
+    dlg.querySelector('[data-a="0"]').onclick = () => done(false);
+    dlg.querySelector('[data-a="1"]').onclick = () => done(true);
+    dlg.oncancel = () => done(false);
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  });
+}
+
+function renderSkeletons(nn = 6) {
+  const list = document.getElementById("list");
+  if (!list) return;
+  list.innerHTML = Array.from({ length: nn }, () => `
+    <article class="card skel">
+      <div><div class="sk sk-title"></div><div class="sk sk-tags"></div>
+        <div class="sk sk-line"></div><div class="sk sk-line short"></div></div>
+      <div class="actions"><div class="sk sk-btn"></div><div class="sk sk-btn"></div></div>
+    </article>`).join("");
+}
+
+function docFiles(p) { return ((latest(p).documents || [])[0] || {}).files || {}; }
+
+function openPreview(p) {
+  const docs = latest(p).documents || [];
+  const opts = [];
+  docs.forEach(d => {
+    const base = docs.length > 1 ? d.label + " · " : "";
+    if (d.files.approval) opts.push([base + "Signed", d.files.approval]);
+    if (d.files.non_approval) opts.push([base + (d.files.approval ? "Unsigned" : "PDF"), d.files.non_approval]);
+  });
+  const wordF = (docFiles(p) || {}).word;
+  if (!opts.length) { toast("No PDF available to preview", "err"); return; }
+  const dlg = document.getElementById("preview");
+  const ed = latest(p);
+  document.getElementById("pvTitle").textContent = p.title;
+  document.getElementById("pvSub").textContent = `${ed.version || "Version 1"} · ${prettyDate(ed.date)}`;
+  const seg = document.getElementById("pvSeg"), frame = document.getElementById("pvFrame"), dl = document.getElementById("pvDownload");
+  let cur = opts[0][1];
+  const draw = () => {
+    frame.src = cur + "#view=FitH";
+    dl.href = cur;
+    seg.innerHTML = opts.map(([lab, src]) =>
+      `<button type="button" class="pv-segbtn${src === cur ? " active" : ""}" data-src="${esc(src)}">${esc(lab)}</button>`).join("") +
+      (wordF ? `<a class="pv-segbtn word" href="${esc(wordF)}" download>Word ↓</a>` : "");
+    seg.querySelectorAll("[data-src]").forEach(b => b.onclick = () => { cur = b.dataset.src; draw(); });
+  };
+  draw();
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+}
+
+function downloadMenu(p) {
+  const docs = latest(p).documents || [];
+  const items = [];
+  docs.forEach(d => {
+    const base = docs.length > 1 ? esc(d.label) + " · " : "";
+    if (d.files.approval) items.push(`<a href="${esc(d.files.approval)}" target="_blank" rel="noopener">${base}Signed PDF ↗</a>`);
+    if (d.files.non_approval) items.push(`<a href="${esc(d.files.non_approval)}" target="_blank" rel="noopener">${base}${d.files.approval ? "Unsigned PDF" : "PDF"} ↗</a>`);
+    if (d.files.word) items.push(`<a href="${esc(d.files.word)}" download>${base}Word ↓</a>`);
+  });
+  return `<div class="dl-menu">
+    <button type="button" class="btn ghost dl-toggle">Download <span class="arrow">▾</span></button>
+    <div class="dl-list" hidden>${items.join("")}</div></div>`;
+}
+
+const STEPS = ["Requested", "In progress", "In review", "Done"];
+function stepperHtml(p) {
+  const st = PENDING.get(p.id);
+  if (!st) return "";
+  const active = st === "change_pending" ? 1 : st === "pending_review" ? 2 : 3;
+  return `<div class="stepper">${STEPS.map((s, i) =>
+    `<div class="step ${i < active ? "done" : i === active ? "active" : ""}"><span class="step-dot"></span><span class="step-lbl">${s}</span></div>`).join("")}</div>`;
+}
+
+function recentBadge(ed) {
+  const m = /(\d{4})-(\d{2})/.exec(ed.date || "");
+  if (!m) return "";
+  const now = new Date();
+  const diff = (now.getFullYear() * 12 + now.getMonth() + 1) - (+m[1] * 12 + +m[2]);
+  return diff >= 0 && diff <= 1 ? '<span class="tag recent">Recently updated</span>' : "";
+}
+
 function card(p) {
   const ed = latest(p);
   const el = document.createElement("article");
@@ -64,7 +167,7 @@ function card(p) {
   const multi = docs.length > 1;
   el.innerHTML = `
     <div>
-      <h2 class="title">${esc(p.title)}${statusBadge(p.id)}</h2>
+      <h2 class="title"><button type="button" class="title-link preview" title="Preview document">${esc(p.title)}</button>${statusBadge(p.id)}${recentBadge(ed)}</h2>
       <div class="tags">
         <span class="tag lang">${esc(p.language || "English")}</span>
         <span class="tag">${esc(ed.version || "Version 1")}</span>
@@ -77,14 +180,25 @@ function card(p) {
         <br><b>Last updated:</b> ${prettyDate(ed.date)} &nbsp;·&nbsp;
         <b>Editions:</b> ${n}
       </div>
+      ${stepperHtml(p)}
     </div>
     <div class="actions">
-      ${docs.map(d => docLinks(d, multi)).join("")}
+      <button type="button" class="btn primary preview">👁 Preview</button>
+      ${downloadMenu(p)}
       <button type="button" class="btn primary edit">Request change or edit</button>
       <button type="button" class="btn ghost history">History</button>
     </div>`;
+  el.querySelectorAll(".preview").forEach(b => b.addEventListener("click", () => openPreview(p)));
   el.querySelector(".edit").addEventListener("click", () => openEditChooser(p));
   el.querySelector(".history").addEventListener("click", () => openHistory(p));
+  const dlt = el.querySelector(".dl-toggle");
+  if (dlt) dlt.addEventListener("click", e => {
+    e.stopPropagation();
+    const list = el.querySelector(".dl-list");
+    const wasHidden = list.hidden;
+    document.querySelectorAll(".dl-list").forEach(l => l.hidden = true);
+    list.hidden = !wasHidden;
+  });
   wireStatusActions(el, p);
   return el;
 }
@@ -144,11 +258,12 @@ function approveWithReview(p) {
   };
   if (eds.length >= 2) {
     const key = `${eds[eds.length - 1].version}__${eds[eds.length - 2].version}`;
-    openCompare(p.id, key, { onApprove: () => {
-      if (confirm(`Approve the changes to "${p.title}"? This clears the request.`)) doApprove();
+    openCompare(p.id, key, { onApprove: async () => {
+      if (await confirmDialog(`Approve the changes to "${p.title}"? This clears the request.`, { ok: "Approve" })) doApprove();
     } });
-  } else if (confirm(`Approve the changes to "${p.title}"? This clears the request.`)) {
-    pendingAction(p.id, "approve");
+  } else {
+    confirmDialog(`Approve the changes to "${p.title}"? This clears the request.`, { ok: "Approve" })
+      .then(ok => { if (ok) pendingAction(p.id, "approve"); });
   }
 }
 
@@ -188,9 +303,12 @@ function wireStatusActions(el, p) {
     badge.classList.add("clickable");
     badge.title = "Clear request";
     badge.addEventListener("click", async () => {
-      if (!confirm(`Clear the change request for "${p.title}"?`)) return;
-      await fetch("api/pending", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ policy: p.id }) });
-      await loadPendingChanges();
+      if (!await confirmDialog(`Clear the change request for "${p.title}"?`, { ok: "Clear request", danger: true })) return;
+      try {
+        await fetch("api/pending", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ policy: p.id }) });
+        await loadPendingChanges();
+        toast("Change request cleared");
+      } catch { toast("Could not clear the request", "err"); }
     });
   }
 }
@@ -802,12 +920,23 @@ function renderQueue() {
   }));
 }
 
+const ACTION_TOAST = {
+  approve: "Change approved ✓",
+  reopen: "Sent back for another round",
+  review: "Marked ready for review",
+};
 async function pendingAction(policy, action) {
-  await fetch("api/pending", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ policy, action }),
-  });
-  await loadPendingChanges();
+  try {
+    const r = await fetch("api/pending", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ policy, action }),
+    });
+    if (!r.ok) throw new Error(r.status);
+    await loadPendingChanges();
+    toast(ACTION_TOAST[action] || "Done");
+  } catch {
+    toast("Something went wrong — please try again", "err");
+  }
 }
 
 function render() {
@@ -1050,6 +1179,7 @@ async function decideUser(id, action, item) {
 }
 
 async function init() {
+  renderSkeletons();
   try {
     // Use embedded data when present (works from file:// with no server),
     // otherwise fetch library.json (served over HTTP / GitHub Pages).
@@ -1085,6 +1215,17 @@ async function init() {
     document.getElementById("reqClose").addEventListener("click",
       () => { const d = document.getElementById("request"); if (d.close) d.close(); });
     document.getElementById("reqSubmit").addEventListener("click", submitRequest);
+    const pvClose = document.getElementById("pvClose");
+    if (pvClose) pvClose.addEventListener("click", () => {
+      const d = document.getElementById("preview");
+      const f = document.getElementById("pvFrame"); if (f) f.src = "about:blank";
+      if (d.close) d.close(); else d.removeAttribute("open");
+    });
+    // Close any open download menu when clicking elsewhere.
+    document.addEventListener("click", e => {
+      if (!e.target.closest(".dl-menu"))
+        document.querySelectorAll(".dl-list").forEach(l => l.hidden = true);
+    });
     initSigPad();
     setupAccount();
     loadPendingChanges();

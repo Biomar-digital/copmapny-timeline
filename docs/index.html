@@ -262,6 +262,25 @@ codex</code></pre>
     </div>
   </dialog>
 
+  <dialog id="preview" class="vh-dialog pv-dialog">
+    <div class="vh-box">
+      <header class="vh-bar">
+        <div>
+          <h2 class="vh-title" id="pvTitle">Preview</h2>
+          <p class="vh-sub" id="pvSub"></p>
+        </div>
+        <div class="pv-head-actions">
+          <div class="pv-seg" id="pvSeg"></div>
+          <a class="btn word" id="pvDownload" download>Download ↓</a>
+          <button type="button" class="vh-close" id="pvClose" aria-label="Close">×</button>
+        </div>
+      </header>
+      <div class="pv-body"><iframe id="pvFrame" class="pv-frame" title="Document preview"></iframe></div>
+    </div>
+  </dialog>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
   <script src="library-data.js"></script>
   <script src="app.js"></script>
 </body>

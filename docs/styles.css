@@ -601,3 +601,85 @@ main { max-width: 900px; margin: 0 auto; padding: 22px; }
 /* Moved (relocated) content — neutral, not a change */
 .cmp-row.cmp-mov .cmp-cell { color: #8aa0b8; background: #f7fafc; }
 .cmp-row.cmp-mov .cmp-cell::before { content: "↕ "; color: #b6c6d6; }
+
+/* ===== UX batch: toasts, confirm, skeletons, preview, downloads, stepper ==== */
+
+/* Toasts */
+.toasts { position: fixed; right: 18px; bottom: 18px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast { display: flex; align-items: center; gap: 10px; min-width: 220px; max-width: 360px;
+  padding: 11px 14px; border-radius: 10px; background: var(--navy); color: #fff;
+  font-size: 13px; font-weight: 600; box-shadow: 0 6px 20px rgba(28,64,118,.28);
+  opacity: 0; transform: translateY(10px); transition: opacity .22s, transform .22s; pointer-events: auto; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.err { background: #b3261e; }
+.toast.info { background: #2b579a; }
+.toast-i { display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,.2);
+  font-size: 12px; font-weight: 800; flex: 0 0 auto; }
+
+/* Confirm dialog */
+.confirm-dlg { border: none; border-radius: 14px; padding: 0; box-shadow: 0 18px 50px rgba(13,38,76,.32); }
+.confirm-dlg::backdrop { background: rgba(13,38,76,.45); }
+.confirm-box { padding: 22px 24px; max-width: 400px; }
+.confirm-msg { margin: 0 0 18px; color: var(--navy); font-size: 14.5px; line-height: 1.55; }
+.confirm-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.confirm-actions .btn { cursor: pointer; font-family: inherit; }
+.btn.danger { background: #b3261e; color: #fff; border-color: #b3261e; }
+.btn.danger:hover { background: #8f1d17; }
+
+/* Skeleton loading cards */
+.card.skel { pointer-events: none; }
+.sk { border-radius: 7px; background: linear-gradient(90deg, #eaf0f6 25%, #f4f8fb 37%, #eaf0f6 63%);
+  background-size: 400% 100%; animation: sk 1.3s ease infinite; }
+@keyframes sk { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+.sk-title { height: 20px; width: 55%; margin-bottom: 12px; }
+.sk-tags { height: 14px; width: 40%; margin-bottom: 14px; }
+.sk-line { height: 12px; width: 80%; margin-bottom: 8px; }
+.sk-line.short { width: 50%; }
+.sk-btn { height: 36px; width: 100%; border-radius: 8px; margin-bottom: 2px; }
+
+/* Clickable title (opens preview) */
+.title-link { background: none; border: none; padding: 0; margin: 0; cursor: pointer;
+  font: inherit; color: inherit; text-align: left; }
+.title-link:hover { color: var(--ocean); text-decoration: underline; text-underline-offset: 2px; }
+
+/* Preview dialog */
+.pv-dialog { width: 92vw; max-width: 1100px; }
+.pv-head-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.pv-head-actions .btn.word { padding: 6px 12px; text-decoration: none; }
+.pv-body { height: 82vh; background: #eef3f8; }
+.pv-frame { width: 100%; height: 100%; border: none; display: block; background: #fff; }
+.pv-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.pv-segbtn { border: 1px solid var(--sky); background: #fff; color: var(--navy);
+  font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 11px;
+  border-radius: 20px; cursor: pointer; text-decoration: none; }
+.pv-segbtn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+.pv-segbtn.word { color: #2b579a; border-color: #2b579a; }
+
+/* Download menu */
+.dl-menu { position: relative; }
+.dl-toggle { width: 100%; cursor: pointer; font-family: inherit; }
+.dl-list { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20;
+  background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 6px;
+  box-shadow: 0 10px 28px rgba(28,64,118,.2); display: flex; flex-direction: column; gap: 2px; }
+.dl-list a { display: block; padding: 8px 10px; border-radius: 7px; font-size: 12.5px;
+  font-weight: 600; color: var(--navy); text-decoration: none; }
+.dl-list a:hover { background: var(--bg); }
+
+/* Change-status stepper */
+.stepper { display: flex; align-items: flex-start; gap: 0; margin-top: 12px; max-width: 340px; }
+.step { flex: 1; text-align: center; position: relative; font-size: 10.5px; color: #9db1c6; }
+.step:not(:first-child)::before { content: ""; position: absolute; top: 6px; left: -50%;
+  width: 100%; height: 2px; background: var(--line); z-index: 0; }
+.step.done:not(:first-child)::before, .step.active:not(:first-child)::before { background: var(--navy); }
+.step-dot { position: relative; z-index: 1; display: block; width: 13px; height: 13px;
+  margin: 0 auto 5px; border-radius: 50%; background: #fff; border: 2px solid var(--line); }
+.step.done .step-dot { background: var(--navy); border-color: var(--navy); }
+.step.active .step-dot { background: #fff; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(28,64,118,.15); }
+.step-lbl { display: block; line-height: 1.2; }
+.step.done .step-lbl, .step.active .step-lbl { color: var(--navy); font-weight: 600; }
+
+/* Recently-updated tag */
+.tag.recent { background: #e6f6ec; color: #14522f; border: 1px solid #b6e6c6;
+  margin-left: 8px; vertical-align: middle; }
