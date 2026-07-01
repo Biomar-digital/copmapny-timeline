@@ -512,3 +512,9 @@ main { max-width: 900px; margin: 0 auto; padding: 22px; }
 .pending-badge.newp { background: var(--crisp); color: var(--navy); }
 .sfilter.sf-done::before { background: #2e9e6b; }
 .sfilter.sf-new_policy::before { background: var(--sky); }
+
+/* New-policy request emphasis */
+.req-card.req-new { border-color: #f5c518; border-left: 4px solid #f5c518; background: #fffdf3; }
+.req-newbanner { font-size: 11px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
+  color: #7a5c00; margin: -2px 0 10px; }
+.reqbtn .qbadge.newreq { background: #f5c518; color: #5a4a00; }

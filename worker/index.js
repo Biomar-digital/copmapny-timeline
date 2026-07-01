@@ -232,8 +232,11 @@ async function ghCreateIssue(env, title, body, labels) {
 // Send an email via Brevo (preferred) or Resend, to `to` (defaults to the admin
 // NOTIFY_EMAIL). Credentials live only in Worker secrets, never in the repo.
 async function sendEmail(env, subject, html, to) {
-  const recipient = to || env.NOTIFY_EMAIL;
-  if (!recipient) return { ok: false, skipped: true };
+  // NOTIFY_EMAIL (or an explicit `to`) may be a comma-separated list — every
+  // address receives the notification.
+  const recipients = String(to || env.NOTIFY_EMAIL || "")
+    .split(",").map((s) => s.trim()).filter(Boolean);
+  if (!recipients.length) return { ok: false, skipped: true };
   // Parse "Name <addr>" or a bare address for the sender.
   const fromRaw = env.BREVO_FROM || env.RESEND_FROM || `BioMar Policies <${env.NOTIFY_EMAIL || "onboarding@resend.dev"}>`;
   const m = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(fromRaw);
@@ -244,7 +247,7 @@ async function sendEmail(env, subject, html, to) {
     const r = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({ sender: { name: fromName, email: fromAddr }, to: [{ email: recipient }], subject, htmlContent: html }),
+      body: JSON.stringify({ sender: { name: fromName, email: fromAddr }, to: recipients.map((e) => ({ email: e })), subject, htmlContent: html }),
     });
     return { ok: r.ok, status: r.status };
   }
@@ -252,7 +255,7 @@ async function sendEmail(env, subject, html, to) {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: fromRaw, to: [recipient], subject, html }),
+      body: JSON.stringify({ from: fromRaw, to: recipients, subject, html }),
     });
     return { ok: r.ok, status: r.status };
   }

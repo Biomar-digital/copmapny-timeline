@@ -750,6 +750,16 @@ function renderChips() {
   if (clr) clr.addEventListener("click", () => { OWNER_FILTER = ""; APPROVER_FILTER = ""; renderChips(); render(); });
 }
 
+// Show a count of open requests (new-policy + pending) on the Requests button.
+async function loadOpenRequestCount() {
+  try {
+    const d = await (await fetch("api/admin/requests", { cache: "no-store" })).json();
+    const open = (d.requests || []).filter(r => r.current_status !== "done").length;
+    const b = document.getElementById("reqCount");
+    if (b) { b.textContent = open; b.hidden = open === 0; }
+  } catch {}
+}
+
 // ---- account + admin (bell / approvals) ----
 
 const EVENT_LABEL = {
@@ -765,6 +775,7 @@ async function setupAccount() {
   IS_ADMIN = me.role === "admin";
   const reqLink = document.getElementById("requestsLink");
   if (reqLink) reqLink.hidden = !IS_ADMIN;
+  if (IS_ADMIN) loadOpenRequestCount();
   document.getElementById("acctName").textContent = me.name;
   const logout = document.getElementById("logoutBtn");
   logout.hidden = false;

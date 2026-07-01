@@ -80,13 +80,13 @@ function requestCard(r) {
   const hl = highlights.length
     ? `<div class="req-hl"><div class="req-sec">Highlights on the document (${highlights.length})</div>
         <ul>${highlights.map((h) => `<li>${esc(h)}</li>`).join("")}</ul></div>` : "";
-  return `<article class="req-card" data-status="${esc(r.current_status)}">
+  return `<article class="req-card${r.kind === "new" ? " req-new" : ""}" data-status="${esc(r.current_status)}">
+    ${r.kind === "new" ? '<div class="req-newbanner">✦ New policy requested</div>' : ""}
     <div class="req-head">
       <div>
         <span class="req-title">${esc(title)}</span>
         <span class="pending-badge ${s.cls}">${esc(s.label)}</span>
         ${varBadge}
-        ${r.kind === "new" ? '<span class="req-kind">New policy</span>' : ""}
       </div>
       <div class="req-when">${esc(fmtTime(r.created_at))}</div>
     </div>
@@ -114,9 +114,13 @@ async function fillComments() {
   }
 }
 
+const PRIORITY = { new_policy: 0, change_pending: 1, pending_review: 2, done: 3 };
+
 function render() {
   const list = document.getElementById("list");
-  const shown = FILTER ? REQUESTS.filter((r) => r.current_status === FILTER) : REQUESTS;
+  const shown = (FILTER ? REQUESTS.filter((r) => r.current_status === FILTER) : REQUESTS.slice())
+    .sort((a, b) => (PRIORITY[a.current_status] ?? 9) - (PRIORITY[b.current_status] ?? 9) ||
+      (a.created_at < b.created_at ? 1 : -1));
   document.getElementById("empty").hidden = shown.length > 0;
   list.innerHTML = shown.map(requestCard).join("");
   document.getElementById("meta").textContent =
