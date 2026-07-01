@@ -24,12 +24,17 @@ CMP_DIR = os.path.join(REPO, "docs", "files", "cmp")
 DPI = 120
 
 
+_CARD = ("Version history", "Owner and approver", "Powered by Partnership",
+         "Driven by Innovation")
 def is_furniture(t, title):
     tl = t.strip()
     if not tl or tl == "BioMar Group" or tl == title:
         return True
     if "BioMar Group A/S" in tl or "www.biomar.com" in tl:
         return True
+    if tl in _CARD or tl.startswith(("Owner:", "Approver:", "Approval date:")) or \
+       re.match(r"^Version\s+[\d.]+:", tl):
+        return True                      # back-cover version/owner card — not content
     return bool(re.fullmatch(r"\d{1,3}", tl))
 
 
