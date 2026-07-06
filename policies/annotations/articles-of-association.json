@@ -538,5 +538,23 @@
     "author": "Marianne Niviaq Thomsen",
     "text": "This needs to be on a separat, independent line, without any numbering as in the original document.",
     "created_at": "2026-07-06T08:30:14.795Z"
+  },
+  {
+    "id": "55968cdd-a56c-4223-a501-6e2830a00fd7",
+    "file": "files/Articles_of_Association__Policy_2026-05_non-approval.pdf",
+    "page": 2,
+    "quote": "Share capital and shares",
+    "rects": [
+      {
+        "x": 0.0826297460432424,
+        "y": 0.2852115096440699,
+        "w": 0.22926211210165076,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 2__2026-05",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Can you make the headings bigger?",
+    "created_at": "2026-07-06T08:31:58.882Z"
   }
 ]
