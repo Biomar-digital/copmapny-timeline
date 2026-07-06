@@ -135,6 +135,8 @@ def main():
                     meta_args += ["--lead-title"]
                 if p.get("body_size"):
                     meta_args += ["--body-size", str(p["body_size"])]
+                if p.get("head_scale"):
+                    meta_args += ["--head-scale", str(p["head_scale"])]
                 if p.get("footer_note"):
                     meta_args += ["--footer-note", p["footer_note"]]
                 if ed.get("approval_date"):

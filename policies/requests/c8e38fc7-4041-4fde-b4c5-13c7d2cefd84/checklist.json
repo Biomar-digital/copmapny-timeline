@@ -1,0 +1,24 @@
+[
+  {
+    "id": "letters-no-bullet",
+    "label": "Lettered lists on p.5 use the letters as markers (no bullet dots)",
+    "page": 5,
+    "present": ["a. The notice convening the general meeting", "e. The forms to be used for voting by proxy or by postal vote"],
+    "absent": ["•"]
+  },
+  {
+    "id": "adoption-line",
+    "label": "Adoption statement on p.7 stands on its own line, unnumbered",
+    "page": 7,
+    "present": [
+      "As adopted at the extraordinary general meeting on 13 May 2026 and latest amended by decision of the board of directors on 19 May 2026.",
+      "financial year is the calendar year."
+    ]
+  },
+  {
+    "id": "headings-bigger",
+    "label": "Section headings enlarged for legibility (p.2)",
+    "page": 2,
+    "present": ["2 Share capital and shares", "3 Authorisations to increase share capital"]
+  }
+]

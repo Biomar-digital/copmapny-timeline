@@ -73,6 +73,10 @@ CELL_GAP = ParagraphStyle("CellGap", parent=CELL, spaceBefore=3.5)      # paragr
 
 _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
 _LONG = re.compile(r"\S{28,}")
+# A list item already lettered ("a. …" / "b) …") carries its own marker, so it
+# is rendered as an indented item WITHOUT a bullet glyph (the letter is the
+# marker) — avoids the redundant "• a." double marking.
+_LETTERED = re.compile(r"^[a-z][.)]\s")
 
 
 def _breakable(t):
@@ -438,7 +442,10 @@ def _col_flowables(blocks):
         if isinstance(sb, Heading):
             out.append(Paragraph(escape(sb.text), H1 if sb.level == 1 else H2))
         elif isinstance(sb, Bullet):
-            out.append(Paragraph(_fmt(sb.text), COL_BULLET, bulletText="•"))
+            if _LETTERED.match(sb.text.strip()):
+                out.append(Paragraph(_fmt(sb.text), COL_BULLET))
+            else:
+                out.append(Paragraph(_fmt(sb.text), COL_BULLET, bulletText="•"))
         elif getattr(sb, "runs", None):
             out.append(Paragraph(_body_markup(sb), COL_BODY))
         elif getattr(sb, "bold", False):
@@ -593,7 +600,10 @@ def _story(policy):
             else:
                 flow.append(Paragraph(_fmt(b.text), BODY if justify else BODY_LEFT))
         elif isinstance(b, Bullet):
-            flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
+            if _LETTERED.match(b.text.strip()):
+                flow.append(Paragraph(_fmt(b.text), BULLET))          # letter is the marker
+            else:
+                flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):
             if _is_signature_form(b):
                 flow.extend(_signature_card_flowables(b))
@@ -849,8 +859,22 @@ def _set_body_size(size):
     COL_BODY_BOLD = ParagraphStyle("ColBodyBold", parent=COL_BODY, fontName=B.F_DEMI)
 
 
+def _set_heading_size(scale):
+    """Scale the section-heading styles (H1/H2) up for a policy whose headings
+    should read larger than the default (e.g. the Articles of Association, whose
+    section titles are only 1 pt above the body at the default size)."""
+    global H1, H2
+    H1 = ParagraphStyle("H1", fontName=B.F_DEMI, fontSize=14 * scale,
+                        leading=16 * scale, textColor=B.BIOMAR_BLUE,
+                        spaceBefore=14.5, spaceAfter=15, keepWithNext=1)
+    H2 = ParagraphStyle("H2", fontName=B.F_DEMI, fontSize=12 * scale,
+                        leading=14 * scale, textColor=B.BIOMAR_BLUE,
+                        spaceBefore=5.3, spaceAfter=6.2, keepWithNext=1)
+
+
 def build_pdf(policy, out_path):
     _set_body_size(getattr(policy, "body_size", 11) or 11)
+    _set_heading_size(getattr(policy, "head_scale", 1.0) or 1.0)
     doc = BaseDocTemplate(
         out_path, pagesize=(B.PAGE_W, B.PAGE_H),
         leftMargin=B.MARGIN_L, rightMargin=B.MARGIN_R,

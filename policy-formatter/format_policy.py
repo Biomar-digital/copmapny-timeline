@@ -40,6 +40,8 @@ def main(argv=None):
                     help="Repeat the title as a bold lead heading on the first body page")
     ap.add_argument("--body-size", dest="body_size", type=float, default=11,
                     help="Body text point size (default 11; the Code of Conduct uses 10)")
+    ap.add_argument("--head-scale", dest="head_scale", type=float, default=1.0,
+                    help="Scale factor for section headings (default 1.0; >1 makes them bigger)")
     ap.add_argument("--footer-note", dest="footer_note", default="",
                     help="Small disclaimer line under the footer address")
     ap.add_argument("--version-date", dest="version_date", default="",
@@ -60,6 +62,7 @@ def main(argv=None):
                         adopted_on=args.adopted_on, effective_on=args.effective_on,
                         signatures=args.signatures, cover_year=args.cover_year,
                         lead_title=args.lead_title, body_size=args.body_size,
+                        head_scale=args.head_scale,
                         footer_note=args.footer_note, version_date=args.version_date,
                         has_signed=args.has_signed)
 
