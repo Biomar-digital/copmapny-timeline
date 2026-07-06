@@ -64,5 +64,41 @@
     "author": "Marianne Niviaq Thomsen",
     "text": "Remove bullet from this item.",
     "created_at": "2026-07-06T09:19:08.840Z"
+  },
+  {
+    "id": "f382cf0e-f4ef-46b9-87d8-11ce242b2e07",
+    "file": "files/Corporate_Governance_Statement__Policy_2026-06_non-approval.pdf",
+    "page": 11,
+    "quote": "the number of shares, options, warrants, etc. that the\nmember holds in the company and its group companies\nand any changes in such holdings during t",
+    "rects": [
+      {
+        "x": 0.08319884894324435,
+        "y": 0.5830159886718267,
+        "w": 0.47618099674807024,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.08319884894324435,
+        "y": 0.5968875018903201,
+        "w": 0.5091566856565106,
+        "h": 0.014077729966042975
+      },
+      {
+        "x": 0.08319884894324435,
+        "y": 0.5960076437674425,
+        "w": 0.5091566856565106,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.08319884894324435,
+        "y": 0.609109281128418,
+        "w": 0.38201729015574265,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1.1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Please add bullet",
+    "created_at": "2026-07-06T09:20:01.303Z"
   }
 ]
