@@ -16,5 +16,53 @@
     "author": "Marianne Niviaq Thomsen",
     "text": "It appears that the section \"Management structure\" and the following sections have been moved up before the table - is there a specific reason for this? If do to my comments, I apologise for any confusion. Please revert to original structure.",
     "created_at": "2026-07-06T09:17:29.044Z"
+  },
+  {
+    "id": "9ab5db68-a140-49ac-8bd2-3303f96d4e16",
+    "file": "files/Corporate_Governance_Statement__Policy_2026-06_non-approval.pdf",
+    "page": 10,
+    "quote": "Even if a member of the board of directors does not fall\nwithin the above-stated criteria, the board of directors\nmay for other reasons decide that the member in\nquestion is not indep",
+    "rects": [
+      {
+        "x": 0.09378740600270265,
+        "y": 0.6899187506014656,
+        "w": 0.5143633354032587,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.09999805564737221,
+        "y": 0.703790263819959,
+        "w": 0.4888793662868698,
+        "h": 0.014077729966042975
+      },
+      {
+        "x": 0.09999805564737221,
+        "y": 0.7029104056970813,
+        "w": 0.4888793662868698,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.09999805564737221,
+        "y": 0.7168919011809346,
+        "w": 0.443972035955941,
+        "h": 0.014077729966042975
+      },
+      {
+        "x": 0.09999805564737221,
+        "y": 0.7160120430580569,
+        "w": 0.443972035955941,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.09999805564737221,
+        "y": 0.7291136804190325,
+        "w": 0.19192378198460072,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1.1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Remove bullet from this item.",
+    "created_at": "2026-07-06T09:19:08.840Z"
   }
 ]
