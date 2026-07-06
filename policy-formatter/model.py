@@ -29,6 +29,7 @@ class Body:
     text: str
     bold: bool = False
     runs: list = None        # optional [(text, bold)] for run-in bold labels
+    italic: bool = False     # whole paragraph set in italic (e.g. a sub-heading)
 
 @dataclass
 class Bullet:
@@ -178,6 +179,12 @@ def _body_from_runs(item, text):
     allb = bool(rlist) and all(b for _, b in rlist)
     if anyb and not allb:
         return Body(text=text, runs=rlist)
+    # A paragraph fully in italic (and not bold) is a run-in sub-heading; keep
+    # the italic so the generator can render it (bold takes precedence).
+    itals = [bool(r.italic) for r in item.runs if r.text and r.text.strip()]
+    alli = bool(itals) and all(itals)
+    if alli and not allb:
+        return Body(text=text, italic=True)
     return Body(text=text, bold=allb)
 
 

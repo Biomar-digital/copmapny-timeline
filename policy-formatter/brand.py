@@ -90,12 +90,17 @@ FONT_FALLBACKS = {
     "Regular": ["AvenirNextLTPro-Regular.ttf", "Outfit-Regular.ttf"],
     "Demi":    ["AvenirNextLTPro-Demi.ttf",    "Outfit-Bold.ttf"],
     "Bold":    ["AvenirNextLTPro-Bold.ttf",    "Outfit-Bold.ttf"],
+    # Avenir has no bundled italic; a 12° oblique synthesised from Regular
+    # (assets/fonts/AvenirNextLTPro-Italic.ttf) stands in, falling back to the
+    # upright Regular if that file is ever missing.
+    "Italic":  ["AvenirNextLTPro-Italic.ttf",  "AvenirNextLTPro-Regular.ttf", "Outfit-Regular.ttf"],
 }
 
 # Public font names used by the stylesheet.
-F_LIGHT, F_REGULAR, F_DEMI, F_BOLD = (
-    "Brand-Light", "Brand-Regular", "Brand-Demi", "Brand-Bold")
-_PSNAMES = {"Light": F_LIGHT, "Regular": F_REGULAR, "Demi": F_DEMI, "Bold": F_BOLD}
+F_LIGHT, F_REGULAR, F_DEMI, F_BOLD, F_ITALIC = (
+    "Brand-Light", "Brand-Regular", "Brand-Demi", "Brand-Bold", "Brand-Italic")
+_PSNAMES = {"Light": F_LIGHT, "Regular": F_REGULAR, "Demi": F_DEMI,
+            "Bold": F_BOLD, "Italic": F_ITALIC}
 
 _registered = False
 

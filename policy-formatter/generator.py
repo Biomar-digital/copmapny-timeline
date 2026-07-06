@@ -43,6 +43,7 @@ BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
                       allowWidows=0, allowOrphans=0)
 BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
 BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
+BODY_ITALIC = ParagraphStyle("BodyItalic", parent=BODY, fontName=B.F_ITALIC, alignment=TA_LEFT)
 # Document title repeated as a lead heading on the first content page (some
 # originals, e.g. the Code of Conduct, open the body with the title in large bold).
 LEAD_TITLE = ParagraphStyle("LeadTitle", fontName=B.F_BOLD, fontSize=19, leading=22,
@@ -73,10 +74,10 @@ CELL_GAP = ParagraphStyle("CellGap", parent=CELL, spaceBefore=3.5)      # paragr
 
 _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
 _LONG = re.compile(r"\S{28,}")
-# A list item already lettered ("a. …" / "b) …") carries its own marker, so it
-# is rendered as an indented item WITHOUT a bullet glyph (the letter is the
+# A list item already lettered ("a. …", "b) …", "(a) …") carries its own marker,
+# so it is rendered as an indented item WITHOUT a bullet glyph (the letter is the
 # marker) — avoids the redundant "• a." double marking.
-_LETTERED = re.compile(r"^[a-z][.)]\s")
+_LETTERED = re.compile(r"^\(?[a-z][.)]\s")
 
 
 def _breakable(t):
@@ -597,6 +598,10 @@ def _story(policy):
             justify = len(b.text) >= 90 and "://" not in b.text
             if getattr(b, "runs", None):
                 flow.append(Paragraph(_body_markup(b), BODY if justify else BODY_LEFT))
+            elif getattr(b, "italic", False):
+                # Whole-line italic sub-heading: keep the leading number inline
+                # (no bold) and set the entire line in the oblique face.
+                flow.append(Paragraph(_fmt(b.text, number=False), BODY_ITALIC))
             elif getattr(b, "bold", False):
                 flow.append(Paragraph(_fmt(b.text), BODY_BOLD))
             else:
@@ -857,7 +862,7 @@ def _set_body_size(size):
     """Rebuild the body/​bullet/​column paragraph styles for a given point size so
     a policy can match its original's density (e.g. the Code of Conduct is set at
     10pt, the rest at the default 11pt). Spacing and leading scale with the size."""
-    global BODY, BODY_LEFT, BODY_BOLD, BULLET, COL_BODY, COL_BULLET, COL_BODY_BOLD
+    global BODY, BODY_LEFT, BODY_BOLD, BODY_ITALIC, BULLET, COL_BODY, COL_BULLET, COL_BODY_BOLD
     BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=size,
                           leading=size * 16 / 11.0, textColor=B.BIOMAR_BLUE,
                           alignment=TA_JUSTIFY, spaceAfter=size * 11.4 / 11.0,
@@ -865,6 +870,7 @@ def _set_body_size(size):
                           allowWidows=0, allowOrphans=0)
     BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
     BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
+    BODY_ITALIC = ParagraphStyle("BodyItalic", parent=BODY, fontName=B.F_ITALIC, alignment=TA_LEFT)
     BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
                             leftIndent=16, bulletIndent=2, spaceAfter=size * 6 / 11.0)
     COL_BODY = ParagraphStyle("ColBody", parent=BODY_LEFT, fontSize=size,

@@ -40,9 +40,10 @@
     "policy": "remuneration-policy",
     "request_id": "cc5c486b-1cc6-4cd5-af34-038c636787db",
     "title": "Change: remuneration-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783331459435
+    "created_at": 1783331459435,
+    "updated_at": 1783331459435
   }
 ]
