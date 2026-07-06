@@ -134,9 +134,24 @@ function downloadMenu(p) {
     if (d.files.non_approval) items.push(`<a href="${esc(d.files.non_approval)}" target="_blank" rel="noopener">${base}${d.files.approval ? "Unsigned PDF" : "PDF"} ↗</a>`);
     if (d.files.word) items.push(`<a href="${esc(d.files.word)}" download>${base}Word ↓</a>`);
   });
-  return `<div class="dl-menu">
-    <button type="button" class="btn ghost dl-toggle">Download <span class="arrow">▾</span></button>
-    <div class="dl-list" hidden>${items.join("")}</div></div>`;
+  return `<div class="pop">
+    <button type="button" class="btn ghost pop-toggle">Download <span class="arrow">▾</span></button>
+    <div class="pop-list" hidden>${items.join("")}</div></div>`;
+}
+
+function closePops() {
+  document.querySelectorAll(".pop-list").forEach(l => l.hidden = true);
+}
+
+// Overflow menu: the less-frequent per-policy actions, tucked behind a "⋯" so
+// the card shows just View + Download by default.
+function moreMenu(p) {
+  return `<div class="pop more">
+    <button type="button" class="btn ghost pop-toggle kebab" aria-label="More actions" title="More actions">⋯</button>
+    <div class="pop-list" hidden>
+      <button type="button" data-more="edit">Request change or edit</button>
+      <button type="button" data-more="history">Version history</button>
+    </div></div>`;
 }
 
 const STEPS = ["Requested", "In progress", "In review", "Done"];
@@ -167,7 +182,7 @@ function card(p) {
   const multi = docs.length > 1;
   el.innerHTML = `
     <div>
-      <h2 class="title"><button type="button" class="title-link preview" title="Preview document">${esc(p.title)}</button>${statusBadge(p.id)}${recentBadge(ed)}</h2>
+      <h2 class="title"><button type="button" class="title-link view" title="Preview document">${esc(p.title)}</button>${statusBadge(p.id)}${recentBadge(ed)}</h2>
       <div class="tags">
         <span class="tag lang">${esc(p.language || "English")}</span>
         <span class="tag">${esc(ed.version || "Version 1")}</span>
@@ -183,22 +198,26 @@ function card(p) {
       ${stepperHtml(p)}
     </div>
     <div class="actions">
-      <button type="button" class="btn primary preview">👁 Preview</button>
-      ${downloadMenu(p)}
-      <button type="button" class="btn primary edit">Request change or edit</button>
-      <button type="button" class="btn ghost history">History</button>
+      <button type="button" class="btn primary view">View</button>
+      <div class="act-row">
+        ${downloadMenu(p)}
+        ${moreMenu(p)}
+      </div>
     </div>`;
-  el.querySelectorAll(".preview").forEach(b => b.addEventListener("click", () => openPreview(p)));
-  el.querySelector(".edit").addEventListener("click", () => openEditChooser(p));
-  el.querySelector(".history").addEventListener("click", () => openHistory(p));
-  const dlt = el.querySelector(".dl-toggle");
-  if (dlt) dlt.addEventListener("click", e => {
+  el.querySelectorAll(".view").forEach(b => b.addEventListener("click", () => openPreview(p)));
+  // Dropdown toggles (Download, ⋯ More): open this one, close any others.
+  el.querySelectorAll(".pop-toggle").forEach(t => t.addEventListener("click", e => {
     e.stopPropagation();
-    const list = el.querySelector(".dl-list");
+    const list = t.parentElement.querySelector(".pop-list");
     const wasHidden = list.hidden;
-    document.querySelectorAll(".dl-list").forEach(l => l.hidden = true);
+    document.querySelectorAll(".pop-list").forEach(l => l.hidden = true);
     list.hidden = !wasHidden;
-  });
+  }));
+  const more = el.querySelector(".more");
+  if (more) {
+    more.querySelector('[data-more="edit"]').addEventListener("click", () => { closePops(); openEditChooser(p); });
+    more.querySelector('[data-more="history"]').addEventListener("click", () => { closePops(); openHistory(p); });
+  }
   wireStatusActions(el, p);
   return el;
 }
@@ -1221,10 +1240,9 @@ async function init() {
       const f = document.getElementById("pvFrame"); if (f) f.src = "about:blank";
       if (d.close) d.close(); else d.removeAttribute("open");
     });
-    // Close any open download menu when clicking elsewhere.
+    // Close any open card dropdown (Download / ⋯ More) when clicking elsewhere.
     document.addEventListener("click", e => {
-      if (!e.target.closest(".dl-menu"))
-        document.querySelectorAll(".dl-list").forEach(l => l.hidden = true);
+      if (!e.target.closest(".pop")) closePops();
     });
     initSigPad();
     setupAccount();
