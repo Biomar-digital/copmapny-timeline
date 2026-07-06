@@ -1,0 +1,20 @@
+[
+  {
+    "id": "e1a9318b-5b89-4af4-8f42-5f729706f3b8",
+    "file": "files/Corporate_Governance_Statement__Policy_2026-06_non-approval.pdf",
+    "page": 2,
+    "quote": "Management structu",
+    "rects": [
+      {
+        "x": 0.07139662849254341,
+        "y": 0.39561995628204955,
+        "w": 0.19088678125789893,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1.1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "It appears that the section \"Management structure\" and the following sections have been moved up before the table - is there a specific reason for this? If do to my comments, I apologise for any confusion. Please revert to original structure.",
+    "created_at": "2026-07-06T09:17:29.044Z"
+  }
+]
