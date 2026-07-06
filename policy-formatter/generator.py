@@ -726,6 +726,19 @@ def _draw_back_cover(c, doc):
         _draw_version_card(c, policy)
 
 
+def _fill_round_rect(c, x, y, w, h, r):
+    """Fill a rounded rectangle from axis-aligned rectangles + corner circles
+    rather than one compound roundRect path. Chrome's embedded PDF viewer
+    (PDFium) can mis-rasterise a single roundRect fill at certain zoom levels,
+    leaving a diagonal navy wedge across the card; these primitives rasterise
+    reliably. The visual result is identical."""
+    c.rect(x + r, y, w - 2 * r, h, stroke=0, fill=1)
+    c.rect(x, y + r, w, h - 2 * r, stroke=0, fill=1)
+    for ccx, ccy in ((x + r, y + r), (x + w - r, y + r),
+                     (x + r, y + h - r), (x + w - r, y + h - r)):
+        c.circle(ccx, ccy, r, stroke=0, fill=1)
+
+
 def _draw_version_card(c, policy):
     # White "Version history / Owner and approver" card, drawn on the back
     # cover only when approval data is supplied. Layout (column x-positions,
@@ -735,7 +748,7 @@ def _draw_version_card(c, policy):
     cy = B.PAGE_H - 150 - ch
     right = cx + cw
     c.setFillColor(B.WHITE)
-    c.roundRect(cx, cy, cw, ch, 10, stroke=0, fill=1)
+    _fill_round_rect(c, cx, cy, cw, ch, 10)
 
     # Absolute column geometry from the template card.
     L_LABEL_R, L_VALUE = 199.0, 201.5   # left column: label right-edge, value
