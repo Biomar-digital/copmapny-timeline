@@ -514,5 +514,29 @@
     "author": "Marianne Niviaq Thomsen",
     "text": "Please amend to remove the bullets, so the numbering only consist of the letters.",
     "created_at": "2026-07-06T08:28:53.528Z"
+  },
+  {
+    "id": "595df659-2d31-436e-8b37-3b124bab5378",
+    "file": "files/Articles_of_Association__Policy_2026-05_non-approval.pdf",
+    "page": 7,
+    "quote": "ear. As adopted at the extraordinary general\nmeeting on 13 May 2026 and latest amended by decision of the board of directors on 19 May",
+    "rects": [
+      {
+        "x": 0.5679476811164473,
+        "y": 0.4307180467149672,
+        "w": 0.4222087299002547,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.07139662849254341,
+        "y": 0.449813717538047,
+        "w": 0.8527083768787307,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 2__2026-05",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "This needs to be on a separat, independent line, without any numbering as in the original document.",
+    "created_at": "2026-07-06T08:30:14.795Z"
   }
 ]
