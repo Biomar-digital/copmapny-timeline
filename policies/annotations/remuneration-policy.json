@@ -34,5 +34,23 @@
     "author": "Marianne Niviaq Thomsen",
     "text": "Please make bold and add space between number and heading",
     "created_at": "2026-07-06T09:46:00.461Z"
+  },
+  {
+    "id": "4cc62206-af19-4c75-8d50-36002fd5bb8c",
+    "file": "files/Remuneration_Policy__Policy_2026-06_non-approval.pdf",
+    "page": 5,
+    "quote": "4.3.5Long-term incentives",
+    "rects": [
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7496116251254485,
+        "w": 0.23596579944488733,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1.1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Same as above",
+    "created_at": "2026-07-06T09:46:18.443Z"
   }
 ]
