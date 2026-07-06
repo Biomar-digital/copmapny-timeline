@@ -1,0 +1,23 @@
+[
+  {
+    "id": "table-order",
+    "label": "Table restored to original position (before 'Management structure')",
+    "present": ["Management structure", "The composition, organisation and evaluation of the board of directors"]
+  },
+  {
+    "id": "p10-remove-bullet",
+    "label": "p.10 'Even if a member of the board...' no longer a bullet",
+    "present": ["Even if a member of the board of directors does not fall"],
+    "absent": ["• Even if a member of the board of directors does not fall"]
+  },
+  {
+    "id": "p11-add-bullet",
+    "label": "p.11 'the number of shares, options, warrants...' is now a bullet",
+    "present": ["• the number of shares, options, warrants"]
+  },
+  {
+    "id": "p9-add-bullet",
+    "label": "p.9 'the composition of and diversity on the board' is now a bullet",
+    "present": ["• the composition of and diversity on the board"]
+  }
+]

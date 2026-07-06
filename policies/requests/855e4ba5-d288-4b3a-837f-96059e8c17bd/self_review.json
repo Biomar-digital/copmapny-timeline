@@ -1,0 +1,69 @@
+{
+  "request_id": "855e4ba5-d288-4b3a-837f-96059e8c17bd",
+  "policy": "corporate-governance-statement",
+  "generated_at": "2026-07-06 10:03 UTC",
+  "overall": "pass",
+  "summary": "10 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "18 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Signed + Unsigned)",
+      "status": "pass",
+      "detail": "produced: Signed + Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "21/21 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:table-order",
+      "label": "Table restored to original position (before 'Management structure')",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:p10-remove-bullet",
+      "label": "p.10 'Even if a member of the board...' no longer a bullet",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:p11-add-bullet",
+      "label": "p.11 'the number of shares, options, warrants...' is now a bullet",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:p9-add-bullet",
+      "label": "p.9 'the composition of and diversity on the board' is now a bullet",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}

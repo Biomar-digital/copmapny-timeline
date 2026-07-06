@@ -198,8 +198,10 @@ def _header_rows(rows, ncols, hdr):
 
 _REC = re.compile(r"(The [Cc]ommittee recommends)")
 def _bold_rec(markup):
-    """Render 'The Committee recommends' in Demi (bold) inside recommendation cells."""
-    return _REC.sub(rf'<font name="{B.F_DEMI}">\1</font>', markup)
+    """Render 'The Committee recommends' in Demi (bold) inside recommendation cells
+    — but only the FIRST occurrence within a paragraph (count=1); repeated mentions
+    in the same paragraph stay in the regular weight."""
+    return _REC.sub(rf'<font name="{B.F_DEMI}">\1</font>', markup, count=1)
 
 
 def _cell_flowables(c):

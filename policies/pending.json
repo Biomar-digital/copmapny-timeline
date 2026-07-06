@@ -28,10 +28,11 @@
     "policy": "corporate-governance-statement",
     "request_id": "855e4ba5-d288-4b3a-837f-96059e8c17bd",
     "title": "Change: corporate-governance-statement",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783330295475
+    "created_at": 1783330295475,
+    "updated_at": 1783330295475
   },
   {
     "id": "45d7501e-c643-4e9f-bd86-61444268bacf",
