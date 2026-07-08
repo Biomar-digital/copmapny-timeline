@@ -96,5 +96,15 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783498465175
+  },
+  {
+    "id": "b9e98f62-ec94-4588-85db-ea67fcda8c31",
+    "policy": "remuneration-policy",
+    "request_id": "01ee5a93-053d-4003-885e-112b621d7f07",
+    "title": "Change: remuneration-policy",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1783498559583
   }
 ]
