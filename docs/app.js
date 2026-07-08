@@ -231,13 +231,13 @@ function editTargets(p) {
   docs.forEach(d => {
     const base = docs.length > 1 ? d.label + " — " : "";
     if (d.files && d.files.non_approval)
-      out.push({ label: base + (d.files.approval ? "Unsigned" : "PDF"), file: d.files.non_approval, variant: d.files.approval ? "Unsigned" : "", ed });
+      out.push({ label: base + (d.files.approval ? "Unsigned" : "PDF"), file: d.files.non_approval, variant: d.files.approval ? "Unsigned" : "", ed, word: d.files.word });
     if (d.files && d.files.approval)
-      out.push({ label: base + "Signed", file: d.files.approval, variant: "Signed", ed });
+      out.push({ label: base + "Signed", file: d.files.approval, variant: "Signed", ed, word: d.files.word });
     // When both signed and unsigned exist, offer a "Both" option: the requester
     // marks up the unsigned copy and the change is applied to both variants.
     if (d.files && d.files.approval && d.files.non_approval)
-      out.push({ label: base + "Both (signed + unsigned)", file: d.files.non_approval, variant: "Both", ed });
+      out.push({ label: base + "Both (signed + unsigned)", file: d.files.non_approval, variant: "Both", ed, word: d.files.word });
   });
   return out;
 }
@@ -245,6 +245,7 @@ function editTargets(p) {
 function gotoEdit(p, t) {
   const q = new URLSearchParams({ policy: p.id, edition: edKey(t.ed), title: p.title, file: t.file });
   if (t.variant) q.set("variant", t.variant);
+  if (t.word) q.set("word", t.word);
   location.href = "review.html?" + q.toString();
 }
 
@@ -315,7 +316,10 @@ function wireStatusActions(el, p) {
     ap.addEventListener("click", () => approveWithReview(p));
     const re = document.createElement("button");
     re.type = "button"; re.className = "btn ghost"; re.textContent = "Request another round";
-    re.addEventListener("click", () => pendingAction(p.id, "reopen"));
+    re.addEventListener("click", async () => {
+      if (!await confirmDialog(`Send "${p.title}" back for another round of changes? The requester will need to review it again.`, { ok: "Request another round" })) return;
+      pendingAction(p.id, "reopen");
+    });
     actions.appendChild(ap); actions.appendChild(re);
   }
   if (badge && IS_ADMIN) {
@@ -933,7 +937,9 @@ function renderQueue() {
     const p = POLICIES.find(x => x.id === it.policy);
     const act = btn.dataset.act;
     if (act === "edit") { if (p) openEditChooser(p); return; }
-    if (act === "approve" && !confirm(`Approve the changes to "${p ? p.title : it.policy}"? This clears the request.`)) return;
+    const label = p ? p.title : it.policy;
+    if (act === "approve" && !await confirmDialog(`Approve the changes to "${label}"? This clears the request.`, { ok: "Approve" })) return;
+    if (act === "reopen" && !await confirmDialog(`Send "${label}" back for another round of changes? The requester will need to review it again.`, { ok: "Request another round" })) return;
     btn.disabled = true;
     await pendingAction(it.policy, act);   // reloads pending + re-renders the queue
   }));

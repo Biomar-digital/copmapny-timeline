@@ -12,6 +12,7 @@ const POLICY = params.get("policy") || "";
 const EDITION = params.get("edition") || "";
 const TITLE = params.get("title") || "Document";
 const VARIANT = params.get("variant") || "";
+const WORD = params.get("word") || "";
 
 const viewer = document.getElementById("viewer");
 const selBtn = document.getElementById("selBtn");
@@ -315,6 +316,11 @@ async function init() {
     (VARIANT ? `Editing the ${VARIANT} version. ` : "") +
     "Highlight text, add a comment and a file, then send.";
   document.title = `BioMar · Edit — ${TITLE}${VARIANT ? " (" + VARIANT + ")" : ""}`;
+  if (WORD) {
+    const tip = document.getElementById("rvWordTip");
+    const link = document.getElementById("rvWordLink");
+    if (tip && link) { link.href = WORD; tip.hidden = false; }
+  }
 
   selBtn.addEventListener("click", openComposer);
   document.getElementById("cSave").addEventListener("click", saveNote);
