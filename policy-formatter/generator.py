@@ -45,6 +45,7 @@ BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
 BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
 BODY_ITALIC = ParagraphStyle("BodyItalic", parent=BODY, fontName=B.F_ITALIC, alignment=TA_LEFT)
 BODY_HANG, BODY_HANG_LEFT = BODY, BODY_LEFT   # overridden per-policy by _set_clause_indent
+BODY_INDENT, BODY_INDENT_LEFT = BODY, BODY_LEFT   # overridden per-policy by _set_clause_indent
 # Document title repeated as a lead heading on the first content page (some
 # originals, e.g. the Code of Conduct, open the body with the title in large bold).
 LEAD_TITLE = ParagraphStyle("LeadTitle", fontName=B.F_BOLD, fontSize=19, leading=22,
@@ -594,39 +595,70 @@ def _story(policy):
         while j >= 0 and isinstance(blocks[j], Body):
             j -= 1
         dec_i = j + 1
+    # Tracks whether the previous block was a numbered sub-heading run in
+    # (e.g. "3.2 Incentive pay" bold, or "4.3.5.4 Cash-based..." italic) with
+    # no clause number of its own — the following un-numbered paragraph is
+    # that sub-heading's actual content and must hang-indent to match it,
+    # or the page reads as misaligned ("straight lines" the original keeps).
+    prev_subhead = False
     for i, b in enumerate(blocks):
         if i == dec_i:
             flow.append(PageBreak())
         if isinstance(b, Heading):
             flow.append(Paragraph(escape(b.text), H1 if b.level == 1 else H2))
+            prev_subhead = False
         elif isinstance(b, Body):
             # Justify normal running text; left-align short lines and anything
             # with a URL/long token so justification doesn't stretch the spaces.
             justify = len(b.text) >= 90 and "://" not in b.text
+            is_numbered_subhead = bool(_NUM.match(b.text.strip()))
             if getattr(b, "runs", None):
                 flow.append(Paragraph(_body_markup(b), BODY if justify else BODY_LEFT))
+                prev_subhead = False
             elif getattr(b, "italic", False):
                 # Whole-line italic sub-heading: keep the leading number inline
                 # (no bold) and set the entire line in the oblique face.
                 flow.append(Paragraph(_fmt(b.text, number=False), BODY_ITALIC))
+                prev_subhead = is_numbered_subhead
             elif getattr(b, "bold", False):
                 flow.append(Paragraph(_fmt(b.text), BODY_BOLD))
+                prev_subhead = is_numbered_subhead
             else:
                 # A numbered clause ("1.1 The Company's...") hang-indents (when
                 # the policy opts in) so wrapped lines align under the clause
-                # text; un-numbered paragraphs always use the plain style.
-                numbered = bool(_NUM.match(b.text.strip()))
-                if numbered:
+                # text. The paragraph right after a numbered sub-heading (its
+                # content, just split into a separate block, e.g. "3.2 Incentive
+                # pay" / "The Board of Directors shall not...") has no number of
+                # its own to occupy the negative first-line indent, so it needs a
+                # UNIFORM indent instead — otherwise a short paragraph that never
+                # wraps would sit flush at the margin, out of line with the rest.
+                # Anything else uses the plain style.
+                if is_numbered_subhead:
                     style = BODY_HANG if justify else BODY_HANG_LEFT
+                elif prev_subhead:
+                    style = BODY_INDENT if justify else BODY_INDENT_LEFT
                 else:
                     style = BODY if justify else BODY_LEFT
                 flow.append(Paragraph(_fmt(b.text), style))
+                if is_numbered_subhead:
+                    # A numbered-but-not-bold block can still be a short
+                    # sub-heading in the source ("3.2 Incentive pay", no
+                    # trailing period) rather than a full clause ("1.1 The
+                    # Company's name is ... A/S.") — only the former's content
+                    # needs the uniform-indent style.
+                    stripped = b.text.strip()
+                    prev_subhead = (len(stripped.split()) <= 8
+                                    and not stripped.rstrip().endswith((".", ":", ";")))
+                # else: leave prev_subhead as-is — a sub-heading's content can
+                # span several paragraphs, all of which need the same indent.
         elif isinstance(b, Bullet):
+            prev_subhead = False
             if _LETTERED.match(b.text.strip()):
                 flow.append(Paragraph(_fmt(b.text), BULLET_HANG))     # letter is the marker
             else:
                 flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):
+            prev_subhead = False
             if _is_signature_form(b):
                 flow.extend(_signature_card_flowables(b))
             else:
@@ -634,8 +666,10 @@ def _story(policy):
                 flow.extend(_table_flowables(b))
                 flow.append(Spacer(1, 8))
         elif isinstance(b, ImageBlock):
+            prev_subhead = False
             flow.extend(_image_flowables(b))
         elif isinstance(b, Columns):
+            prev_subhead = False
             flow.extend(_columns_flowables(b))
         if i == sig_i:
             flow.append(PageBreak())     # definitions/refs start on the next page
@@ -921,9 +955,10 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     head_scale, since this runs after _set_heading_size; BODY_HANG/_LEFT and
     BULLET_HANG are separate styles so only numbered clauses / lettered items
     (not every Body/Bullet block) indent."""
-    global H1, H2, BODY_HANG, BODY_HANG_LEFT, BULLET_HANG
+    global H1, H2, BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BODY_INDENT, BODY_INDENT_LEFT
     if not enabled:
         BODY_HANG, BODY_HANG_LEFT, BULLET_HANG = BODY, BODY_LEFT, BULLET
+        BODY_INDENT, BODY_INDENT_LEFT = BODY, BODY_LEFT
         return
     H1 = ParagraphStyle("H1i", parent=H1, leftIndent=indent, firstLineIndent=-indent)
     H2 = ParagraphStyle("H2i", parent=H2, leftIndent=indent, firstLineIndent=-indent)
@@ -932,6 +967,13 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     BULLET_HANG = ParagraphStyle("BulletHang", parent=BULLET,
                                  leftIndent=LETTER_TEXT_INDENT,
                                  firstLineIndent=-(LETTER_TEXT_INDENT - LETTER_MARKER_INDENT))
+    # Uniform indent (NOT hanging: firstLineIndent=0) for a paragraph that has no
+    # clause number of its own but is the content of a numbered sub-heading right
+    # above it (e.g. "3.2 Incentive pay" / "The Board of Directors shall not..."):
+    # with a hanging indent, a paragraph short enough to never wrap would render
+    # its one-and-only line flush at the margin instead of under the clause text.
+    BODY_INDENT = ParagraphStyle("BodyIndent", parent=BODY, leftIndent=indent, firstLineIndent=0)
+    BODY_INDENT_LEFT = ParagraphStyle("BodyIndentLeft", parent=BODY_LEFT, leftIndent=indent, firstLineIndent=0)
 
 
 def build_pdf(policy, out_path):

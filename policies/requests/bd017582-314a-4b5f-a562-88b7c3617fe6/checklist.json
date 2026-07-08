@@ -1,6 +1,5 @@
 [
-  {"id":"headings-numbered","label":"Top-level headings are numbered (1..11)","present":["1 Introduction","2 Objectives","11 Adoption and publication"]},
-  {"id":"subheading-bold-space","label":"4.3.4 / 4.3.5 sub-headings bold with a space after the number","present":["4.3.4 Short-term incentives","4.3.5 Long-term incentives"]},
-  {"id":"list-format","label":"(a)/(b)/... items under 4.3.5.4 and 4.3.5.5 kept as a list","present":["(a) The long-term cash-based incentive","(a) Members of Executive Management"]},
-  {"id":"hanging-indent","label":"Clause wraps indent under the clause text (article layout)","present":["1 Introduction","1.1 This remuneration policy"]}
+  {"id":"wrap-indent","label":"Wrapped clause lines indent under the clause text (35.4pt)","present":["1.1 This remuneration policy"]},
+  {"id":"subhead-content-indent","label":"Content under a short sub-heading (e.g. 3.2) also indents, not just numbered clauses","present":["3.2 Incentive pay"]},
+  {"id":"headings-numbered","label":"Top-level headings numbered","present":["1 Introduction","2 Objectives"]}
 ]

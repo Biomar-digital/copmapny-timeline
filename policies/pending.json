@@ -16,72 +16,72 @@
     "policy": "articles-of-association",
     "request_id": "c8e38fc7-4041-4fde-b4c5-13c7d2cefd84",
     "title": "Change: articles-of-association",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783327759141,
     "updated_at": 1783516205365,
-    "notified": true
+    "notified": false
   },
   {
     "id": "bf1b2de6-6dfc-468d-9e68-8f02c5a0e84c",
     "policy": "articles-of-association",
     "request_id": "c78577f0-146a-47b5-80e4-143459ec2ddc",
     "title": "Change: articles-of-association",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783496456255,
     "updated_at": 1783516205365,
-    "notified": true
+    "notified": false
   },
   {
     "id": "f7236332-dba4-4418-9957-cef1c47859a7",
     "policy": "articles-of-association",
     "request_id": "6e37e532-4f64-450a-b2fc-27ab0354b975",
     "title": "Change: articles-of-association",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783497285793,
     "updated_at": 1783516205365,
-    "notified": true
+    "notified": false
   },
   {
     "id": "915e4b12-ebb0-44b1-8c4c-73764ce29323",
     "policy": "remuneration-policy",
     "request_id": "bd017582-314a-4b5f-a562-88b7c3617fe6",
     "title": "Change: remuneration-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783498344471,
     "updated_at": 1783516351838,
-    "notified": true
+    "notified": false
   },
   {
     "id": "b081d1e4-9a84-411b-b3d0-f0fcc02c91c7",
     "policy": "remuneration-policy",
     "request_id": "577ee509-9ed7-4bd5-9da0-96e71325590f",
     "title": "Change: remuneration-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783498465175,
     "updated_at": 1783516351838,
-    "notified": true
+    "notified": false
   },
   {
     "id": "b9e98f62-ec94-4588-85db-ea67fcda8c31",
     "policy": "remuneration-policy",
     "request_id": "01ee5a93-053d-4003-885e-112b621d7f07",
     "title": "Change: remuneration-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783498559583,
     "updated_at": 1783516351838,
-    "notified": true
+    "notified": false
   },
   {
     "id": "becd0949-0f06-4630-a162-f40a83530581",

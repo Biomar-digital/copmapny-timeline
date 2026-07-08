@@ -1,9 +1,9 @@
 {
   "request_id": "bd017582-314a-4b5f-a562-88b7c3617fe6",
   "policy": "remuneration-policy",
-  "generated_at": "2026-07-08 12:32 UTC",
+  "generated_at": "2026-07-08 14:01 UTC",
   "overall": "pass",
-  "summary": "10 passed",
+  "summary": "9 passed",
   "checks": [
     {
       "id": "outputs",
@@ -42,26 +42,20 @@
       "detail": "clean"
     },
     {
+      "id": "assert:wrap-indent",
+      "label": "Wrapped clause lines indent under the clause text (35.4pt)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:subhead-content-indent",
+      "label": "Content under a short sub-heading (e.g. 3.2) also indents, not just numbered clauses",
+      "status": "pass",
+      "detail": ""
+    },
+    {
       "id": "assert:headings-numbered",
-      "label": "Top-level headings are numbered (1..11)",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "id": "assert:subheading-bold-space",
-      "label": "4.3.4 / 4.3.5 sub-headings bold with a space after the number",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "id": "assert:list-format",
-      "label": "(a)/(b)/... items under 4.3.5.4 and 4.3.5.5 kept as a list",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "id": "assert:hanging-indent",
-      "label": "Clause wraps indent under the clause text (article layout)",
+      "label": "Top-level headings numbered",
       "status": "pass",
       "detail": ""
     }
