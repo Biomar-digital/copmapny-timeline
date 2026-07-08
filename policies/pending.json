@@ -78,5 +78,15 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783497617935
+  },
+  {
+    "id": "5c1d5169-9df0-41b4-b95a-65d87677046c",
+    "policy": "corporate-governance-statement",
+    "request_id": "5c68c641-76cd-434f-abe1-e6e6dcb6d93f",
+    "title": "Change: corporate-governance-statement",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1783498042081
   }
 ]
