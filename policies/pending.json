@@ -84,18 +84,6 @@
     "notified": true
   },
   {
-    "id": "9dba5f31-93a2-440a-9e8e-be6ce3d55667",
-    "policy": "tax-policy",
-    "request_id": "836b5018-26a4-46bc-99b5-9c6f62596d50",
-    "title": "Change: tax-policy",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1783498672632,
-    "updated_at": 1783498672632,
-    "notified": true
-  },
-  {
     "id": "becd0949-0f06-4630-a162-f40a83530581",
     "policy": "diversity-policy",
     "request_id": "60131f62-8a43-4311-ac5d-927f3883cd41",
