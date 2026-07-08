@@ -24,18 +24,6 @@
     "notified": true
   },
   {
-    "id": "66f202c1-3a6b-4021-905c-d9b6b3e56d3a",
-    "policy": "corporate-governance-statement",
-    "request_id": "855e4ba5-d288-4b3a-837f-96059e8c17bd",
-    "title": "Change: corporate-governance-statement",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1783330295475,
-    "updated_at": 1783330295475,
-    "notified": true
-  },
-  {
     "id": "bf1b2de6-6dfc-468d-9e68-8f02c5a0e84c",
     "policy": "articles-of-association",
     "request_id": "c78577f0-146a-47b5-80e4-143459ec2ddc",
@@ -57,30 +45,6 @@
     "email": "marni@biomar.com",
     "created_at": 1783497285793,
     "updated_at": 1783516205365,
-    "notified": true
-  },
-  {
-    "id": "f5b9ded3-211d-4af4-8537-42c35789b848",
-    "policy": "corporate-governance-statement",
-    "request_id": "8517c246-77a0-4830-8b6e-37fd26df03cf",
-    "title": "Change: corporate-governance-statement",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1783497617935,
-    "updated_at": 1783497617935,
-    "notified": true
-  },
-  {
-    "id": "5c1d5169-9df0-41b4-b95a-65d87677046c",
-    "policy": "corporate-governance-statement",
-    "request_id": "5c68c641-76cd-434f-abe1-e6e6dcb6d93f",
-    "title": "Change: corporate-governance-statement",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1783498042081,
-    "updated_at": 1783498042081,
     "notified": true
   },
   {
