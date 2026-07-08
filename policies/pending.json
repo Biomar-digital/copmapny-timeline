@@ -46,5 +46,15 @@
     "created_at": 1783331459435,
     "updated_at": 1783331459435,
     "notified": true
+  },
+  {
+    "id": "bf1b2de6-6dfc-468d-9e68-8f02c5a0e84c",
+    "policy": "articles-of-association",
+    "request_id": "c78577f0-146a-47b5-80e4-143459ec2ddc",
+    "title": "Change: articles-of-association",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1783496456255
   }
 ]
