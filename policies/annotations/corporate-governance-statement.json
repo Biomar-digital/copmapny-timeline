@@ -646,5 +646,23 @@
     "author": "Marianne Niviaq Thomsen",
     "text": "\"The Committee recommends\" should only be in bold the first time it appears within a paragraph.",
     "created_at": "2026-07-06T09:30:51.319Z"
+  },
+  {
+    "id": "559dbbc8-ec53-40eb-a443-7073e19031ea",
+    "file": "files/Corporate_Governance_Statement__Policy_2026-06_non-approval.pdf",
+    "page": 17,
+    "quote": "d in the follow",
+    "rects": [
+      {
+        "x": 0.33130614318212753,
+        "y": 0.27351214616643066,
+        "w": 0.12709298927203438,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1.1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Please change \"in the following\" to \"herein\"",
+    "created_at": "2026-07-08T07:58:17.931Z"
   }
 ]
