@@ -682,5 +682,23 @@
     "author": "Marianne Niviaq Thomsen",
     "text": "The second \"The Committee recommends\" should not be bold",
     "created_at": "2026-07-08T07:59:47.478Z"
+  },
+  {
+    "id": "cd22fbed-ba74-4bc0-add7-90aadf8a78c4",
+    "file": "files/Corporate_Governance_Statement__Policy_2026-06_approval.pdf",
+    "page": 18,
+    "quote": "on",
+    "rects": [
+      {
+        "x": 0.30757516745737007,
+        "y": 0.2301103946988548,
+        "w": 0.022583427917987207,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1.1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Could this be changed to version 1 so that we don't count different design versions?",
+    "created_at": "2026-07-08T08:07:14.565Z"
   }
 ]
