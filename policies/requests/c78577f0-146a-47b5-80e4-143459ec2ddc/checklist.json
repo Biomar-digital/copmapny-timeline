@@ -1,3 +1,3 @@
 [
-  {"id":"no-approval-box","label":"Back cover carries no Version/Owner/Approver box (signed version removed)","page":8,"absent":["Owner and approver","Version history","Approval date:"]}
+  {"id":"no-signed-variant","label":"Signed version / approval box removed (Articles is not a policy)","absent":["Owner and approver","Version 2:"]}
 ]

@@ -1,9 +1,9 @@
 {
-  "request_id": "c78577f0-146a-47b5-80e4-143459ec2ddc",
+  "request_id": "6e37e532-4f64-450a-b2fc-27ab0354b975",
   "policy": "articles-of-association",
   "generated_at": "2026-07-08 12:31 UTC",
   "overall": "pass",
-  "summary": "7 passed",
+  "summary": "11 passed",
   "checks": [
     {
       "id": "outputs",
@@ -42,8 +42,32 @@
       "detail": "clean"
     },
     {
+      "id": "assert:letters-no-bullet",
+      "label": "Lettered lists use letters as markers (no bullet dots)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:adoption-line",
+      "label": "Adoption statement stands on its own unnumbered line",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:headings-bigger",
+      "label": "Section headings enlarged",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:hanging-indent",
+      "label": "Clause wraps indent under the clause text (article layout)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
       "id": "assert:no-signed-variant",
-      "label": "Signed version / approval box removed (Articles is not a policy)",
+      "label": "Signed variant / approval card removed (Articles is not a policy)",
       "status": "pass",
       "detail": ""
     }

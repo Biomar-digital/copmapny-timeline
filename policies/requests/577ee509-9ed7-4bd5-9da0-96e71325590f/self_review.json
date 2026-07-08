@@ -1,15 +1,15 @@
 {
-  "request_id": "c78577f0-146a-47b5-80e4-143459ec2ddc",
-  "policy": "articles-of-association",
-  "generated_at": "2026-07-08 12:31 UTC",
+  "request_id": "577ee509-9ed7-4bd5-9da0-96e71325590f",
+  "policy": "remuneration-policy",
+  "generated_at": "2026-07-08 12:32 UTC",
   "overall": "pass",
-  "summary": "7 passed",
+  "summary": "6 passed",
   "checks": [
     {
       "id": "outputs",
       "label": "Rendered PDF exists and is non-empty",
       "status": "pass",
-      "detail": "8 pages"
+      "detail": "11 pages"
     },
     {
       "id": "word",
@@ -19,9 +19,9 @@
     },
     {
       "id": "variants",
-      "label": "Variants match request (Unsigned)",
+      "label": "Variants match request (Signed + Unsigned)",
       "status": "pass",
-      "detail": "produced: Unsigned"
+      "detail": "produced: Signed + Unsigned"
     },
     {
       "id": "metadata",
@@ -33,19 +33,13 @@
       "id": "coverage",
       "label": "All source content appears in the PDF",
       "status": "pass",
-      "detail": "67/67 passages found"
+      "detail": "64/64 passages found"
     },
     {
       "id": "ligatures",
       "label": "No raw ligatures left",
       "status": "pass",
       "detail": "clean"
-    },
-    {
-      "id": "assert:no-signed-variant",
-      "label": "Signed version / approval box removed (Articles is not a policy)",
-      "status": "pass",
-      "detail": ""
     }
   ]
 }

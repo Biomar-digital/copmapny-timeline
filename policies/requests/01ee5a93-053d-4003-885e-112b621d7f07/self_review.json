@@ -1,0 +1,69 @@
+{
+  "request_id": "01ee5a93-053d-4003-885e-112b621d7f07",
+  "policy": "remuneration-policy",
+  "generated_at": "2026-07-08 12:32 UTC",
+  "overall": "pass",
+  "summary": "10 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "11 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Signed + Unsigned)",
+      "status": "pass",
+      "detail": "produced: Signed + Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "64/64 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:headings-numbered",
+      "label": "Top-level headings are numbered (1..11)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:subheading-bold-space",
+      "label": "4.3.4 / 4.3.5 sub-headings bold with a space after the number",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:list-format",
+      "label": "(a)/(b)/... items under 4.3.5.4 and 4.3.5.5 kept as a list",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:hanging-indent",
+      "label": "Clause wraps indent under the clause text (article layout)",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}

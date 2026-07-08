@@ -4,12 +4,12 @@
     "policy": "diversity-policy",
     "request_id": "21e2a25c-a6e2-4672-8798-5e69d8081fd8",
     "title": "Updated Diversity Policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Jeppe Andersen",
     "email": "jepan@biomar.com",
     "created_at": 1782000000000,
     "updated_at": 1783499806790,
-    "notified": true
+    "notified": false
   },
   {
     "id": "a95f0452-242b-498a-9923-9fbed3049089",
@@ -21,7 +21,7 @@
     "email": "marni@biomar.com",
     "created_at": 1783327759141,
     "updated_at": 1783496082534,
-    "notified": true
+    "notified": false
   },
   {
     "id": "66f202c1-3a6b-4021-905c-d9b6b3e56d3a",
@@ -33,7 +33,7 @@
     "email": "marni@biomar.com",
     "created_at": 1783330295475,
     "updated_at": 1783330295475,
-    "notified": true
+    "notified": false
   },
   {
     "id": "bf1b2de6-6dfc-468d-9e68-8f02c5a0e84c",
@@ -45,86 +45,102 @@
     "email": "marni@biomar.com",
     "created_at": 1783496456255,
     "updated_at": 1783496456255,
-    "notified": true
+    "notified": false
   },
   {
     "id": "f7236332-dba4-4418-9957-cef1c47859a7",
     "policy": "articles-of-association",
     "request_id": "6e37e532-4f64-450a-b2fc-27ab0354b975",
     "title": "Change: articles-of-association",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783497285793
+    "created_at": 1783497285793,
+    "updated_at": 1783497285793,
+    "notified": false
   },
   {
     "id": "f5b9ded3-211d-4af4-8537-42c35789b848",
     "policy": "corporate-governance-statement",
     "request_id": "8517c246-77a0-4830-8b6e-37fd26df03cf",
     "title": "Change: corporate-governance-statement",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783497617935
+    "created_at": 1783497617935,
+    "updated_at": 1783497617935,
+    "notified": false
   },
   {
     "id": "5c1d5169-9df0-41b4-b95a-65d87677046c",
     "policy": "corporate-governance-statement",
     "request_id": "5c68c641-76cd-434f-abe1-e6e6dcb6d93f",
     "title": "Change: corporate-governance-statement",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783498042081
+    "created_at": 1783498042081,
+    "updated_at": 1783498042081,
+    "notified": false
   },
   {
     "id": "915e4b12-ebb0-44b1-8c4c-73764ce29323",
     "policy": "remuneration-policy",
     "request_id": "bd017582-314a-4b5f-a562-88b7c3617fe6",
     "title": "Change: remuneration-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783498344471
+    "created_at": 1783498344471,
+    "updated_at": 1783498344471,
+    "notified": false
   },
   {
     "id": "b081d1e4-9a84-411b-b3d0-f0fcc02c91c7",
     "policy": "remuneration-policy",
     "request_id": "577ee509-9ed7-4bd5-9da0-96e71325590f",
     "title": "Change: remuneration-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783498465175
+    "created_at": 1783498465175,
+    "updated_at": 1783498465175,
+    "notified": false
   },
   {
     "id": "b9e98f62-ec94-4588-85db-ea67fcda8c31",
     "policy": "remuneration-policy",
     "request_id": "01ee5a93-053d-4003-885e-112b621d7f07",
     "title": "Change: remuneration-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783498559583
+    "created_at": 1783498559583,
+    "updated_at": 1783498559583,
+    "notified": false
   },
   {
     "id": "9dba5f31-93a2-440a-9e8e-be6ce3d55667",
     "policy": "tax-policy",
     "request_id": "836b5018-26a4-46bc-99b5-9c6f62596d50",
     "title": "Change: tax-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783498672632
+    "created_at": 1783498672632,
+    "updated_at": 1783498672632,
+    "notified": false
   },
   {
     "id": "becd0949-0f06-4630-a162-f40a83530581",
     "policy": "diversity-policy",
     "request_id": "60131f62-8a43-4311-ac5d-927f3883cd41",
     "title": "Change: diversity-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783499881415
+    "created_at": 1783499881415,
+    "updated_at": 1783499881415,
+    "notified": false
   }
 ]

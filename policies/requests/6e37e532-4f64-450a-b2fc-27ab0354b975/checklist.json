@@ -1,0 +1,7 @@
+[
+  {"id":"letters-no-bullet","label":"Lettered lists use letters as markers (no bullet dots)","present":["a. The notice convening the general meeting"],"absent":["•"]},
+  {"id":"adoption-line","label":"Adoption statement stands on its own unnumbered line","present":["As adopted at the extraordinary general meeting on 13 May 2026 and latest amended by decision of the board of directors on 19 May 2026.","financial year is the calendar year."]},
+  {"id":"headings-bigger","label":"Section headings enlarged","present":["2 Share capital and shares","3 Authorisations to increase share capital"]},
+  {"id":"hanging-indent","label":"Clause wraps indent under the clause text (article layout)","present":["1 Name and objects","1.1 The Company"]},
+  {"id":"no-signed-variant","label":"Signed variant / approval card removed (Articles is not a policy)","absent":["Owner and approver","Version 2:"]}
+]

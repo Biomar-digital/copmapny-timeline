@@ -69,6 +69,7 @@ class Policy:
     lead_title: bool = False  # repeat the title as a lead heading on page 1 of body
     body_size: float = 11     # body point size (e.g. the Code of Conduct uses 10)
     head_scale: float = 1.0   # section-heading scale (>1 = bigger headings)
+    hanging_indent: bool = False  # hang-indent numbered clauses/headings (articles-style docs)
     footer_note: str = ""     # small disclaimer line under the footer address
     version_date: str = ""    # date shown on the version line (defaults to approval date)
     has_signed: bool = False  # this unsigned render has a signed sibling (-> drop the card)

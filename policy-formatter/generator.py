@@ -44,12 +44,14 @@ BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
 BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
 BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
 BODY_ITALIC = ParagraphStyle("BodyItalic", parent=BODY, fontName=B.F_ITALIC, alignment=TA_LEFT)
+BODY_HANG, BODY_HANG_LEFT = BODY, BODY_LEFT   # overridden per-policy by _set_clause_indent
 # Document title repeated as a lead heading on the first content page (some
 # originals, e.g. the Code of Conduct, open the body with the title in large bold).
 LEAD_TITLE = ParagraphStyle("LeadTitle", fontName=B.F_BOLD, fontSize=19, leading=22,
                             textColor=B.BIOMAR_BLUE, spaceAfter=11, spaceBefore=0)
 BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
                         leftIndent=16, bulletIndent=2, spaceAfter=6)
+BULLET_HANG = BULLET   # overridden per-policy by _set_clause_indent (lettered items, e.g. "a. ...")
 # Two-column running text is set at the original's denser 10pt so each section
 # keeps the same footprint as the official PDF (one page per 2-column section).
 COL_BODY = ParagraphStyle("ColBody", parent=BODY_LEFT, fontSize=10, leading=13,
@@ -207,13 +209,18 @@ def _bold_rec(markup):
 
 def _cell_flowables(c):
     """A multi-paragraph cell: first line keeps its clause number, '• ' lines
-    become hanging bullets, other lines are spaced continuation paragraphs."""
+    become hanging bullets, other lines are spaced continuation paragraphs.
+    "The Committee recommends" is only bolded on the cell's FIRST line — a
+    repeat of the phrase on a later paragraph within the same cell (e.g. a
+    follow-up sentence starting "The Committee recommends...") stays regular
+    weight, since count=1 inside _bold_rec only dedupes within one line."""
     out = []
     for i, line in enumerate([ln.strip() for ln in c.split("\n") if ln.strip()]):
+        rec = _bold_rec if i == 0 else (lambda m: m)
         if line.startswith("• "):
-            out.append(Paragraph("•&nbsp;&nbsp;" + _bold_rec(_fmt(line[2:], number=False, widow=False)), CELL_BULLET))
+            out.append(Paragraph("•&nbsp;&nbsp;" + rec(_fmt(line[2:], number=False, widow=False)), CELL_BULLET))
         else:
-            out.append(Paragraph(_bold_rec(_fmt(line, number=(i == 0), widow=False)),
+            out.append(Paragraph(rec(_fmt(line, number=(i == 0), widow=False)),
                                   CELL if i == 0 else CELL_GAP))
     return out
 
@@ -605,10 +612,18 @@ def _story(policy):
             elif getattr(b, "bold", False):
                 flow.append(Paragraph(_fmt(b.text), BODY_BOLD))
             else:
-                flow.append(Paragraph(_fmt(b.text), BODY if justify else BODY_LEFT))
+                # A numbered clause ("1.1 The Company's...") hang-indents (when
+                # the policy opts in) so wrapped lines align under the clause
+                # text; un-numbered paragraphs always use the plain style.
+                numbered = bool(_NUM.match(b.text.strip()))
+                if numbered:
+                    style = BODY_HANG if justify else BODY_HANG_LEFT
+                else:
+                    style = BODY if justify else BODY_LEFT
+                flow.append(Paragraph(_fmt(b.text), style))
         elif isinstance(b, Bullet):
             if _LETTERED.match(b.text.strip()):
-                flow.append(Paragraph(_fmt(b.text), BULLET))          # letter is the marker
+                flow.append(Paragraph(_fmt(b.text), BULLET_HANG))     # letter is the marker
             else:
                 flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):
@@ -893,9 +908,36 @@ def _set_heading_size(scale):
                         spaceBefore=5.3, spaceAfter=6.2, keepWithNext=1)
 
 
+CLAUSE_INDENT = 35.4     # measured from the official Articles of Association (42.6pt margin -> 78.0pt text)
+LETTER_MARKER_INDENT = 53.4 - 42.6   # "a." marker position relative to the margin
+LETTER_TEXT_INDENT = 71.4 - 42.6     # lettered item's own text/wrap position
+
+
+def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
+    """Hang-indent numbered headings/clauses ("1 Name and objects", "1.1 The
+    Company's...") so wrapped lines align under the clause text instead of
+    falling back to the left margin — matches the original Articles of
+    Association / Remuneration Policy layout. H1/H2 already reflect any
+    head_scale, since this runs after _set_heading_size; BODY_HANG/_LEFT and
+    BULLET_HANG are separate styles so only numbered clauses / lettered items
+    (not every Body/Bullet block) indent."""
+    global H1, H2, BODY_HANG, BODY_HANG_LEFT, BULLET_HANG
+    if not enabled:
+        BODY_HANG, BODY_HANG_LEFT, BULLET_HANG = BODY, BODY_LEFT, BULLET
+        return
+    H1 = ParagraphStyle("H1i", parent=H1, leftIndent=indent, firstLineIndent=-indent)
+    H2 = ParagraphStyle("H2i", parent=H2, leftIndent=indent, firstLineIndent=-indent)
+    BODY_HANG = ParagraphStyle("BodyHang", parent=BODY, leftIndent=indent, firstLineIndent=-indent)
+    BODY_HANG_LEFT = ParagraphStyle("BodyHangLeft", parent=BODY_LEFT, leftIndent=indent, firstLineIndent=-indent)
+    BULLET_HANG = ParagraphStyle("BulletHang", parent=BULLET,
+                                 leftIndent=LETTER_TEXT_INDENT,
+                                 firstLineIndent=-(LETTER_TEXT_INDENT - LETTER_MARKER_INDENT))
+
+
 def build_pdf(policy, out_path):
     _set_body_size(getattr(policy, "body_size", 11) or 11)
     _set_heading_size(getattr(policy, "head_scale", 1.0) or 1.0)
+    _set_clause_indent(getattr(policy, "hanging_indent", False))
     doc = BaseDocTemplate(
         out_path, pagesize=(B.PAGE_W, B.PAGE_H),
         leftMargin=B.MARGIN_L, rightMargin=B.MARGIN_R,
