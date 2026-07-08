@@ -21,7 +21,7 @@
     "email": "marni@biomar.com",
     "created_at": 1783327759141,
     "updated_at": 1783516205365,
-    "notified": false
+    "notified": true
   },
   {
     "id": "bf1b2de6-6dfc-468d-9e68-8f02c5a0e84c",
@@ -33,7 +33,7 @@
     "email": "marni@biomar.com",
     "created_at": 1783496456255,
     "updated_at": 1783516205365,
-    "notified": false
+    "notified": true
   },
   {
     "id": "f7236332-dba4-4418-9957-cef1c47859a7",
@@ -45,7 +45,7 @@
     "email": "marni@biomar.com",
     "created_at": 1783497285793,
     "updated_at": 1783516205365,
-    "notified": false
+    "notified": true
   },
   {
     "id": "915e4b12-ebb0-44b1-8c4c-73764ce29323",
@@ -57,7 +57,7 @@
     "email": "marni@biomar.com",
     "created_at": 1783498344471,
     "updated_at": 1783516351838,
-    "notified": false
+    "notified": true
   },
   {
     "id": "b081d1e4-9a84-411b-b3d0-f0fcc02c91c7",
@@ -69,7 +69,7 @@
     "email": "marni@biomar.com",
     "created_at": 1783498465175,
     "updated_at": 1783516351838,
-    "notified": false
+    "notified": true
   },
   {
     "id": "b9e98f62-ec94-4588-85db-ea67fcda8c31",
@@ -81,7 +81,7 @@
     "email": "marni@biomar.com",
     "created_at": 1783498559583,
     "updated_at": 1783516351838,
-    "notified": false
+    "notified": true
   },
   {
     "id": "becd0949-0f06-4630-a162-f40a83530581",
