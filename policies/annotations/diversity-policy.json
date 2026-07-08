@@ -1,0 +1,20 @@
+[
+  {
+    "id": "72dc5974-a7c1-47f8-8fb5-d24a906a3a17",
+    "file": "files/Diversity_Policy__Policy_2026-06_approval.pdf",
+    "page": 6,
+    "quote": "Version",
+    "rects": [
+      {
+        "x": 0.26248760475199784,
+        "y": 0.2301103946988548,
+        "w": 0.07329708128366161,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1.1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Could this be changed to version 1 so that we don't count different design versions?",
+    "created_at": "2026-07-08T08:37:55.933Z"
+  }
+]
