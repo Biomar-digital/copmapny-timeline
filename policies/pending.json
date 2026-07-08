@@ -36,18 +36,6 @@
     "notified": true
   },
   {
-    "id": "45d7501e-c643-4e9f-bd86-61444268bacf",
-    "policy": "remuneration-policy",
-    "request_id": "cc5c486b-1cc6-4cd5-af34-038c636787db",
-    "title": "Change: remuneration-policy",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1783331459435,
-    "updated_at": 1783331459435,
-    "notified": true
-  },
-  {
     "id": "bf1b2de6-6dfc-468d-9e68-8f02c5a0e84c",
     "policy": "articles-of-association",
     "request_id": "c78577f0-146a-47b5-80e4-143459ec2ddc",
