@@ -80,9 +80,10 @@
               "label": "Policy",
               "language": "English",
               "source": "Articles_of_Association__prev.docx",
-              "board_approval": true
+              "board_approval": false
             }
-          ]
+          ],
+          "board_approval": false
         },
         {
           "version": "Version 2",
@@ -90,10 +91,11 @@
           "approval_date": "19-05-2026",
           "source": "Articles_of_Association.docx",
           "notes": "Updated to the most recent version dated 19 May 2026.",
-          "board_approval": true
+          "board_approval": false
         }
       ],
-      "head_scale": 1.25
+      "head_scale": 1.25,
+      "no_version_card": true
     },
     {
       "id": "remuneration-policy",

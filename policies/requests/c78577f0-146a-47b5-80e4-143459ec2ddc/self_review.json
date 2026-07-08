@@ -1,0 +1,51 @@
+{
+  "request_id": "c78577f0-146a-47b5-80e4-143459ec2ddc",
+  "policy": "articles-of-association",
+  "generated_at": "2026-07-08 07:52 UTC",
+  "overall": "pass",
+  "summary": "7 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "8 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Unsigned only)",
+      "status": "pass",
+      "detail": "produced: Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "67/67 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:no-approval-box",
+      "label": "Back cover carries no Version/Owner/Approver box (signed version removed)",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}

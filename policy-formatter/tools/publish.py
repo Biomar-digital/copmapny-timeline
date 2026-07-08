@@ -145,8 +145,11 @@ def main():
                     meta_args += ["--version", ed["version"] + ":"]
                 # When a document has a signed sibling, the unsigned copy drops
                 # the back card so the two are distinguishable; standalone
-                # documents keep it.
-                unsigned_extra = ["--no-signatures"] + (["--has-signed"] if doc.get("board_approval") else [])
+                # documents keep it — unless the policy opts out of the version
+                # card entirely with "no_version_card" (e.g. the Articles of
+                # Association, which is not a policy and shouldn't carry the box).
+                drop_card = doc.get("board_approval") or p.get("no_version_card")
+                unsigned_extra = ["--no-signatures"] + (["--has-signed"] if drop_card else [])
                 # Editable Word copy generated alongside the unsigned PDF.
                 word_abs = os.path.join(FILES, f"{name_base}_{date}.docx")
                 files = {"non_approval": _gen(src, cover_title, year, date, name_base, "non-approval",
