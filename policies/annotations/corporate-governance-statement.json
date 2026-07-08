@@ -664,5 +664,23 @@
     "author": "Marianne Niviaq Thomsen",
     "text": "Please change \"in the following\" to \"herein\"",
     "created_at": "2026-07-08T07:58:17.931Z"
+  },
+  {
+    "id": "1b7fa0b5-d8c2-41da-b16b-408d43bd1798",
+    "file": "files/Corporate_Governance_Statement__Policy_2026-06_non-approval.pdf",
+    "page": 12,
+    "quote": "The Committee recommends",
+    "rects": [
+      {
+        "x": 0.08319884894324435,
+        "y": 0.3080190819230399,
+        "w": 0.26807837806964674,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1.1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "The second \"The Committee recommends\" should not be bold",
+    "created_at": "2026-07-08T07:59:47.478Z"
   }
 ]
