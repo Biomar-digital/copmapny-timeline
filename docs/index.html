@@ -29,12 +29,13 @@
   </header>
 
   <main>
+    <div id="typetabs" class="typetabs"></div>
     <div class="toolbar">
       <input id="search" type="search" placeholder="Search policies…" autocomplete="off" />
       <span class="count" id="count"></span>
       <a id="requestsLink" class="btn reqbtn" href="requests.html" hidden>📋 Requests <span class="qbadge newreq" id="reqCount" hidden>0</span></a>
       <button type="button" id="queueBtn" class="btn reqbtn" hidden>Review queue <span class="qbadge" id="queueCount">0</span></button>
-      <button type="button" id="newReqBtn" class="btn reqbtn">+ Request a new policy</button>
+      <button type="button" id="newReqBtn" class="btn reqbtn">+ Request new</button>
       <button type="button" id="connectBtn" class="btn connect" hidden>
         <span class="dot"></span> Connect an AI agent
       </button>
@@ -116,8 +117,16 @@
         <button type="button" class="vh-close" id="reqClose" aria-label="Close">×</button>
       </header>
       <div class="cn-body">
+        <div class="rq-field rq-check" id="reqTypeField">
+          <label>What are you requesting?</label>
+          <div class="rq-seg" id="reqTypeSeg">
+            <button type="button" class="rq-segbtn active" data-type="Policy">Policy</button>
+            <button type="button" class="rq-segbtn" data-type="Guideline">Guideline</button>
+          </div>
+          <span class="rq-hint">A guideline (e.g. brand voice, style guide) isn't a legal/governance document — it publishes with its own ocean-blue cover.</span>
+        </div>
         <div class="rq-field" id="reqTitleField">
-          <label>Policy title</label>
+          <label id="reqTitleLabel">Policy title</label>
           <input id="reqDocTitle" type="text" placeholder="e.g. Travel &amp; Expenses Policy" />
         </div>
         <div class="rq-field rq-check" id="reqVariantsField">

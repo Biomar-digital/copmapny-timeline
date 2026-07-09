@@ -45,6 +45,9 @@ def main(argv=None):
     ap.add_argument("--hanging-indent", dest="hanging_indent", action="store_true",
                     help="Hang-indent numbered clauses/headings so wrapped lines align under the "
                          "clause text (matches the Articles of Association / Remuneration Policy layout)")
+    ap.add_argument("--category", default="Policy",
+                    help="Document category: Policy (default), Guideline, or Position Statement. "
+                         "Guideline swaps the cover artwork to the ocean-blue variant.")
     ap.add_argument("--footer-note", dest="footer_note", default="",
                     help="Small disclaimer line under the footer address")
     ap.add_argument("--version-date", dest="version_date", default="",
@@ -67,7 +70,7 @@ def main(argv=None):
                         lead_title=args.lead_title, body_size=args.body_size,
                         head_scale=args.head_scale, hanging_indent=args.hanging_indent,
                         footer_note=args.footer_note, version_date=args.version_date,
-                        has_signed=args.has_signed)
+                        has_signed=args.has_signed, category=args.category)
 
     # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
     import datetime

@@ -74,6 +74,22 @@ body {
 
 main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 60px; }
 
+/* Top-level shelf tabs: Policies vs Guidelines */
+.typetabs { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+.typetab {
+  border: none; background: none; cursor: pointer; font-family: inherit;
+  font-size: 14px; font-weight: 700; color: #6b87a4; padding: 10px 4px 12px;
+  margin-right: 22px; border-bottom: 2.5px solid transparent; display: flex;
+  align-items: center; gap: 8px;
+}
+.typetab:hover { color: var(--navy); }
+.typetab.active { color: var(--navy); border-bottom-color: var(--ocean); }
+.typetab-count {
+  font-size: 11px; font-weight: 700; background: var(--bg); color: #6b87a4;
+  border-radius: 20px; padding: 1px 8px;
+}
+.typetab.active .typetab-count { background: var(--crisp); color: var(--navy); }
+
 .toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 #search {
   flex: 1;
@@ -526,6 +542,15 @@ main { max-width: 900px; margin: 0 auto; padding: 22px; }
   font-weight: 500; color: var(--navy); cursor: pointer; }
 .rq-check input[type="checkbox"] { margin-top: 2px; width: 15px; height: 15px; accent-color: var(--navy); }
 .rq-check .rq-hint { display: block; margin-top: 4px; font-size: 11.5px; color: #7c95b1; }
+
+/* Policy vs Guideline segmented control (new-request form) */
+.rq-seg { display: flex; gap: 6px; }
+.rq-segbtn {
+  flex: 1; border: 1px solid var(--line); background: #fff; color: var(--navy);
+  border-radius: 8px; padding: 8px 10px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+.rq-segbtn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
 
 /* AI self-review panel (Requests page) */
 .req-sr { margin-top: 14px; border-radius: 10px; padding: 12px 14px; border: 1px solid var(--line); }

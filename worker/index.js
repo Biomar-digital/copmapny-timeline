@@ -505,8 +505,10 @@ async function handleRequests(request, env, user) {
   // Which variant the change applies to: "Signed", "Unsigned", "Both", or "".
   const variant = String(form.get("variant") || "").slice(0, 40);
   // New-policy requests specify which versions they need ("Signed", "Unsigned",
-  // or "Signed + Unsigned").
+  // or "Signed + Unsigned"), and which shelf it belongs on ("Policy" or
+  // "Guideline" — a guideline gets the ocean-blue cover instead of navy).
   const versions = kind === "new" ? String(form.get("versions") || "Signed").slice(0, 40) : "";
+  const category = kind === "new" && form.get("category") === "Guideline" ? "Guideline" : "Policy";
   const details = String(form.get("details") || "").trim().slice(0, MAX_TEXT);
   if (!author) return json({ error: "Your name is required." }, 400);
   if (!details) return json({ error: "Please describe your request." }, 400);
@@ -527,11 +529,12 @@ async function handleRequests(request, env, user) {
     if (!r.ok) return json({ error: `Could not store the uploaded file (${r.status}).` }, 502);
   }
 
-  const record = { id, kind, status: "open", title: kind === "new" ? title : (policy || title), policy, edition, variant, versions, author, email, details, upload: uploadPath, created_at: new Date().toISOString() };
+  const record = { id, kind, status: "open", title: kind === "new" ? title : (policy || title), policy, edition, variant, versions, category: kind === "new" ? category : undefined, author, email, details, upload: uploadPath, created_at: new Date().toISOString() };
   const heading = kind === "new" ? "New policy request" : "Policy change request";
-  const issueTitle = kind === "new" ? `New policy: ${title}` : `Change: ${policy || title}`;
+  const issueTitle = kind === "new" ? `New ${category.toLowerCase()}: ${title}` : `Change: ${policy || title}`;
   const issueBody =
     `**${heading}**\n\n- **Requested by:** ${author}${email ? ` (${email})` : ""}\n` +
+    (kind === "new" ? `- **Type:** ${category}\n` : "") +
     (kind === "new" ? `- **Proposed title:** ${title}\n` : `- **Policy:** ${policy || "—"}\n`) +
     (kind === "new" ? `- **Versions:** ${versions}\n` : "") +
     (edition ? `- **Edition:** ${edition}\n` : "") +
@@ -545,8 +548,9 @@ async function handleRequests(request, env, user) {
   if (!rec.ok) return json({ error: `Could not save the request (${rec.status}).` }, 502);
 
   const mail = await sendEmail(env, `[BioMar Policy Library] ${heading} — ${kind === "new" ? title : (policy || title)}`,
-    emailHtml(heading, `${author} submitted a ${kind === "new" ? "new policy" : "change"} request.`, [
+    emailHtml(heading, `${author} submitted a ${kind === "new" ? "new " + category.toLowerCase() : "change"} request.`, [
       ["Requested by", escapeHtml(author) + (email ? ` (${escapeHtml(email)})` : "")],
+      kind === "new" ? ["Type", escapeHtml(category)] : null,
       kind === "new" ? ["Proposed title", escapeHtml(title)] : ["Policy", escapeHtml(policy || "—")],
       kind === "new" ? ["Versions", escapeHtml(versions)] : null,
       edition ? ["Edition", escapeHtml(edition)] : null,

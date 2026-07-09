@@ -704,7 +704,10 @@ def _draw_cover(c, doc):
     policy = doc._policy
     # The official empty cover already has the navy pellet artwork, the logo
     # and the decorative rule baked in; we only add the year, title and address.
-    c.drawImage(ImageReader(B.COVER_BG), 0, 0, B.PAGE_W, B.PAGE_H,
+    # Guidelines use the same artwork recoloured to ocean blue (#0471ad) so
+    # they read as visually distinct from policies on the shelf.
+    bg = B.COVER_BG_GUIDELINE if getattr(policy, "category", "Policy") == "Guideline" else B.COVER_BG
+    c.drawImage(ImageReader(bg), 0, 0, B.PAGE_W, B.PAGE_H,
                 preserveAspectRatio=False, mask=None)
 
     # Title - auto-fit width, wrap; anchored so the bottom line sits just above
@@ -791,7 +794,8 @@ def _draw_back_cover(c, doc):
     policy = doc._policy
     # The official empty back cover already has the pellet artwork, the logo,
     # the tagline and the URL baked in; we only overlay the optional card.
-    c.drawImage(ImageReader(B.COVER_BG_BACK), 0, 0, B.PAGE_W, B.PAGE_H,
+    bg = B.COVER_BG_BACK_GUIDELINE if getattr(policy, "category", "Policy") == "Guideline" else B.COVER_BG_BACK
+    c.drawImage(ImageReader(bg), 0, 0, B.PAGE_W, B.PAGE_H,
                 preserveAspectRatio=False, mask=None)
     # The version-history / owner-approver card is shown on the signed copy and
     # on standalone documents. The unsigned copy of a signed/unsigned pair drops

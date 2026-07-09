@@ -484,20 +484,33 @@ function wireComments(policyId) {
 
 let HISTORY_POLICY = null;
 
+function setReqType(type) {
+  const seg = document.getElementById("reqTypeSeg");
+  if (!seg) return;
+  seg.dataset.value = type;
+  seg.querySelectorAll(".rq-segbtn").forEach(b => b.classList.toggle("active", b.dataset.type === type));
+  const lbl = document.getElementById("reqTitleLabel");
+  const inp = document.getElementById("reqDocTitle");
+  if (lbl) lbl.textContent = type === "Guideline" ? "Guideline title" : "Policy title";
+  if (inp) inp.placeholder = type === "Guideline" ? "e.g. Brand Voice Guidelines" : "e.g. Travel & Expenses Policy";
+}
+
 function openRequest(mode, policy) {
   const dlg = document.getElementById("request");
   const isNew = mode === "new";
   document.getElementById("reqTitle").textContent =
-    isNew ? "Request a new policy" : "Request a change";
+    isNew ? "Request a new policy or guideline" : "Request a change";
   document.getElementById("reqSub").textContent = isNew
-    ? "Describe the policy you need and optionally attach a draft."
+    ? "Describe what you need and optionally attach a draft."
     : `Policy: ${policy ? policy.title : "—"}`;
+  document.getElementById("reqTypeField").style.display = isNew ? "" : "none";
   document.getElementById("reqTitleField").style.display = isNew ? "" : "none";
   document.getElementById("reqVariantsField").style.display = isNew ? "" : "none";
+  setReqType("Policy");
   const ws = document.getElementById("reqWantSigned"); if (ws) ws.checked = true;
   const wu = document.getElementById("reqWantUnsigned"); if (wu) wu.checked = false;
   document.getElementById("reqDetailsLabel").textContent =
-    isNew ? "What should this policy cover? *" : "What change do you need? *";
+    isNew ? "What should this cover? *" : "What change do you need? *";
   document.getElementById("reqDocTitle").value = "";
   document.getElementById("reqDetails").value = "";
   document.getElementById("reqFile").value = "";
@@ -517,7 +530,7 @@ async function submitRequest() {
   const docTitle = document.getElementById("reqDocTitle").value.trim();
   const fileEl = document.getElementById("reqFile");
   if (!details) { status.textContent = "Please describe your request."; return; }
-  if (mode === "new" && !docTitle) { status.textContent = "Enter a title for the new policy."; return; }
+  if (mode === "new" && !docTitle) { status.textContent = "Enter a title."; return; }
 
   const fd = new FormData();
   fd.set("kind", mode === "new" ? "new" : "change");
@@ -528,6 +541,7 @@ async function submitRequest() {
     const wantUnsigned = document.getElementById("reqWantUnsigned").checked;
     const versions = [wantSigned && "Signed", wantUnsigned && "Unsigned"].filter(Boolean).join(" + ") || "Signed";
     fd.set("versions", versions);
+    fd.set("category", document.getElementById("reqTypeSeg")?.dataset.value || "Policy");
   }
   else { fd.set("policy", dlg.dataset.policy || ""); fd.set("title", dlg.dataset.title || ""); }
   if (fileEl.files && fileEl.files[0]) fd.set("file", fileEl.files[0]);
@@ -862,6 +876,25 @@ let APPROVER_FILTER = ""; // "" = all
 let PENDING = new Map(); // policy id -> "change_pending" | "pending_review"
 let IS_ADMIN = false;
 let STATUS_FILTER = null; // null = all; else "change_pending" | "pending_review" | "approved"
+let TYPE_FILTER = "Policy"; // "Policy" | "Guideline" — top-level shelf tab
+
+// Position Statements share the "Policy" shelf; only category="Guideline" gets
+// its own tab (and the ocean-blue cover).
+function policyType(p) { return p.category === "Guideline" ? "Guideline" : "Policy"; }
+
+function renderTypeTabs() {
+  const el = document.getElementById("typetabs");
+  if (!el) return;
+  const nPolicy = POLICIES.filter(p => policyType(p) === "Policy").length;
+  const nGuideline = POLICIES.filter(p => policyType(p) === "Guideline").length;
+  const tab = (val, label, n) =>
+    `<button type="button" class="typetab${TYPE_FILTER === val ? " active" : ""}" data-val="${esc(val)}">${esc(label)} <span class="typetab-count">${n}</span></button>`;
+  el.innerHTML = tab("Policy", "Policies", nPolicy) + tab("Guideline", "Guidelines", nGuideline);
+  el.querySelectorAll(".typetab").forEach(b => b.addEventListener("click", () => {
+    TYPE_FILTER = b.dataset.val;
+    renderTypeTabs(); renderChips(); renderStatusFilter(); render();
+  }));
+}
 
 // A policy with no open change request is "approved" (up to date).
 function policyStatus(p) { return PENDING.get(p.id) || "approved"; }
@@ -968,6 +1001,7 @@ function render() {
   const list = document.getElementById("list");
   const f = SEARCH.trim().toLowerCase();
   let shown = POLICIES.filter(p => {
+    if (policyType(p) !== TYPE_FILTER) return false;
     if (OWNER_FILTER && (p.owner || "") !== OWNER_FILTER) return false;
     if (APPROVER_FILTER && (p.approver || "") !== APPROVER_FILTER) return false;
     if (STATUS_FILTER && policyStatus(p) !== STATUS_FILTER) return false;
@@ -995,26 +1029,30 @@ function render() {
     }
     list.appendChild(card(p));
   });
+  const inTabTotal = POLICIES.filter(p => policyType(p) === TYPE_FILTER).length;
   document.getElementById("empty").hidden = shown.length > 0;
+  document.getElementById("empty").textContent = TYPE_FILTER === "Guideline"
+    ? "No guidelines match your search." : "No policies match your search.";
   document.getElementById("count").textContent =
-    `${shown.length} of ${POLICIES.length} policies`;
+    `${shown.length} of ${inTabTotal} ${TYPE_FILTER === "Guideline" ? "guidelines" : "policies"}`;
 }
 
 function renderStatusFilter() {
   const el = document.getElementById("statusfilter");
   if (!el) return;
+  const inTab = POLICIES.filter(p => policyType(p) === TYPE_FILTER);
   const defs = [
     ["change_pending", "Change pending"],
     ["pending_review", "Pending for review"],
     ["approved", "Up to date"],
   ];
-  const count = (s) => POLICIES.filter(p => policyStatus(p) === s).length;
+  const count = (s) => inTab.filter(p => policyStatus(p) === s).length;
   const isActive = (val) => val === "__all" ? STATUS_FILTER === null : STATUS_FILTER === val;
   const btn = (val, label, n) =>
     `<button type="button" class="sfilter sf-${esc(val)}${isActive(val) ? " active" : ""}" data-val="${esc(val)}">${esc(label)} <span class="sf-count">${n}</span></button>`;
   el.innerHTML =
     '<span class="chips-label">Status</span>' +
-    btn("__all", "All", POLICIES.length) +
+    btn("__all", "All", inTab.length) +
     defs.map(([v, l]) => btn(v, l, count(v))).join("");
   el.querySelectorAll(".sfilter").forEach(b => b.addEventListener("click", () => {
     const v = b.dataset.val;
@@ -1025,7 +1063,8 @@ function renderStatusFilter() {
 
 function renderChips() {
   const el = document.getElementById("chips");
-  const uniq = (k) => [...new Set(POLICIES.map(p => p[k]).filter(Boolean))].sort();
+  const inTab = POLICIES.filter(p => policyType(p) === TYPE_FILTER);
+  const uniq = (k) => [...new Set(inTab.map(p => p[k]).filter(Boolean))].sort();
   const opts = (vals, sel) => `<option value="">All</option>` +
     vals.map(v => `<option value="${esc(v)}"${v === sel ? " selected" : ""}>${esc(v)}</option>`).join("");
   const active = OWNER_FILTER || APPROVER_FILTER;
@@ -1214,6 +1253,7 @@ async function init() {
       .sort((a, b) => a.title.localeCompare(b.title));
     document.getElementById("meta").textContent =
       `${POLICIES.length} policies · Last update: ${data.updated || ""}`;
+    renderTypeTabs();
     renderChips();
     renderStatusFilter();
     render();
@@ -1240,6 +1280,9 @@ async function init() {
     document.getElementById("reqClose").addEventListener("click",
       () => { const d = document.getElementById("request"); if (d.close) d.close(); });
     document.getElementById("reqSubmit").addEventListener("click", submitRequest);
+    const reqTypeSeg = document.getElementById("reqTypeSeg");
+    if (reqTypeSeg) reqTypeSeg.querySelectorAll(".rq-segbtn").forEach(b =>
+      b.addEventListener("click", () => setReqType(b.dataset.type)));
     const pvClose = document.getElementById("pvClose");
     if (pvClose) pvClose.addEventListener("click", () => {
       const d = document.getElementById("preview");

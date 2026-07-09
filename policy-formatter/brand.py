@@ -18,6 +18,11 @@ FONT_DIR = os.path.join(ASSETS, "fonts")
 LOGO = os.path.join(ASSETS, "logo.png")              # dark square (content pages)
 COVER_BG = os.path.join(ASSETS, "cover_bg.png")      # front: logo + rule baked in
 COVER_BG_BACK = os.path.join(ASSETS, "cover_bg_back.png")  # back: no logo / rule
+# Guidelines (category="Guideline") use the same artwork recoloured to the
+# BioMar "ocean" blue (#0471ad) instead of navy, so they read as visually
+# distinct from policies on the shelf.
+COVER_BG_GUIDELINE = os.path.join(ASSETS, "cover_bg_guideline.png")
+COVER_BG_BACK_GUIDELINE = os.path.join(ASSETS, "cover_bg_back_guideline.png")
 COVER_RULE_Y = 252.0                                 # baked rule, pt from bottom
 
 # ---------------------------------------------------------------------------

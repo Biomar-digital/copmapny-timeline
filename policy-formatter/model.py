@@ -73,6 +73,7 @@ class Policy:
     footer_note: str = ""     # small disclaimer line under the footer address
     version_date: str = ""    # date shown on the version line (defaults to approval date)
     has_signed: bool = False  # this unsigned render has a signed sibling (-> drop the card)
+    category: str = "Policy"  # "Policy" | "Guideline" | "Position Statement" — Guideline swaps the cover colour
 
 
 def _para_images(item):

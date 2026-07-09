@@ -139,6 +139,8 @@ def main():
                     meta_args += ["--head-scale", str(p["head_scale"])]
                 if p.get("hanging_indent"):
                     meta_args += ["--hanging-indent"]
+                if p.get("category"):
+                    meta_args += ["--category", p["category"]]
                 if p.get("footer_note"):
                     meta_args += ["--footer-note", p["footer_note"]]
                 if ed.get("approval_date"):
