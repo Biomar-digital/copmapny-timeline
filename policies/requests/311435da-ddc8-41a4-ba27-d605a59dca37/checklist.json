@@ -1,0 +1,8 @@
+[
+  {"id":"identity","label":"Our Identity in Words section present","present":["Our Identity in Words","knowledgeable colleague"]},
+  {"id":"core-principles","label":"Core Principles present","present":["Clear and informed","Accurate and responsible"]},
+  {"id":"casing","label":"Casing rules present (title case, full capitals)","present":["Titles and headlines","We do not set words or phrases in full capitals"]},
+  {"id":"vocabulary-table","label":"Preferred Vocabulary table present","present":["aquafeed (feed is permitted to avoid repetition)","targeted nutrition"]},
+  {"id":"global-spanish","label":"Global Spanish section present","present":["BioMar Global Spanish","alimento acuícola"]},
+  {"id":"closing","label":"Closing statement present","present":["A knowledgeable, trustworthy and close partner in global aquaculture"]}
+]

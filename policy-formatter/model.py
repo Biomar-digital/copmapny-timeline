@@ -28,7 +28,7 @@ class Heading:
 class Body:
     text: str
     bold: bool = False
-    runs: list = None        # optional [(text, bold)] for run-in bold labels
+    runs: list = None        # optional [(text, bold, italic)] for mixed-style runs
     italic: bool = False     # whole paragraph set in italic (e.g. a sub-heading)
 
 @dataclass
@@ -173,17 +173,20 @@ def _classify(text: str, style: str):
 
 
 def _body_from_runs(item, text):
-    """Build a Body, keeping per-run bold (a run-in bold label + plain text) when
-    the paragraph mixes bold and regular; otherwise collapse to a bold flag."""
-    rlist = [(r.text, bool(r.bold)) for r in item.runs if r.text and (r.text.strip() or r.text == " ")]
-    anyb = any(b for _, b in rlist)
-    allb = bool(rlist) and all(b for _, b in rlist)
-    if anyb and not allb:
+    """Build a Body, keeping per-run (bold, italic) — a run-in bold label, a
+    word or two in italic within an otherwise plain sentence, etc. — when the
+    paragraph mixes styles; otherwise collapse to a single bold/italic flag
+    for the whole paragraph."""
+    rlist = [(r.text, bool(r.bold), bool(r.italic))
+             for r in item.runs if r.text and (r.text.strip() or r.text == " ")]
+    allb = bool(rlist) and all(b for _, b, _ in rlist)
+    alli = bool(rlist) and all(i for _, _, i in rlist)
+    mixed_bold = any(b for _, b, _ in rlist) and not allb
+    mixed_italic = any(i for _, _, i in rlist) and not alli
+    if mixed_bold or mixed_italic:
         return Body(text=text, runs=rlist)
     # A paragraph fully in italic (and not bold) is a run-in sub-heading; keep
     # the italic so the generator can render it (bold takes precedence).
-    itals = [bool(r.italic) for r in item.runs if r.text and r.text.strip()]
-    alli = bool(itals) and all(itals)
     if alli and not allb:
         return Body(text=text, italic=True)
     return Body(text=text, bold=allb)

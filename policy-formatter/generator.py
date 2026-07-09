@@ -90,12 +90,21 @@ def _breakable(t):
     return _LONG.sub(lambda m: re.sub(r"([/?&])", "\\1​", m.group(0)), t)
 
 
-def _fmt(text, number=True, widow=True):
+def _fmt(text, number=True, widow=True, lstrip=True, rstrip=True):
     """Format clause text: (1) keep the last two words together so a paragraph
     never ends with a single orphaned word; (2) render a leading clause number
     (e.g. '2.3.2') in Demi. Headings are already fully Demi, so this is used
-    for body/bullets/cells only."""
-    t = _breakable(text.strip())
+    for body/bullets/cells only. lstrip/rstrip=False preserve boundary
+    whitespace — needed when formatting one run of a multi-run paragraph
+    (_body_markup): trimming each segment on BOTH sides would eat the space
+    between a bold run-in label and the text that follows it, so only the
+    outer edge of the first/last run is trimmed, not the seam between runs."""
+    t = text
+    if lstrip:
+        t = t.lstrip()
+    if rstrip:
+        t = t.rstrip()
+    t = _breakable(t)
     if widow:
         parts = t.rsplit(" ", 1)
         if len(parts) == 2:
@@ -108,15 +117,27 @@ def _fmt(text, number=True, widow=True):
 
 
 def _body_markup(b):
-    """Markup for a Body block, wrapping any run-in bold label in <b>…</b>."""
+    """Markup for a Body block, wrapping any run-in bold/italic segment in the
+    brand's Demi/Italic face. Uses explicit <font name="Brand-Demi"/"Brand-
+    Italic"> tags rather than <b>/<i> — ReportLab's <b>/<i> only resolve to a
+    styled face via a registered font family (registerFontFamily), which this
+    pipeline never sets up; every other styled spot in this file (clause
+    numbers, table headers) already uses <font name=...> for the same reason.
+    A run that is both bold and italic renders bold — there is no bundled
+    bold-italic face to combine the two."""
     runs = getattr(b, "runs", None)
     if not runs:
         return _fmt(b.text)
     n = len(runs)
     out = []
-    for i, (t, bd) in enumerate(runs):
-        seg = _fmt(t, number=(i == 0), widow=(i == n - 1))
-        out.append("<b>" + seg + "</b>" if bd else seg)
+    for i, (t, bd, it) in enumerate(runs):
+        seg = _fmt(t, number=(i == 0), widow=(i == n - 1),
+                   lstrip=(i == 0), rstrip=(i == n - 1))
+        if bd:
+            seg = f'<font name="{B.F_DEMI}">{seg}</font>'
+        elif it:
+            seg = f'<font name="{B.F_ITALIC}">{seg}</font>'
+        out.append(seg)
     return "".join(out)
 
 

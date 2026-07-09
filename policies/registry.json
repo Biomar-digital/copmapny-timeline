@@ -781,6 +781,24 @@
         }
       ],
       "doc_title": "Position Statement Plant-based Ingredients"
+    },
+    {
+      "id": "brand-voice-guidelines",
+      "title": "BioMar Brand Voice Guidelines",
+      "language": "English",
+      "owner": "Global Marketing",
+      "approver": "Executive Committee",
+      "category": "Guideline",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-07",
+          "approval_date": "",
+          "source": "Brand_Voice_Guidelines.docx",
+          "notes": "Initial publication.",
+          "requested_by": "Administrator"
+        }
+      ]
     }
   ]
 }

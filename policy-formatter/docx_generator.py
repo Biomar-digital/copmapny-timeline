@@ -50,9 +50,10 @@ def _no_table_borders(table):
     tblPr.append(borders)
 
 
-def _run(p, text, *, bold=False, size=11, color=NAVY, font=FONT):
+def _run(p, text, *, bold=False, italic=False, size=11, color=NAVY, font=FONT):
     r = p.add_run(text)
     r.bold = bold
+    r.italic = italic
     r.font.size = Pt(size)
     r.font.color.rgb = color
     r.font.name = font
@@ -71,11 +72,11 @@ def _body(doc, blk, size=11):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     p.paragraph_format.space_after = Pt(10)
-    if blk.runs:                              # run-in bold label + plain remainder
-        for t, b in blk.runs:
-            _run(p, t, bold=b, size=size)
+    if blk.runs:                              # mixed-style runs (bold label, italic word, ...)
+        for t, b, i in blk.runs:
+            _run(p, t, bold=b, italic=i, size=size)
     else:
-        _run(p, blk.text, bold=blk.bold, size=size)
+        _run(p, blk.text, bold=blk.bold, italic=getattr(blk, "italic", False), size=size)
     return p
 
 
@@ -149,10 +150,10 @@ def _render_into_cell(cell, blk, size, first):
         p = cell.add_paragraph() if not first else cell.paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         if blk.runs:
-            for t, b in blk.runs:
-                _run(p, t, bold=b, size=size - 1)
+            for t, b, i in blk.runs:
+                _run(p, t, bold=b, italic=i, size=size - 1)
         else:
-            _run(p, blk.text, bold=blk.bold, size=size - 1)
+            _run(p, blk.text, bold=blk.bold, italic=getattr(blk, "italic", False), size=size - 1)
 
 
 def _zero_margins(section):
