@@ -36,8 +36,17 @@ PAGE_W_PT, PAGE_H_PT = 595.276, 841.890   # A4, matching the PDF
 # Remuneration Policy): mirrors generator.py's CLAUSE_INDENT/_NUM/_LETTERED so
 # the editable Word copy matches the PDF's article-style layout instead of
 # flush-left wrapped lines.
+#
+# The clause number/letter is placed before a literal tab character, with a
+# tab stop set at the target indent — NOT left embedded in the flowing text
+# with only a plain space after it. A plain space's width follows the number
+# ("3.4" is narrower than "12.10"), so the word right after it would start at
+# a different x on every clause; a tab stop always jumps to the same fixed
+# position regardless of the number's width, matching how the official
+# reference document lines up every clause under the same left edge.
 _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
 _LETTERED = re.compile(r"^\(?[a-z][.)]\s")
+_LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
 CLAUSE_INDENT = 35.4
 LETTER_MARKER_INDENT = 53.4 - 42.6
 LETTER_TEXT_INDENT = 71.4 - 42.6
@@ -76,10 +85,14 @@ def _heading(doc, text, level, hang=False):
     p.paragraph_format.space_before = Pt(13 if level == 1 else 6)
     p.paragraph_format.space_after = Pt(8 if level == 1 else 4)
     p.paragraph_format.keep_with_next = True
-    if hang:
+    m = _NUM.match(text.strip()) if hang else None
+    if m:
         p.paragraph_format.left_indent = Pt(CLAUSE_INDENT)
         p.paragraph_format.first_line_indent = Pt(-CLAUSE_INDENT)
-    _run(p, text, bold=True, size=14 if level == 1 else 12)
+        p.paragraph_format.tab_stops.add_tab_stop(Pt(CLAUSE_INDENT), WD_TAB_ALIGNMENT.LEFT)
+        _run(p, f"{m.group(1)}\t{m.group(3)}", bold=True, size=14 if level == 1 else 12)
+    else:
+        _run(p, text, bold=True, size=14 if level == 1 else 12)
 
 
 def _body(doc, blk, size=11, indent_mode=None):
@@ -92,12 +105,22 @@ def _body(doc, blk, size=11, indent_mode=None):
     if indent_mode == "hang":
         p.paragraph_format.left_indent = Pt(CLAUSE_INDENT)
         p.paragraph_format.first_line_indent = Pt(-CLAUSE_INDENT)
+        p.paragraph_format.tab_stops.add_tab_stop(Pt(CLAUSE_INDENT), WD_TAB_ALIGNMENT.LEFT)
     elif indent_mode == "uniform":
         p.paragraph_format.left_indent = Pt(CLAUSE_INDENT)
         p.paragraph_format.first_line_indent = Pt(0)
     if blk.runs:                              # mixed-style runs (bold label, italic word, ...)
-        for t, b, i in blk.runs:
+        runs = list(blk.runs)
+        if indent_mode == "hang":
+            m = _NUM.match(runs[0][0].strip())
+            if m:
+                _run(p, f"{m.group(1)}\t", bold=True, size=size)
+                runs[0] = (m.group(3), runs[0][1], runs[0][2])
+        for t, b, i in runs:
             _run(p, t, bold=b, italic=i, size=size)
+    elif indent_mode == "hang" and (m := _NUM.match(blk.text.strip())):
+        _run(p, f"{m.group(1)}\t", bold=True, size=size)
+        _run(p, m.group(3), bold=blk.bold, italic=getattr(blk, "italic", False), size=size)
     else:
         _run(p, blk.text, bold=blk.bold, italic=getattr(blk, "italic", False), size=size)
     return p
@@ -108,12 +131,16 @@ def _bullet(doc, text, size=11, hang=False):
     # so it must NOT also get Word's automatic "List Bullet" glyph — same
     # double-marker bug the PDF generator guards against. Use a plain
     # paragraph with a manual hanging indent instead.
-    if hang:
+    m = _LETTERED_SPLIT.match(text.strip()) if hang else None
+    if m:
         p = doc.add_paragraph()
         p.paragraph_format.left_indent = Pt(LETTER_TEXT_INDENT)
         p.paragraph_format.first_line_indent = Pt(-(LETTER_TEXT_INDENT - LETTER_MARKER_INDENT))
-    else:
-        p = doc.add_paragraph(style="List Bullet")
+        p.paragraph_format.tab_stops.add_tab_stop(Pt(LETTER_TEXT_INDENT), WD_TAB_ALIGNMENT.LEFT)
+        p.paragraph_format.space_after = Pt(4)
+        _run(p, f"{m.group(1)}\t{m.group(2)}", size=size)
+        return
+    p = doc.add_paragraph(style="List Bullet")
     p.paragraph_format.space_after = Pt(4)
     _run(p, text, size=size)
 

@@ -23,6 +23,24 @@ from io import BytesIO
 
 B.register_fonts()
 
+# ReportLab's Paragraph `bulletText` normally nudges the first line rightward
+# whenever the bullet's own rendered width (+ a small safety pad) would run
+# past `leftIndent` — meant to stop a wide bullet glyph from overlapping the
+# text. Our numbered clauses use bulletText as a fixed tab stop for the clause
+# number (see _set_clause_indent), and a handful of deeply-nested numbers
+# ("4.3.4.1") are wide enough to trip that guard, which would shift only
+# their first line and reproduce the exact first-line-vs-wrapped-line
+# misalignment this mechanism exists to prevent. The official reference PDF
+# has no such guard — a wide number simply sits close to the text with no
+# push — so disable it: keep ReportLab's bullet drawing but always keep the
+# body text at its normal (unshifted) position.
+import reportlab.platypus.paragraph as _rl_paragraph
+_rl_draw_bullet = _rl_paragraph._drawBullet
+def _draw_bullet_no_overflow_shift(canvas, offset, cur_y, bulletText, style, rtl):
+    _rl_draw_bullet(canvas, offset, cur_y, bulletText, style, rtl)
+    return offset
+_rl_paragraph._drawBullet = _draw_bullet_no_overflow_shift
+
 
 # --------------------------------------------------------------------------
 # Paragraph stylesheet (mirrors the IDML "Title / Subtitle / Body / Bullets")
@@ -81,6 +99,7 @@ _LONG = re.compile(r"\S{28,}")
 # so it is rendered as an indented item WITHOUT a bullet glyph (the letter is the
 # marker) — avoids the redundant "• a." double marking.
 _LETTERED = re.compile(r"^\(?[a-z][.)]\s")
+_LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
 
 
 def _breakable(t):
@@ -626,7 +645,12 @@ def _story(policy):
         if i == dec_i:
             flow.append(PageBreak())
         if isinstance(b, Heading):
-            flow.append(Paragraph(escape(b.text), H1 if b.level == 1 else H2))
+            style = H1 if b.level == 1 else H2
+            m = _NUM.match(b.text.strip()) if getattr(policy, "hanging_indent", False) else None
+            if m:
+                flow.append(Paragraph(escape(m.group(3)), style, bulletText=m.group(1)))
+            else:
+                flow.append(Paragraph(escape(b.text), style))
             prev_subhead = False
         elif isinstance(b, Body):
             # Justify normal running text; left-align short lines and anything
@@ -656,11 +680,17 @@ def _story(policy):
                 # Anything else uses the plain style.
                 if is_numbered_subhead:
                     style = BODY_HANG if justify else BODY_HANG_LEFT
+                    if getattr(policy, "hanging_indent", False):
+                        m = _NUM.match(b.text.strip())
+                        flow.append(Paragraph(_fmt(m.group(3), number=False), style, bulletText=m.group(1)))
+                    else:
+                        flow.append(Paragraph(_fmt(b.text), style))
                 elif prev_subhead:
                     style = BODY_INDENT if justify else BODY_INDENT_LEFT
+                    flow.append(Paragraph(_fmt(b.text), style))
                 else:
                     style = BODY if justify else BODY_LEFT
-                flow.append(Paragraph(_fmt(b.text), style))
+                    flow.append(Paragraph(_fmt(b.text), style))
                 if is_numbered_subhead:
                     # A numbered-but-not-bold block can still be a short
                     # sub-heading in the source ("3.2 Incentive pay", no
@@ -674,8 +704,12 @@ def _story(policy):
                 # span several paragraphs, all of which need the same indent.
         elif isinstance(b, Bullet):
             prev_subhead = False
-            if _LETTERED.match(b.text.strip()):
-                flow.append(Paragraph(_fmt(b.text), BULLET_HANG))     # letter is the marker
+            if _LETTERED.match(b.text.strip()) and getattr(policy, "hanging_indent", False):
+                lm = _LETTERED_SPLIT.match(b.text.strip())
+                flow.append(Paragraph(_fmt(lm.group(2), number=False), BULLET_HANG,
+                                      bulletText=lm.group(1)))     # letter is the marker
+            elif _LETTERED.match(b.text.strip()):
+                flow.append(Paragraph(_fmt(b.text), BULLET_HANG))     # letter is the marker (no hang)
             else:
                 flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):
@@ -979,19 +1013,38 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     Association / Remuneration Policy layout. H1/H2 already reflect any
     head_scale, since this runs after _set_heading_size; BODY_HANG/_LEFT and
     BULLET_HANG are separate styles so only numbered clauses / lettered items
-    (not every Body/Bullet block) indent."""
+    (not every Body/Bullet block) indent.
+
+    The clause number/letter is rendered via ReportLab's Paragraph `bulletText`
+    mechanism instead of being embedded in the flowing text: a firstLineIndent
+    trick would only push the START of the first line to the margin, but the
+    text AFTER the number would still begin wherever that number's own
+    (variable) rendered width happens to end — so "3.4" (narrow) and "12.10"
+    (wide) would leave their first word at different x positions, out of line
+    with the fixed-position wrapped continuation lines below. bulletText draws
+    the marker at a fixed `bulletIndent` independent of the paragraph text,
+    which then starts at `leftIndent` on EVERY line, first or wrapped alike."""
     global H1, H2, BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BODY_INDENT, BODY_INDENT_LEFT
     if not enabled:
         BODY_HANG, BODY_HANG_LEFT, BULLET_HANG = BODY, BODY_LEFT, BULLET
         BODY_INDENT, BODY_INDENT_LEFT = BODY, BODY_LEFT
         return
-    H1 = ParagraphStyle("H1i", parent=H1, leftIndent=indent, firstLineIndent=-indent)
-    H2 = ParagraphStyle("H2i", parent=H2, leftIndent=indent, firstLineIndent=-indent)
-    BODY_HANG = ParagraphStyle("BodyHang", parent=BODY, leftIndent=indent, firstLineIndent=-indent)
-    BODY_HANG_LEFT = ParagraphStyle("BodyHangLeft", parent=BODY_LEFT, leftIndent=indent, firstLineIndent=-indent)
+    H1 = ParagraphStyle("H1i", parent=H1, leftIndent=indent, firstLineIndent=0,
+                        bulletIndent=0, bulletFontName=H1.fontName,
+                        bulletFontSize=H1.fontSize, bulletColor=H1.textColor)
+    H2 = ParagraphStyle("H2i", parent=H2, leftIndent=indent, firstLineIndent=0,
+                        bulletIndent=0, bulletFontName=H2.fontName,
+                        bulletFontSize=H2.fontSize, bulletColor=H2.textColor)
+    BODY_HANG = ParagraphStyle("BodyHang", parent=BODY, leftIndent=indent, firstLineIndent=0,
+                               bulletIndent=0, bulletFontName=B.F_DEMI,
+                               bulletFontSize=BODY.fontSize, bulletColor=BODY.textColor)
+    BODY_HANG_LEFT = ParagraphStyle("BodyHangLeft", parent=BODY_LEFT, leftIndent=indent, firstLineIndent=0,
+                                    bulletIndent=0, bulletFontName=B.F_DEMI,
+                                    bulletFontSize=BODY_LEFT.fontSize, bulletColor=BODY_LEFT.textColor)
     BULLET_HANG = ParagraphStyle("BulletHang", parent=BULLET,
-                                 leftIndent=LETTER_TEXT_INDENT,
-                                 firstLineIndent=-(LETTER_TEXT_INDENT - LETTER_MARKER_INDENT))
+                                 leftIndent=LETTER_TEXT_INDENT, firstLineIndent=0,
+                                 bulletIndent=LETTER_MARKER_INDENT, bulletFontName=BULLET.fontName,
+                                 bulletFontSize=BULLET.fontSize, bulletColor=BULLET.textColor)
     # Uniform indent (NOT hanging: firstLineIndent=0) for a paragraph that has no
     # clause number of its own but is the content of a numbered sub-heading right
     # above it (e.g. "3.2 Incentive pay" / "The Board of Directors shall not..."):
