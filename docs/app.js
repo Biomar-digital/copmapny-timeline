@@ -268,22 +268,30 @@ function openEditChooser(p) {
 }
 
 // Approve after reviewing: open the compare view first (what changed), with an
-// Approve button inside. Falls back to a plain confirm if there's no prior
-// version to compare against.
-function approveWithReview(p) {
+// Approve button inside. Before a version is minted (still on the same
+// edition as the pending request) there's nothing in the normal per-edition
+// diffs.json yet, so prefer a "pending" comparison — computed by
+// diff_pending.py straight off the pre-change source recovered from git,
+// against the already-published PDF — over the last approved edition's diff,
+// and only fall back to a plain confirm if neither is available.
+async function approveWithReview(p) {
   const eds = p.editions || [];
   const doApprove = () => {
     const d = document.getElementById("compare"); if (d && d.close) d.close();
     pendingAction(p.id, "approve");
   };
-  if (eds.length >= 2) {
+  const confirmThenApprove = () => confirmDialog(
+    `Approve the changes to "${p.title}"? This clears the request.`, { ok: "Approve" }
+  ).then(ok => { if (ok) doApprove(); });
+  await loadDiffs();
+  const hasPending = !!(DIFFS[p.id] || {}).pending;
+  if (hasPending) {
+    openCompare(p.id, "pending", { onApprove: confirmThenApprove });
+  } else if (eds.length >= 2) {
     const key = `${eds[eds.length - 1].version}__${eds[eds.length - 2].version}`;
-    openCompare(p.id, key, { onApprove: async () => {
-      if (await confirmDialog(`Approve the changes to "${p.title}"? This clears the request.`, { ok: "Approve" })) doApprove();
-    } });
+    openCompare(p.id, key, { onApprove: confirmThenApprove });
   } else {
-    confirmDialog(`Approve the changes to "${p.title}"? This clears the request.`, { ok: "Approve" })
-      .then(ok => { if (ok) pendingAction(p.id, "approve"); });
+    confirmThenApprove();
   }
 }
 
