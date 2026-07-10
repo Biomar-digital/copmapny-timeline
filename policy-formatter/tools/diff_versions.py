@@ -179,9 +179,23 @@ def build_pair(policy_id, title, old_ed, new_ed):
 
 def main():
     lib = json.load(open(LIBRARY, encoding="utf-8"))
+    # Preserve any existing "pending" entry (diff_pending.py, run for a
+    # change still in pending_review — no minted edition to pair against
+    # yet) and its rendered pages under cmp/<policy>/. This function only
+    # owns the per-edition version-pair diffs; wiping the whole dir/file
+    # unconditionally deleted pending comparisons out from under an
+    # in-flight review every time publish.py ran for an unrelated policy.
+    old_diffs = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}
+    pending = {pid: d["pending"] for pid, d in old_diffs.items() if "pending" in d}
     if os.path.isdir(CMP_DIR):
-        shutil.rmtree(CMP_DIR)
-    diffs = {}
+        for entry in os.listdir(CMP_DIR):
+            if entry in pending:
+                for sub in os.listdir(os.path.join(CMP_DIR, entry)):
+                    if not (sub.startswith("Before_this_request") or sub.startswith("Current_pending_review")):
+                        shutil.rmtree(os.path.join(CMP_DIR, entry, sub), ignore_errors=True)
+            else:
+                shutil.rmtree(os.path.join(CMP_DIR, entry), ignore_errors=True)
+    diffs = {pid: {"pending": d} for pid, d in pending.items()}
     for p in lib["policies"]:
         eds = p.get("editions", [])
         if len(eds) < 2:
@@ -198,7 +212,8 @@ def main():
             print(f"  {p['id']}: {pair['old']} → {pair['new']}  ({pair['changed']} changed lines)")
     json.dump(diffs, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     open(OUT, "a").write("\n")
-    print("wrote", os.path.relpath(OUT, REPO), "-", len(diffs), "policies")
+    print("wrote", os.path.relpath(OUT, REPO), "-", len(diffs), "policies",
+          f"({len(pending)} pending comparison(s) preserved)" if pending else "")
 
 
 if __name__ == "__main__":
