@@ -163,5 +163,15 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783689346568
+  },
+  {
+    "id": "6884e63b-6e29-46d7-8d80-a742f53b8a11",
+    "policy": "diversity-policy",
+    "request_id": "0e6ca721-2c3a-4d71-a4d4-4e1970aae33a",
+    "title": "Change: diversity-policy",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1783689473405
   }
 ]
