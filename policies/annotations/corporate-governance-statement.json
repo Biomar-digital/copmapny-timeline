@@ -15,7 +15,10 @@
     "edition": "Version 1.1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "It appears that the section \"Management structure\" and the following sections have been moved up before the table - is there a specific reason for this? If do to my comments, I apologise for any confusion. Please revert to original structure.",
-    "created_at": "2026-07-06T09:17:29.044Z"
+    "created_at": "2026-07-06T09:17:29.044Z",
+    "included_in": [
+      "80b9b572-f39b-46a5-bf1b-bc616b2a11c6"
+    ]
   },
   {
     "id": "9ab5db68-a140-49ac-8bd2-3303f96d4e16",
@@ -63,7 +66,10 @@
     "edition": "Version 1.1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Remove bullet from this item.",
-    "created_at": "2026-07-06T09:19:08.840Z"
+    "created_at": "2026-07-06T09:19:08.840Z",
+    "included_in": [
+      "80b9b572-f39b-46a5-bf1b-bc616b2a11c6"
+    ]
   },
   {
     "id": "f382cf0e-f4ef-46b9-87d8-11ce242b2e07",
@@ -99,13 +105,16 @@
     "edition": "Version 1.1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please add bullet",
-    "created_at": "2026-07-06T09:20:01.303Z"
+    "created_at": "2026-07-06T09:20:01.303Z",
+    "included_in": [
+      "80b9b572-f39b-46a5-bf1b-bc616b2a11c6"
+    ]
   },
   {
     "id": "9330b7ee-fa92-4f40-bb32-6383db0dcd3f",
     "file": "files/Corporate_Governance_Statement__Policy_2026-06_non-approval.pdf",
     "page": 12,
-    "quote": "The composition of\nthe board\ncommittees is\ndetermined by the\nBoard of Directors\nbased on a number\nof criteria and\nconsiderations,\nincluding\ncompetences and\ncapabilities as well\nas the Company’s\nshareholder\ncomposition.\nIndependency is an\nimportant part of\nsuch assessment,\nbut the Board of\nDirectors does not\nbelieve that it\nshould be the only\ndecisive factor\nwhen assessing the\noptimal\ncomposition of its\ncommittees. In\nparticular in relation\nto the\nRemuneration and\nNomination\nCommittee, the\nBoard of Directors\nfinds it important\nthat at least one\nboard member\nassociated with the\nmajority\nshareholder is\nrepresented in the\nCompany’s\nRemuneration and\nNomination\nCommittee.\nThe board\ncommittees consist\nsolely of members\nof the Board of\nDirectors.\nAll members of the\nAudit Committee,\nincluding the chair\nof the Audit\nCommittee, are\nconsidered\nindependent.\nHowever, the\nmajority of the\nmembers of the\nRemuneration and\nNomination\nCommittee are not\nconsidered\nindependent as\nonly one of two\nmembers is\n",
+    "quote": "The composition of\nthe board\ncommittees is\ndetermined by the\nBoard of Directors\nbased on a number\nof criteria and\nconsiderations,\nincluding\ncompetences and\ncapabilities as well\nas the Company\u2019s\nshareholder\ncomposition.\nIndependency is an\nimportant part of\nsuch assessment,\nbut the Board of\nDirectors does not\nbelieve that it\nshould be the only\ndecisive factor\nwhen assessing the\noptimal\ncomposition of its\ncommittees. In\nparticular in relation\nto the\nRemuneration and\nNomination\nCommittee, the\nBoard of Directors\nfinds it important\nthat at least one\nboard member\nassociated with the\nmajority\nshareholder is\nrepresented in the\nCompany\u2019s\nRemuneration and\nNomination\nCommittee.\nThe board\ncommittees consist\nsolely of members\nof the Board of\nDirectors.\nAll members of the\nAudit Committee,\nincluding the chair\nof the Audit\nCommittee, are\nconsidered\nindependent.\nHowever, the\nmajority of the\nmembers of the\nRemuneration and\nNomination\nCommittee are not\nconsidered\nindependent as\nonly one of two\nmembers is\n",
     "rects": [
       {
         "x": 0.6281814469872256,
@@ -591,7 +600,10 @@
     "edition": "Version 1.1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Can you add hyphenation?",
-    "created_at": "2026-07-06T09:21:03.963Z"
+    "created_at": "2026-07-06T09:21:03.963Z",
+    "included_in": [
+      "80b9b572-f39b-46a5-bf1b-bc616b2a11c6"
+    ]
   },
   {
     "id": "2d1357db-a6ac-4f11-a2f6-002b501ac3e9",
@@ -609,7 +621,10 @@
     "edition": "Version 1.1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Add bullet",
-    "created_at": "2026-07-06T09:29:00.877Z"
+    "created_at": "2026-07-06T09:29:00.877Z",
+    "included_in": [
+      "80b9b572-f39b-46a5-bf1b-bc616b2a11c6"
+    ]
   },
   {
     "id": "a690b9e2-d9e2-4cc0-9554-20db81e38f05",
@@ -645,7 +660,10 @@
     "edition": "Version 1.1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "\"The Committee recommends\" should only be in bold the first time it appears within a paragraph.",
-    "created_at": "2026-07-06T09:30:51.319Z"
+    "created_at": "2026-07-06T09:30:51.319Z",
+    "included_in": [
+      "80b9b572-f39b-46a5-bf1b-bc616b2a11c6"
+    ]
   },
   {
     "id": "559dbbc8-ec53-40eb-a443-7073e19031ea",
@@ -663,7 +681,10 @@
     "edition": "Version 1.1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please change \"in the following\" to \"herein\"",
-    "created_at": "2026-07-08T07:58:17.931Z"
+    "created_at": "2026-07-08T07:58:17.931Z",
+    "included_in": [
+      "80b9b572-f39b-46a5-bf1b-bc616b2a11c6"
+    ]
   },
   {
     "id": "1b7fa0b5-d8c2-41da-b16b-408d43bd1798",
@@ -681,7 +702,10 @@
     "edition": "Version 1.1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "The second \"The Committee recommends\" should not be bold",
-    "created_at": "2026-07-08T07:59:47.478Z"
+    "created_at": "2026-07-08T07:59:47.478Z",
+    "included_in": [
+      "80b9b572-f39b-46a5-bf1b-bc616b2a11c6"
+    ]
   },
   {
     "id": "cd22fbed-ba74-4bc0-add7-90aadf8a78c4",
@@ -699,7 +723,8 @@
     "edition": "Version 1.1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Could this be changed to version 1 so that we don't count different design versions?",
-    "created_at": "2026-07-08T08:07:14.565Z"
+    "created_at": "2026-07-08T08:07:14.565Z",
+    "included_in": []
   },
   {
     "id": "3cbf2438-9d13-4453-9911-5cb5b4ac3a25",
@@ -717,7 +742,10 @@
     "edition": "Version 1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "The numbering does not work when the headings are not numbered. Please remove the numbering and make the heading italic.",
-    "created_at": "2026-07-10T11:00:14.907Z"
+    "created_at": "2026-07-10T11:00:14.907Z",
+    "included_in": [
+      "80b9b572-f39b-46a5-bf1b-bc616b2a11c6"
+    ]
   },
   {
     "id": "00b7c36d-e4d4-44bc-972c-0f9ef60a716f",
@@ -735,6 +763,9 @@
     "edition": "Version 1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "The numbering does not work when the headings are not numbered. Please remove the numbering and make the heading italic.",
-    "created_at": "2026-07-10T11:00:22.232Z"
+    "created_at": "2026-07-10T11:00:22.232Z",
+    "included_in": [
+      "80b9b572-f39b-46a5-bf1b-bc616b2a11c6"
+    ]
   }
 ]

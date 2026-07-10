@@ -219,6 +219,22 @@ async function appendItem(env, path, item, message) {
   }
   return { ok: false, status: 409 };
 }
+// Mutate items in place (e.g. tag annotations with the request they were just
+// bundled into) instead of appending a new one. `mutateFn(list)` edits `list`
+// in place and returns true if it actually changed something — a false
+// return skips the write entirely (nothing to save, no wasted commit).
+// Retries on a concurrent-write conflict same as appendItem.
+async function updateItems(env, path, mutateFn, message) {
+  for (let i = 0; i < 3; i++) {
+    const { list, sha } = await ghGetList(env, path);
+    if (!mutateFn(list)) return { ok: true, skipped: true };
+    const r = await ghPutList(env, path, list, sha, message);
+    if (r.ok) return { ok: true };
+    if (r.status === 409 || r.status === 422) continue;
+    return { ok: false, status: r.status };
+  }
+  return { ok: false, status: 409 };
+}
 async function ghCreateFile(env, path, contentB64, message) {
   return fetch(contentsUrl(env, path), { method: "PUT", headers: { ...ghHeaders(env), "Content-Type": "application/json" }, body: JSON.stringify({ message, content: contentB64, branch: env.GH_BRANCH }) });
 }
@@ -482,7 +498,7 @@ async function handleAnnotations(request, env, user) {
     const text = String(p.text || "").trim().slice(0, MAX_TEXT);
     const author = String(p.author || user.name || "Anonymous").trim().slice(0, MAX_AUTHOR) || "Anonymous";
     if (!text) return json({ error: "Comment text is required." }, 400);
-    const ann = { id: crypto.randomUUID(), file, page, quote, rects: cleanRects(p.rects), edition: String(p.edition || "").slice(0, 200), author, text, created_at: new Date().toISOString() };
+    const ann = { id: crypto.randomUUID(), file, page, quote, rects: cleanRects(p.rects), edition: String(p.edition || "").slice(0, 200), author, text, included_in: [], created_at: new Date().toISOString() };
     const res = await appendItem(env, `${ANNOTATIONS_DIR}/${id}.json`, ann, `Add annotation on ${id} (${file} p.${page})`);
     if (!res.ok) return json({ error: `GitHub write failed (${res.status}).` }, 502);
     await recordEvent(env, "annotation", `${author} annotated ${id} (p.${page})`, id, author);
@@ -567,6 +583,25 @@ async function handleRequests(request, env, user) {
       { id: crypto.randomUUID(), policy, request_id: id, title: issueTitle, status: "change_pending",
         author, email, created_at: Date.now() },
       `Track pending change on ${policy}`).catch(() => {});
+    // Tag every annotation folded into this request's "Highlights" so a later
+    // round doesn't silently re-bundle the same already-submitted note — the
+    // reviewer builds the list client-side (review.js only sends IDs for
+    // annotations with no included_in yet) and posts it alongside the request.
+    let annotationIds = [];
+    try { annotationIds = JSON.parse(form.get("annotation_ids") || "[]"); } catch { /* ignore */ }
+    annotationIds = Array.isArray(annotationIds) ? annotationIds.filter(x => typeof x === "string").slice(0, 200) : [];
+    if (annotationIds.length) {
+      await updateItems(env, `${ANNOTATIONS_DIR}/${policy}.json`, (list) => {
+        let changed = false;
+        for (const a of list) {
+          if (annotationIds.includes(a.id) && !(a.included_in || []).includes(id)) {
+            a.included_in = [...(a.included_in || []), id];
+            changed = true;
+          }
+        }
+        return changed;
+      }, `Mark ${annotationIds.length} annotation(s) included in request ${id}`).catch(() => {});
+    }
   }
   return json({ ok: true, id, issue: issue.ok ? issue.number : null, warnings }, 201);
 }

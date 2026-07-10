@@ -21,13 +21,14 @@
     "edition": "Version 1__2026-06",
     "author": "Andres",
     "text": "Cambiar a : 2\"",
-    "created_at": "2026-06-16T10:36:59.161Z"
+    "created_at": "2026-06-16T10:36:59.161Z",
+    "included_in": []
   },
   {
     "id": "d43f00c6-fc2a-4b8e-b104-7a4ce793a583",
     "file": "files/Articles_of_Association__Policy_2026-05_non-approval.pdf",
     "page": 5,
-    "quote": "a. The notice convening the general meeting\n• b. The aggregate number of shares and voting rights as at the date of the notice\n• c. The documents to be presented at the general meeting\n• d. The agenda and the complete proposals as well as, for annual general meetings, the audited\nannual report\n• e. The forms to be used for voting by proxy or by postal vote\n9.7 The general meeting shall be presided over by a chairperson appointed by the Board of Directors.\n10 Agenda for the annual general meeting\n10.1 The agenda for the annual general meeting shall include the following:\n• a. The Board of Directors’ report on the Company’s activities in the past financial year\n• b. Presentation and adoption of the audited annual report\n• c. Distribution of profit or covering of loss according to the adopted annual report\n• d. Resolution to grant discharge of liability to the Board of Directors and the\nExecutive Management\n• e. Presentation of the Company’s remuneration report for an advisory vote\n• f. A",
+    "quote": "a. The notice convening the general meeting\n\u2022 b. The aggregate number of shares and voting rights as at the date of the notice\n\u2022 c. The documents to be presented at the general meeting\n\u2022 d. The agenda and the complete proposals as well as, for annual general meetings, the audited\nannual report\n\u2022 e. The forms to be used for voting by proxy or by postal vote\n9.7 The general meeting shall be presided over by a chairperson appointed by the Board of Directors.\n10 Agenda for the annual general meeting\n10.1 The agenda for the annual general meeting shall include the following:\n\u2022 a. The Board of Directors\u2019 report on the Company\u2019s activities in the past financial year\n\u2022 b. Presentation and adoption of the audited annual report\n\u2022 c. Distribution of profit or covering of loss according to the adopted annual report\n\u2022 d. Resolution to grant discharge of liability to the Board of Directors and the\nExecutive Management\n\u2022 e. Presentation of the Company\u2019s remuneration report for an advisory vote\n\u2022 f. A",
     "rects": [
       {
         "x": 0.09828702533491473,
@@ -513,7 +514,10 @@
     "edition": "Version 2__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please amend to remove the bullets, so the numbering only consist of the letters.",
-    "created_at": "2026-07-06T08:28:53.528Z"
+    "created_at": "2026-07-06T08:28:53.528Z",
+    "included_in": [
+      "46721392-edc3-4646-bd26-4d35b674ed04"
+    ]
   },
   {
     "id": "595df659-2d31-436e-8b37-3b124bab5378",
@@ -537,7 +541,10 @@
     "edition": "Version 2__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "This needs to be on a separat, independent line, without any numbering as in the original document.",
-    "created_at": "2026-07-06T08:30:14.795Z"
+    "created_at": "2026-07-06T08:30:14.795Z",
+    "included_in": [
+      "46721392-edc3-4646-bd26-4d35b674ed04"
+    ]
   },
   {
     "id": "55968cdd-a56c-4223-a501-6e2830a00fd7",
@@ -555,7 +562,10 @@
     "edition": "Version 2__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Can you make the headings bigger?",
-    "created_at": "2026-07-06T08:31:58.882Z"
+    "created_at": "2026-07-06T08:31:58.882Z",
+    "included_in": [
+      "46721392-edc3-4646-bd26-4d35b674ed04"
+    ]
   },
   {
     "id": "93ee3f5b-4466-46cf-ba21-11102f5e035c",
@@ -711,13 +721,14 @@
     "edition": "Version 2__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Can we delete the signed version? The set of articles of association is not a policy and thus does not quite work with the information required in the box, and this might cause some confusion.",
-    "created_at": "2026-07-08T07:40:43.177Z"
+    "created_at": "2026-07-08T07:40:43.177Z",
+    "included_in": []
   },
   {
     "id": "606a06c3-1f84-4a56-af37-4711ff1dd13b",
     "file": "files/Articles_of_Association__Policy_2026-05_non-approval.pdf",
     "page": 2,
-    "quote": "Name and objects\n1.1 The Company’s name is BioMar Group A/S.\n1.2 The object of the Company is to engage in development, research, production and trade activities\nwithin feed and aquaculture as well as any other related activities as determined by the Board of\nDirectors. The Company may carry out commercial activities through investments or holdings in other\ncompanies or through participation in associated companies.\n2 Share capital and shares\n2.1 The Company’s nominal share capital is DKK 251,157,500 divided into shares of DKK 2.50 each or\nmultiples thereof.\n2.2 The share capital has been fully paid up.\n2.3 The shares shall be issued in the name of the holder and shall be recorded in the name of the\nholder in the Company’s register of shareholders.\n2.4 The register of shareholders is kept by VP Securities A/S, company reg. (CVR) no. 21 59 93 36.\n2.5 The shares are negotiable instruments. No restrictions shall apply to the transferability of\nthe shares.\n2.6 No shares shall carry special",
+    "quote": "Name and objects\n1.1 The Company\u2019s name is BioMar Group A/S.\n1.2 The object of the Company is to engage in development, research, production and trade activities\nwithin feed and aquaculture as well as any other related activities as determined by the Board of\nDirectors. The Company may carry out commercial activities through investments or holdings in other\ncompanies or through participation in associated companies.\n2 Share capital and shares\n2.1 The Company\u2019s nominal share capital is DKK 251,157,500 divided into shares of DKK 2.50 each or\nmultiples thereof.\n2.2 The share capital has been fully paid up.\n2.3 The shares shall be issued in the name of the holder and shall be recorded in the name of the\nholder in the Company\u2019s register of shareholders.\n2.4 The register of shareholders is kept by VP Securities A/S, company reg. (CVR) no. 21 59 93 36.\n2.5 The shares are negotiable instruments. No restrictions shall apply to the transferability of\nthe shares.\n2.6 No shares shall carry special",
     "rects": [
       {
         "x": 0.08293886773055162,
@@ -1203,7 +1214,10 @@
     "edition": "Version 2__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please match the layout of the original document by indenting each article away from the left margin.",
-    "created_at": "2026-07-08T07:54:33.042Z"
+    "created_at": "2026-07-08T07:54:33.042Z",
+    "included_in": [
+      "46721392-edc3-4646-bd26-4d35b674ed04"
+    ]
   },
   {
     "id": "d6d445ec-82e0-4b90-8076-2d49a3b55496",
@@ -1395,13 +1409,16 @@
     "edition": "Version 2__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please move the list further away from the margin so it align with the text of the other articles.",
-    "created_at": "2026-07-10T10:54:02.832Z"
+    "created_at": "2026-07-10T10:54:02.832Z",
+    "included_in": [
+      "46721392-edc3-4646-bd26-4d35b674ed04"
+    ]
   },
   {
     "id": "2ac39e5b-64d1-4c37-82c8-36661e7484f9",
     "file": "files/Articles_of_Association__Policy_2026-05_non-approval.pdf",
     "page": 6,
-    "quote": "The Board of Directors’ report on the Company’s activities in the past financial year\np. 6BioMar Group\nArticles of Association\nBioMar Group A/S · Kalkværksvej 16, 15. · 8000 Aarhus C · Denmark · Tel +45 86 20 49 70 · www.biomar.com\nb. Presentation and adoption of the audited annual report\nc. Distribution of profit or covering of loss according to the adopted annual report\nd. Resolution to grant discharge of liability to the Board of Directors and the\nExecutive Management\ne. Presentation of the Company’s remuneration report for an advisory vote\nf. Approval of remuneration to the Board of Directors for the current financial year\ng. Election of members to the Board of Directors\nh. Election of auditor\ni. Authorisation to acquire treasury shares, if relevant\nj. Any proposals from the Board of Directors or shareholders\nk. Any other busines",
+    "quote": "The Board of Directors\u2019 report on the Company\u2019s activities in the past financial year\np. 6BioMar Group\nArticles of Association\nBioMar Group A/S \u00b7 Kalkv\u00e6rksvej 16, 15. \u00b7 8000 Aarhus C \u00b7 Denmark \u00b7 Tel +45 86 20 49 70 \u00b7 www.biomar.com\nb. Presentation and adoption of the audited annual report\nc. Distribution of profit or covering of loss according to the adopted annual report\nd. Resolution to grant discharge of liability to the Board of Directors and the\nExecutive Management\ne. Presentation of the Company\u2019s remuneration report for an advisory vote\nf. Approval of remuneration to the Board of Directors for the current financial year\ng. Election of members to the Board of Directors\nh. Election of auditor\ni. Authorisation to acquire treasury shares, if relevant\nj. Any proposals from the Board of Directors or shareholders\nk. Any other busines",
     "rects": [
       {
         "x": 0,
@@ -1833,6 +1850,9 @@
     "edition": "Version 2__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please move the list further away from the margin so it align with the text of the other articles.",
-    "created_at": "2026-07-10T10:54:18.684Z"
+    "created_at": "2026-07-10T10:54:18.684Z",
+    "included_in": [
+      "46721392-edc3-4646-bd26-4d35b674ed04"
+    ]
   }
 ]

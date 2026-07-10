@@ -230,12 +230,17 @@ function focusAnn(id, fromDoc) {
   }
 }
 
+// An annotation already folded into a submitted request (included_in
+// non-empty) stays visible here — never deleted — but won't be re-bundled
+// into the NEXT "Send for review" unless it's still genuinely unsent.
+function isSent(a) { return !!(a.included_in && a.included_in.length); }
+
 function renderSidebar() {
   const sorted = annotations.slice().sort(
     (a, b) => (a.page - b.page) || (a.created_at < b.created_at ? -1 : 1));
   annListEl.innerHTML = sorted.map(a => `
-    <div class="rv-ann" data-id="${esc(a.id)}">
-      <div class="pg">Page ${esc(a.page)}</div>
+    <div class="rv-ann${isSent(a) ? " sent" : ""}" data-id="${esc(a.id)}">
+      <div class="pg">Page ${esc(a.page)}${isSent(a) ? '<span class="rv-sent-badge">Already sent</span>' : ""}</div>
       ${a.quote ? `<p class="q">“${esc(a.quote.slice(0, 220))}”</p>` : ""}
       <p class="tx">${esc(a.text)}</p>
       <div class="by">${esc(a.author || "Anonymous")} · ${fmtTime(a.created_at)}</div>
@@ -271,15 +276,22 @@ async function sendRequest() {
   const comment = document.getElementById("reqComment").value.trim();
   const fileInput = document.getElementById("reqFile");
   const file = fileInput.files[0] || null;
-  if (!comment && !file && annotations.length === 0) {
-    status.textContent = "Add a highlight, a comment or a file first.";
+  // Only fold NOT-yet-sent highlights into this request — one already folded
+  // into an earlier request (included_in non-empty) stays on the document for
+  // reference but doesn't get silently re-submitted every time a later round
+  // goes out, even if that earlier request is still being worked on.
+  const freshAnnotations = annotations.filter(a => !isSent(a));
+  if (!comment && !file && freshAnnotations.length === 0) {
+    status.textContent = annotations.length
+      ? "All your highlights are already part of an earlier request — add a new note or a comment first."
+      : "Add a highlight, a comment or a file first.";
     return;
   }
   btn.disabled = true; status.textContent = "Sending…";
 
   // Fold the highlights into the request details so the AI sees the exact
   // quoted passages alongside the free-text comment.
-  const annText = annotations.map(a =>
+  const annText = freshAnnotations.map(a =>
     `• p.${a.page} “${(a.quote || "").slice(0, 200)}” → ${a.text}`).join("\n");
   const details = [comment, annText && "Highlights:\n" + annText]
     .filter(Boolean).join("\n\n") || "(see highlights on the document)";
@@ -290,7 +302,8 @@ async function sendRequest() {
   fd.append("edition", EDITION);
   fd.append("variant", VARIANT);
   fd.append("details", details);
-  fd.append("annotation_count", String(annotations.length));
+  fd.append("annotation_count", String(freshAnnotations.length));
+  fd.append("annotation_ids", JSON.stringify(freshAnnotations.map(a => a.id)));
   if (file) fd.append("file", file);
   try {
     const r = await fetch("api/requests", { method: "POST", body: fd });
@@ -299,6 +312,8 @@ async function sendRequest() {
     status.textContent = "Sent — the team will review your changes.";
     document.getElementById("reqComment").value = "";
     fileInput.value = ""; document.getElementById("reqFileName").textContent = "Attach a document (optional)";
+    freshAnnotations.forEach(a => { a.included_in = [...(a.included_in || []), d.id]; });
+    renderSidebar();
   } catch (e) {
     status.textContent = "Could not send: " + e.message;
   } finally {

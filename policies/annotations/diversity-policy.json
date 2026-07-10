@@ -15,7 +15,8 @@
     "edition": "Version 1.1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Could this be changed to version 1 so that we don't count different design versions?",
-    "created_at": "2026-07-08T08:37:55.933Z"
+    "created_at": "2026-07-08T08:37:55.933Z",
+    "included_in": []
   },
   {
     "id": "304735a5-a1de-48f9-8e4e-68c12a05a1ce",
@@ -33,7 +34,10 @@
     "edition": "Version 1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Should be \"equality\"",
-    "created_at": "2026-07-10T08:15:18.003Z"
+    "created_at": "2026-07-10T08:15:18.003Z",
+    "included_in": [
+      "989c7598-0789-4f67-b216-e837beb11fae"
+    ]
   },
   {
     "id": "f9f299f5-806c-45fd-b85e-31a37eab7c7e",
@@ -57,7 +61,10 @@
     "edition": "Version 1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Should be \"for work of equal value\"",
-    "created_at": "2026-07-10T08:16:35.219Z"
+    "created_at": "2026-07-10T08:16:35.219Z",
+    "included_in": [
+      "989c7598-0789-4f67-b216-e837beb11fae"
+    ]
   },
   {
     "id": "310d68bd-ffba-42cd-b5e0-f7bbc74f4857",
@@ -75,7 +82,10 @@
     "edition": "Version 1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "To be removed",
-    "created_at": "2026-07-10T08:18:20.431Z"
+    "created_at": "2026-07-10T08:18:20.431Z",
+    "included_in": [
+      "989c7598-0789-4f67-b216-e837beb11fae"
+    ]
   },
   {
     "id": "7528bda3-64b0-468d-8d42-95aa62f433a7",
@@ -99,6 +109,9 @@
     "edition": "Version 1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "amend to \"of equal pay for \nwork of equal value.\"",
-    "created_at": "2026-07-10T13:17:49.131Z"
+    "created_at": "2026-07-10T13:17:49.131Z",
+    "included_in": [
+      "0e6ca721-2c3a-4d71-a4d4-4e1970aae33a"
+    ]
   }
 ]
