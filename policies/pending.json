@@ -159,10 +159,12 @@
     "policy": "articles-of-association",
     "request_id": "46721392-edc3-4646-bd26-4d35b674ed04",
     "title": "Change: articles-of-association",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783689346568
+    "created_at": 1783689346568,
+    "notified": false,
+    "updated_at": 1783691393237
   },
   {
     "id": "6884e63b-6e29-46d7-8d80-a742f53b8a11",
@@ -181,9 +183,11 @@
     "policy": "remuneration-policy",
     "request_id": "06d465af-1897-4aa4-b370-e745b34b691a",
     "title": "Change: remuneration-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783689913256
+    "created_at": 1783689913256,
+    "notified": false,
+    "updated_at": 1783691393237
   }
 ]

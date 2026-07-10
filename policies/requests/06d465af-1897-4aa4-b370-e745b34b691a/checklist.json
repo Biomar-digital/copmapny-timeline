@@ -1,0 +1,30 @@
+[
+  {
+    "id": "heading-numbered",
+    "label": "'1 Introduction' heading numbered, clean gap (already fixed this session)",
+    "page": 2,
+    "present": ["1 Introduction"],
+    "absent": []
+  },
+  {
+    "id": "deep-number-gap",
+    "label": "Deep clause numbers (4.3.4.1) don't glue to the following word",
+    "page": 5,
+    "present": [],
+    "absent": ["4.3.4.1The"]
+  },
+  {
+    "id": "cash-based-italic",
+    "label": "'4.3.5.4 Cash-based long-term incentive' is italic",
+    "page": 6,
+    "present": ["Cash-based long-term incentive"],
+    "absent": []
+  },
+  {
+    "id": "preamble-indented",
+    "label": "Lead-in paragraphs under top-level headings are indented",
+    "page": 2,
+    "present": [],
+    "absent": []
+  }
+]

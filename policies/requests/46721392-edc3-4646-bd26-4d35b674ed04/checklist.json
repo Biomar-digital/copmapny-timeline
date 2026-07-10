@@ -1,0 +1,30 @@
+[
+  {
+    "id": "lettered-list-aligned",
+    "label": "Lettered list items align with numbered-clause text (already fixed this session)",
+    "page": 5,
+    "present": [],
+    "absent": []
+  },
+  {
+    "id": "adoption-line-separate",
+    "label": "'As adopted at the extraordinary general meeting...' is unnumbered, its own line",
+    "page": 7,
+    "present": ["As adopted at the extraordinary general meeting"],
+    "absent": []
+  },
+  {
+    "id": "headings-bigger",
+    "label": "Section headings use the enlarged scale (head_scale)",
+    "page": 2,
+    "present": ["Share capital and shares"],
+    "absent": []
+  },
+  {
+    "id": "articles-indented",
+    "label": "Numbered articles hang-indent away from the margin",
+    "page": 2,
+    "present": [],
+    "absent": []
+  }
+]
