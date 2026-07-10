@@ -718,5 +718,23 @@
     "author": "Marianne Niviaq Thomsen",
     "text": "The numbering does not work when the headings are not numbered. Please remove the numbering and make the heading italic.",
     "created_at": "2026-07-10T11:00:14.907Z"
+  },
+  {
+    "id": "00b7c36d-e4d4-44bc-972c-0f9ef60a716f",
+    "file": "files/Corporate_Governance_Statement__Policy_2026-06_non-approval.pdf",
+    "page": 15,
+    "quote": "3.2",
+    "rects": [
+      {
+        "x": 0.07139662849254341,
+        "y": 0.6833198146798829,
+        "w": 0.029477449155178782,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "The numbering does not work when the headings are not numbered. Please remove the numbering and make the heading italic.",
+    "created_at": "2026-07-10T11:00:22.232Z"
   }
 ]
