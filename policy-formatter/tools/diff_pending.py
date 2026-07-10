@@ -5,24 +5,36 @@ still pending_review — before any version has been minted, so the normal
 edition-to-edition diff (diff_versions.py, docs/diffs.json) has nothing to
 compare against yet.
 
-Recovers the pre-change source from git (the state right before the commit
-that most recently touched it), renders it with the CURRENT
-generator/registry settings, and diffs it against the currently-published
-PDF the same way diff_versions.py compares two editions. Writes the result
-into docs/diffs.json under diffs[policy_id]["pending"], so the dashboard's
-"Review & approve" flow can show a real comparison even though no new
-edition has been minted yet.
+Renders the policy TWICE: once from a git worktree checked out at the
+"before" commit (its own generator.py/docx_generator.py AND its own source
+docx — i.e. exactly how the pipeline produced it right before the fix), and
+once from the current working tree. This covers both kinds of pending
+change: a content edit (source differs, code the same) and a layout/renderer
+fix (code differs, source the same) — either way the two renders are the
+real before/after, not just a source-text diff that would miss pure-code
+fixes entirely.
+
+Diffs the two PDFs the same way diff_versions.py compares two approved
+editions, and writes the result into docs/diffs.json under
+diffs[policy_id]["pending"], so the dashboard's "Review & approve" flow can
+show a real comparison even though no new edition has been minted yet.
 
 Run this once after applying a change and before marking the request
 pending_review — same moment self_review.py runs.
 
 Usage:
     python policy-formatter/tools/diff_pending.py <policy_id> [--before <git-ref>]
+
+    --before defaults to the parent of the most recent commit that touched
+    either this policy's source document or the PDF/Word generators — pass
+    it explicitly when that commit doesn't correspond to this request (e.g.
+    a later, unrelated commit touched the same shared generator file).
 """
 import argparse
 import datetime
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -34,29 +46,29 @@ REGISTRY = os.path.join(REPO, "policies", "registry.json")
 LIBRARY = os.path.join(REPO, "docs", "library.json")
 DIFFS_JSON = os.path.join(REPO, "docs", "diffs.json")
 
+GENERATOR_FILES = [
+    "policy-formatter/generator.py",
+    "policy-formatter/docx_generator.py",
+    "policy-formatter/model.py",
+    "policy-formatter/brand.py",
+]
+
 sys.path.insert(0, HERE)
 from diff_versions import build_pair  # reuse the exact diff/render machinery
 
 
-def _run(cmd):
-    r = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
+def _run(cmd, cwd=REPO):
+    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
     if r.returncode != 0:
-        raise RuntimeError(f"{' '.join(cmd)}: {r.stderr[-600:]}")
+        raise RuntimeError(f"{' '.join(cmd)}: {r.stderr[-800:]}")
     return r.stdout
 
 
-def _last_commit_touching(relpath):
-    out = _run(["git", "log", "-1", "--format=%H", "--", relpath]).strip()
+def _last_commit_touching(relpaths):
+    out = _run(["git", "log", "-1", "--format=%H", "--"] + relpaths).strip()
     if not out:
-        raise RuntimeError(f"no commit history for {relpath}")
+        raise RuntimeError(f"no commit history for {relpaths}")
     return out
-
-
-def _git_show_bytes(ref, relpath):
-    r = subprocess.run(["git", "show", f"{ref}:{relpath}"], cwd=REPO, capture_output=True)
-    if r.returncode != 0:
-        raise RuntimeError(f"git show {ref}:{relpath} failed: {r.stderr[-600:].decode(errors='replace')}")
-    return r.stdout
 
 
 def _meta_args(p, ed):
@@ -88,12 +100,22 @@ def _meta_args(p, ed):
     return meta
 
 
+def _render(format_policy_py, src, p, ed, doc, out_pdf):
+    cover_title = p.get("doc_title", p["title"])
+    cmd = [sys.executable, format_policy_py, src,
+           "--title", cover_title, "--year", ed["date"].split("-")[0], "--date", ed["date"],
+           "-o", out_pdf] + _meta_args(p, ed) + ["--no-signatures"]
+    if doc.get("board_approval") or p.get("no_version_card"):
+        cmd += ["--has-signed"]
+    _run(cmd)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("policy_id")
     ap.add_argument("--before", default=None,
-                     help="git ref whose content is the 'before' state "
-                          "(default: parent of the last commit that touched the source)")
+                     help="git ref for the 'before' state (default: parent of the most "
+                          "recent commit touching this policy's source or the generators)")
     args = ap.parse_args()
 
     reg = json.load(open(REGISTRY, encoding="utf-8"))
@@ -107,8 +129,7 @@ def main():
         raise SystemExit(f"{args.policy_id}: no source document on the current edition")
     rel_src = os.path.join("policies", "sources", src_name)
 
-    before_ref = args.before or f"{_last_commit_touching(rel_src)}^"
-    old_bytes = _git_show_bytes(before_ref, rel_src)
+    before_ref = args.before or f"{_last_commit_touching([rel_src] + GENERATOR_FILES)}^"
 
     lib = json.load(open(LIBRARY, encoding="utf-8"))
     lp = next((x for x in lib["policies"] if x["id"] == args.policy_id), None)
@@ -118,35 +139,38 @@ def main():
     if not cur_pdf:
         raise SystemExit(f"{args.policy_id}: no published non_approval PDF")
 
-    with tempfile.TemporaryDirectory() as tmp:
-        old_src = os.path.join(tmp, src_name)
-        with open(old_src, "wb") as f:
-            f.write(old_bytes)
-        old_pdf = os.path.join(tmp, "old.pdf")
-        cover_title = p.get("doc_title", p["title"])
-        cmd = [sys.executable, os.path.join(PF, "format_policy.py"), old_src,
-               "--title", cover_title, "--year", ed["date"].split("-")[0], "--date", ed["date"],
-               "-o", old_pdf] + _meta_args(p, ed) + ["--no-signatures"]
-        if doc.get("board_approval") or p.get("no_version_card"):
-            cmd += ["--has-signed"]
-        _run(cmd)
+    wt = tempfile.mkdtemp(prefix="diffpending_wt_")
+    old_pdf_rel = os.path.join("files", "cmp", "_pending_src", f"{args.policy_id}.pdf")
+    old_pdf_abs = os.path.join(REPO, "docs", old_pdf_rel)
+    try:
+        # A full worktree at `before_ref` — not just the one source file —
+        # so a renderer-only fix (source untouched, generator.py changed)
+        # still renders with the OLD code, exactly how it looked before.
+        _run(["git", "worktree", "add", "--detach", "-f", wt, before_ref])
+        old_src = os.path.join(wt, rel_src)
+        if not os.path.exists(old_src):
+            raise RuntimeError(f"{rel_src} did not exist at {before_ref}")
+        old_pdf_tmp = os.path.join(wt, "old.pdf")
+        _render(os.path.join(wt, "policy-formatter", "format_policy.py"), old_src, p, ed, doc, old_pdf_tmp)
 
-        # render_pages()/build_pair() write page PNGs relative to docs/, so the
-        # "old" render needs to live under docs/ too.
-        old_pdf_rel = os.path.join("files", "cmp", "_pending_src", f"{args.policy_id}.pdf")
-        old_pdf_abs = os.path.join(REPO, "docs", old_pdf_rel)
         os.makedirs(os.path.dirname(old_pdf_abs), exist_ok=True)
-        with open(old_pdf, "rb") as f, open(old_pdf_abs, "wb") as g:
-            g.write(f.read())
+        shutil.copyfile(old_pdf_tmp, old_pdf_abs)
 
         old_ed = {"version": "Before this request", "documents": [{"files": {"non_approval": old_pdf_rel}}]}
         new_ed = {"version": "Current pending review", "documents": [{"files": {"non_approval": cur_pdf}}]}
-        try:
-            pair = build_pair(args.policy_id, p.get("title", ""), old_ed, new_ed)
-        finally:
-            # Only the rendered page PNGs (already copied into cmp/<policy>/) are
-            # kept for the dashboard — this raw "old" PDF was just scaffolding
-            # for build_pair() to open and diff against.
+        pair = build_pair(args.policy_id, p.get("title", ""), old_ed, new_ed)
+        # A layout/renderer-only fix (source text unchanged) reflows nearly
+        # every line, so the word-level text diff is mostly wrapping noise,
+        # not real content changes — flag it so the dashboard defaults to the
+        # page-image view instead of leading with a wall of false "changes".
+        with open(old_src, "rb") as f:
+            old_source_bytes = f.read()
+        with open(os.path.join(REPO, rel_src), "rb") as f:
+            cur_source_bytes = f.read()
+        pair["source_unchanged"] = old_source_bytes == cur_source_bytes
+    finally:
+        _run(["git", "worktree", "remove", "--force", wt])
+        if os.path.exists(old_pdf_abs):
             os.remove(old_pdf_abs)
             try:
                 os.rmdir(os.path.dirname(old_pdf_abs))
@@ -158,7 +182,7 @@ def main():
     json.dump(diffs, open(DIFFS_JSON, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     open(DIFFS_JSON, "a").write("\n")
     print(f"{args.policy_id}: pending diff = {pair['changed']} changed lines "
-          f"({pair['old']} -> {pair['new']})")
+          f"({pair['old']} -> {pair['new']}) [before={before_ref}]")
 
 
 if __name__ == "__main__":

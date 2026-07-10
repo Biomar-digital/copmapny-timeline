@@ -851,7 +851,9 @@ async function openCompare(policyId, key, opts = {}) {
   const [newVer, oldVer] = key.split("__");
   document.getElementById("cmpTitle").textContent = `${p ? p.title : policyId} — what changed`;
   document.getElementById("cmpSub").textContent = diff
-    ? `${diff.old} → ${diff.new} · ${diff.changed} change${diff.changed !== 1 ? "s" : ""}`
+    ? (diff.source_unchanged
+        ? `${diff.old} → ${diff.new} · layout/formatting only, wording unchanged`
+        : `${diff.old} → ${diff.new} · ${diff.changed} change${diff.changed !== 1 ? "s" : ""}`)
     : `${oldVer} → ${newVer}`;
   document.getElementById("cmpOldHead").textContent = diff ? diff.old : oldVer;
   document.getElementById("cmpNewHead").textContent = diff ? diff.new : newVer;
@@ -873,7 +875,9 @@ async function openCompare(policyId, key, opts = {}) {
   only.onchange = draw;
   bChanges.onclick = () => { mode = "changes"; draw(); };
   bDocs.onclick = () => { mode = "docs"; draw(); };
-  mode = diff ? "changes" : "docs";
+  // A layout-only fix reflows nearly every line, so the word-level text diff
+  // is mostly wrapping noise — lead with the actual pages instead.
+  mode = diff && !diff.source_unchanged ? "changes" : "docs";
   draw();
 }
 
