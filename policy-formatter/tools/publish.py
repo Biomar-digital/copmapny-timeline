@@ -146,7 +146,13 @@ def main():
                 if ed.get("approval_date"):
                     meta_args += ["--approval-date", ed["approval_date"]]
                 if ed.get("version"):
-                    meta_args += ["--version", ed["version"] + ":"]
+                    # The card always reads "Version 1" — the date next to it
+                    # (already on the row) is what distinguishes one edit from
+                    # another, not a climbing decimal. `ed["version"]` still
+                    # increments internally (mint_version.py) since it's the
+                    # unique key the version-history UI and diffs.json key
+                    # editions by; only the on-page text is frozen.
+                    meta_args += ["--version", "Version 1:"]
                 # When a document has a signed sibling, the unsigned copy drops
                 # the back card so the two are distinguishable; standalone
                 # documents keep it — unless the policy opts out of the version

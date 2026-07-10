@@ -9,6 +9,17 @@ function fmtTime(iso) {
     { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+  "August", "September", "October", "November", "December"];
+// The version LABEL a request's edition key carries (e.g. "Version 2.1")
+// is an internal identifier, not something to surface — the dashboard only
+// ever shows "Version 1" plus a date now. Show just the date half.
+function editionDate(edition) {
+  const ym = String(edition || "").split("__")[1] || "";
+  const [y, m] = ym.split("-");
+  return m ? `${MONTHS[parseInt(m, 10) - 1]} ${y}` : "";
+}
+
 const STATUS = {
   change_pending: { label: "Change pending", cls: "change" },
   pending_review: { label: "Pending for review", cls: "review" },
@@ -106,7 +117,7 @@ function requestCard(r) {
       </div>
       <div class="req-when">${esc(fmtTime(r.created_at))}</div>
     </div>
-    <div class="req-meta">Requested by <b>${esc(r.author || "—")}</b>${r.email ? ` · ${esc(r.email)}` : ""}${r.edition ? ` · ${esc(r.edition)}` : ""}${r.kind === "new" && r.versions ? ` · Versions: <b>${esc(r.versions)}</b>` : ""}${r.issue ? ` · issue #${esc(r.issue)}` : ""}</div>
+    <div class="req-meta">Requested by <b>${esc(r.author || "—")}</b>${r.email ? ` · ${esc(r.email)}` : ""}${editionDate(r.edition) ? ` · ${esc(editionDate(r.edition))}` : ""}${r.kind === "new" && r.versions ? ` · Versions: <b>${esc(r.versions)}</b>` : ""}${r.issue ? ` · issue #${esc(r.issue)}` : ""}</div>
     ${comment ? `<div class="req-comment"><div class="req-sec">Comment</div><p>${esc(comment)}</p></div>` : ""}
     ${hl}
     ${sr}

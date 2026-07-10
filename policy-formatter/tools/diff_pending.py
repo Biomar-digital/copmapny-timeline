@@ -96,7 +96,7 @@ def _meta_args(p, ed):
     if ed.get("approval_date"):
         meta += ["--approval-date", ed["approval_date"]]
     if ed.get("version"):
-        meta += ["--version", ed["version"] + ":"]
+        meta += ["--version", "Version 1:"]  # frozen label — see publish.py's _gen
     return meta
 
 

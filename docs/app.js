@@ -13,6 +13,14 @@ function latest(p) {
   return p.editions[p.editions.length - 1];
 }
 
+// The visible label is always "Version 1" — a policy shouldn't read as a
+// climbing decimal every time a typo gets fixed. `ed.version` still
+// increments internally (mint_version.py) as the unique key the compare
+// view and version-history tabs look editions up by; this is display only.
+// The date shown alongside each edition is what actually distinguishes one
+// edit from the next.
+function displayVersion() { return "Version 1"; }
+
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -110,7 +118,7 @@ function openPreview(p) {
   const dlg = document.getElementById("preview");
   const ed = latest(p);
   document.getElementById("pvTitle").textContent = p.title;
-  document.getElementById("pvSub").textContent = `${ed.version || "Version 1"} · ${prettyDate(ed.date)}`;
+  document.getElementById("pvSub").textContent = `${displayVersion()} · ${prettyDate(ed.date)}`;
   const seg = document.getElementById("pvSeg"), frame = document.getElementById("pvFrame"), dl = document.getElementById("pvDownload");
   let cur = opts[0][1];
   const draw = () => {
@@ -185,7 +193,7 @@ function card(p) {
       <h2 class="title"><button type="button" class="title-link view" title="Preview document">${esc(p.title)}</button>${statusBadge(p.id)}${recentBadge(ed)}</h2>
       <div class="tags">
         <span class="tag lang">${esc(p.language || "English")}</span>
-        <span class="tag">${esc(ed.version || "Version 1")}</span>
+        <span class="tag">${displayVersion()}</span>
         <span class="tag">${prettyDate(ed.date)}</span>
         ${p.category && p.category !== "Policy" ? `<span class="tag cat">${esc(p.category)}</span>` : ""}
       </div>
@@ -374,7 +382,7 @@ function editionPanel(p, ed, idx) {
   const prev = idx > 0 ? p.editions[idx - 1] : null;
   const cmpBtn = prev
     ? `<button type="button" class="btn cmp-btn" data-cmp="${esc(p.id)}|${esc(ed.version || "")}__${esc(prev.version || "")}">
-         ⇆ See what changed vs ${esc(prev.version || "previous")}</button>` : "";
+         ⇆ See what changed vs ${esc(prettyDate(prev.date))}</button>` : "";
   const docsHtml = (ed.documents || []).map(doc => `
     <div class="vh-doc">
       <span class="vh-doclabel">${esc(doc.label)}</span>
@@ -385,7 +393,7 @@ function editionPanel(p, ed, idx) {
     </div>`).join("");
   return `
     <div class="vh-ed-head">
-      <span class="vh-version">${esc(ed.version || "Version 1")}</span>
+      <span class="vh-version">${displayVersion()} · ${esc(prettyDate(ed.date))}</span>
       ${isLatest ? '<span class="vh-current">Current</span>' : '<span class="vh-archived">Archived</span>'}
     </div>
     <div class="vh-meta-grid">
@@ -750,7 +758,7 @@ function openHistory(p) {
   tabs.innerHTML = p.editions.map((ed, i) => i).reverse().map(i => {
     const ed = p.editions[i];
     return `<button type="button" class="vh-tab" data-i="${i}">
-      <span class="vh-tab-v">${esc(ed.version || "Version 1")}</span>
+      <span class="vh-tab-v">${displayVersion()}</span>
       <span class="vh-tab-d">${esc(prettyDate(ed.date))}${i === last ? " · current" : ""}</span>
     </button>`;
   }).join("");
