@@ -1,17 +1,5 @@
 [
   {
-    "id": "div-jeppe-1",
-    "policy": "diversity-policy",
-    "request_id": "21e2a25c-a6e2-4672-8798-5e69d8081fd8",
-    "title": "Updated Diversity Policy",
-    "status": "change_pending",
-    "author": "Jeppe Andersen",
-    "email": "jepan@biomar.com",
-    "created_at": 1782000000000,
-    "updated_at": 1783671284454,
-    "notified": true
-  },
-  {
     "id": "a95f0452-242b-498a-9923-9fbed3049089",
     "policy": "articles-of-association",
     "request_id": "c8e38fc7-4041-4fde-b4c5-13c7d2cefd84",
