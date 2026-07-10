@@ -1,0 +1,75 @@
+{
+  "request_id": "f7c3ed75-dbad-4167-b4b7-984ee98c54c4",
+  "policy": "remuneration-policy",
+  "generated_at": "2026-07-10 12:06 UTC",
+  "overall": "pass",
+  "summary": "11 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "11 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Signed + Unsigned)",
+      "status": "pass",
+      "detail": "produced: Signed + Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "64/64 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:heading-numbered-clean",
+      "label": "p.2 'Introduction' heading numbered with a clean, normal gap",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:deep-number-gap",
+      "label": "p.5 '4.3.4.1' and following text have a visible gap (not glued)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:preamble-indented-p2",
+      "label": "p.2 'The remuneration offered...' lead-in indented under heading 3",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:preamble-indented-p4",
+      "label": "p.4 'The remuneration to Executive Management...' lead-in indented under heading 4",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:cash-based-italic",
+      "label": "p.6 '4.3.5.4 Cash-based long-term incentive' is italic",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}

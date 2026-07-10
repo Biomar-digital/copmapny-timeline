@@ -645,12 +645,15 @@ def _story(policy):
         if i == dec_i:
             flow.append(PageBreak())
         if isinstance(b, Heading):
+            # No bulletText split here (unlike numbered clauses): a heading is
+            # always a single short line that never wraps, so there is no
+            # first-line-vs-wrapped-line to misalign — embedding the number
+            # inline (like every heading always has) reads fine, and skips
+            # the widened per-document indent that body clauses need for deep
+            # numbering, which would otherwise leave "1" and "Introduction"
+            # with an oddly large gap between them.
             style = H1 if b.level == 1 else H2
-            m = _NUM.match(b.text.strip()) if getattr(policy, "hanging_indent", False) else None
-            if m:
-                flow.append(Paragraph(escape(m.group(3)), style, bulletText=m.group(1)))
-            else:
-                flow.append(Paragraph(escape(b.text), style))
+            flow.append(Paragraph(escape(b.text), style))
             # An un-numbered paragraph right after a top-level heading ("3
             # Remuneration of the members of the Board of Directors" / "The
             # remuneration offered to...") is that section's lead-in text, not
@@ -1017,13 +1020,11 @@ LETTER_TEXT_INDENT = CLAUSE_INDENT
 
 
 def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
-    """Hang-indent numbered headings/clauses ("1 Name and objects", "1.1 The
-    Company's...") so wrapped lines align under the clause text instead of
-    falling back to the left margin — matches the original Articles of
-    Association / Remuneration Policy layout. H1/H2 already reflect any
-    head_scale, since this runs after _set_heading_size; BODY_HANG/_LEFT and
-    BULLET_HANG are separate styles so only numbered clauses / lettered items
-    (not every Body/Bullet block) indent.
+    """Hang-indent numbered clauses ("1.1 The Company's...") so wrapped lines
+    align under the clause text instead of falling back to the left margin —
+    matches the original Articles of Association / Remuneration Policy
+    layout. BODY_HANG/_LEFT and BULLET_HANG are separate styles so only
+    numbered clauses / lettered items (not every Body/Bullet block) indent.
 
     The clause number/letter is rendered via ReportLab's Paragraph `bulletText`
     mechanism instead of being embedded in the flowing text: a firstLineIndent
@@ -1034,17 +1035,13 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     with the fixed-position wrapped continuation lines below. bulletText draws
     the marker at a fixed `bulletIndent` independent of the paragraph text,
     which then starts at `leftIndent` on EVERY line, first or wrapped alike."""
-    global H1, H2, BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BODY_INDENT, BODY_INDENT_LEFT
+    global BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BODY_INDENT, BODY_INDENT_LEFT
     if not enabled:
         BODY_HANG, BODY_HANG_LEFT, BULLET_HANG = BODY, BODY_LEFT, BULLET
         BODY_INDENT, BODY_INDENT_LEFT = BODY, BODY_LEFT
         return
-    H1 = ParagraphStyle("H1i", parent=H1, leftIndent=indent, firstLineIndent=0,
-                        bulletIndent=0, bulletFontName=H1.fontName,
-                        bulletFontSize=H1.fontSize, bulletColor=H1.textColor)
-    H2 = ParagraphStyle("H2i", parent=H2, leftIndent=indent, firstLineIndent=0,
-                        bulletIndent=0, bulletFontName=H2.fontName,
-                        bulletFontSize=H2.fontSize, bulletColor=H2.textColor)
+    # H1/H2 are left alone: headings never wrap, so there's no hanging-indent
+    # need — see the Heading branch of _story() for why.
     BODY_HANG = ParagraphStyle("BodyHang", parent=BODY, leftIndent=indent, firstLineIndent=0,
                                bulletIndent=0, bulletFontName=B.F_DEMI,
                                bulletFontSize=BODY.fontSize, bulletColor=BODY.textColor)
@@ -1052,8 +1049,8 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
                                     bulletIndent=0, bulletFontName=B.F_DEMI,
                                     bulletFontSize=BODY_LEFT.fontSize, bulletColor=BODY_LEFT.textColor)
     BULLET_HANG = ParagraphStyle("BulletHang", parent=BULLET,
-                                 leftIndent=LETTER_TEXT_INDENT, firstLineIndent=0,
-                                 bulletIndent=LETTER_MARKER_INDENT, bulletFontName=BULLET.fontName,
+                                 leftIndent=indent, firstLineIndent=0,
+                                 bulletIndent=0, bulletFontName=BULLET.fontName,
                                  bulletFontSize=BULLET.fontSize, bulletColor=BULLET.textColor)
     # Uniform indent (NOT hanging: firstLineIndent=0) for a paragraph that has no
     # clause number of its own but is the content of a numbered sub-heading right
@@ -1064,10 +1061,39 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     BODY_INDENT_LEFT = ParagraphStyle("BodyIndentLeft", parent=BODY_LEFT, leftIndent=indent, firstLineIndent=0)
 
 
+# Minimum visible gap between a clause number/letter and the text that follows
+# it. bulletText draws the marker and the body text independently (see
+# _set_clause_indent) — nothing stops them from touching or overlapping if the
+# marker is wider than the indent, which happens with deeply-nested numbers
+# ("4.3.4.1" is ~35.4pt wide at 11pt Demi, the same as CLAUSE_INDENT itself).
+MIN_NUMBER_GAP = 4.0
+
+
+def _required_clause_indent(policy, base=CLAUSE_INDENT):
+    """Widen the hang indent for THIS policy if its widest clause number or
+    lettered marker would otherwise touch/overlap the text that follows it —
+    keeps every clause on the same column (so wrapped lines still line up)
+    while guaranteeing a readable gap after the number, even for the deepest
+    numbering the document actually uses."""
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    widest = 0.0
+    for b in policy.blocks:
+        if isinstance(b, Body) and not getattr(b, "runs", None):
+            m = _NUM.match(b.text.strip())
+            if m:
+                widest = max(widest, stringWidth(m.group(1), B.F_DEMI, BODY.fontSize))
+        elif isinstance(b, Bullet):
+            lm = _LETTERED_SPLIT.match(b.text.strip())
+            if lm:
+                widest = max(widest, stringWidth(lm.group(1), BULLET.fontName, BULLET.fontSize))
+    return max(base, widest + MIN_NUMBER_GAP)
+
+
 def build_pdf(policy, out_path):
     _set_body_size(getattr(policy, "body_size", 11) or 11)
     _set_heading_size(getattr(policy, "head_scale", 1.0) or 1.0)
-    _set_clause_indent(getattr(policy, "hanging_indent", False))
+    hanging = getattr(policy, "hanging_indent", False)
+    _set_clause_indent(hanging, indent=_required_clause_indent(policy) if hanging else CLAUSE_INDENT)
     doc = BaseDocTemplate(
         out_path, pagesize=(B.PAGE_W, B.PAGE_H),
         leftMargin=B.MARGIN_L, rightMargin=B.MARGIN_R,

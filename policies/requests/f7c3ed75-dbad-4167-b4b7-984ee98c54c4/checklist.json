@@ -1,0 +1,37 @@
+[
+  {
+    "id": "heading-numbered-clean",
+    "label": "p.2 'Introduction' heading numbered with a clean, normal gap",
+    "page": 2,
+    "present": ["1 Introduction"],
+    "absent": []
+  },
+  {
+    "id": "deep-number-gap",
+    "label": "p.5 '4.3.4.1' and following text have a visible gap (not glued)",
+    "page": 5,
+    "present": [],
+    "absent": ["4.3.4.1The"]
+  },
+  {
+    "id": "preamble-indented-p2",
+    "label": "p.2 'The remuneration offered...' lead-in indented under heading 3",
+    "page": 2,
+    "present": [],
+    "absent": []
+  },
+  {
+    "id": "preamble-indented-p4",
+    "label": "p.4 'The remuneration to Executive Management...' lead-in indented under heading 4",
+    "page": 4,
+    "present": [],
+    "absent": []
+  },
+  {
+    "id": "cash-based-italic",
+    "label": "p.6 '4.3.5.4 Cash-based long-term incentive' is italic",
+    "page": 6,
+    "present": ["Cash-based long-term incentive"],
+    "absent": []
+  }
+]

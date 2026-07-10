@@ -52,6 +52,32 @@ CLAUSE_INDENT = 35.4
 # see the matching comment in generator.py.
 LETTER_MARKER_INDENT = 0
 LETTER_TEXT_INDENT = CLAUSE_INDENT
+# Minimum visible gap between a clause number/letter and the text tab-stopped
+# after it — same reasoning as generator.py's MIN_NUMBER_GAP: a deeply nested
+# number ("4.3.4.1") can be as wide as CLAUSE_INDENT itself, and without this
+# margin the tab has nowhere to go, so the number and the first word touch.
+MIN_NUMBER_GAP = 4.0
+
+
+def _required_indent(policy, base=CLAUSE_INDENT):
+    """Widen the hang indent for THIS policy if its widest clause number or
+    lettered marker would otherwise touch the text tab-stopped after it —
+    mirrors generator.py's _required_clause_indent so the PDF and Word copy
+    use the same indent."""
+    import brand as _B
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    _B.register_fonts()
+    widest = 0.0
+    for b in policy.blocks:
+        if isinstance(b, M.Body) and not getattr(b, "runs", None):
+            m = _NUM.match(b.text.strip())
+            if m:
+                widest = max(widest, stringWidth(m.group(1), _B.F_DEMI, policy.body_size or 11))
+        elif isinstance(b, M.Bullet):
+            lm = _LETTERED_SPLIT.match(b.text.strip())
+            if lm:
+                widest = max(widest, stringWidth(lm.group(1), _B.F_REGULAR, policy.body_size or 11))
+    return max(base, widest + MIN_NUMBER_GAP)
 
 
 def _set_cell_bg(cell, hex_color):
@@ -82,22 +108,19 @@ def _run(p, text, *, bold=False, italic=False, size=11, color=NAVY, font=FONT):
     return r
 
 
-def _heading(doc, text, level, hang=False):
+def _heading(doc, text, level):
+    # No hang/tab-stop split here (unlike numbered clauses): a heading is
+    # always a single short line that never wraps, so there's no
+    # first-line-vs-wrapped-line to misalign — see the matching comment in
+    # generator.py's _story().
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(13 if level == 1 else 6)
     p.paragraph_format.space_after = Pt(8 if level == 1 else 4)
     p.paragraph_format.keep_with_next = True
-    m = _NUM.match(text.strip()) if hang else None
-    if m:
-        p.paragraph_format.left_indent = Pt(CLAUSE_INDENT)
-        p.paragraph_format.first_line_indent = Pt(-CLAUSE_INDENT)
-        p.paragraph_format.tab_stops.add_tab_stop(Pt(CLAUSE_INDENT), WD_TAB_ALIGNMENT.LEFT)
-        _run(p, f"{m.group(1)}\t{m.group(3)}", bold=True, size=14 if level == 1 else 12)
-    else:
-        _run(p, text, bold=True, size=14 if level == 1 else 12)
+    _run(p, text, bold=True, size=14 if level == 1 else 12)
 
 
-def _body(doc, blk, size=11, indent_mode=None):
+def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     """indent_mode: None (flush), "hang" (numbered clause — wrap aligns under
     the clause text), or "uniform" (content of a short sub-heading above —
     same left position on every line, no hanging first line)."""
@@ -105,11 +128,11 @@ def _body(doc, blk, size=11, indent_mode=None):
     p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     p.paragraph_format.space_after = Pt(10)
     if indent_mode == "hang":
-        p.paragraph_format.left_indent = Pt(CLAUSE_INDENT)
-        p.paragraph_format.first_line_indent = Pt(-CLAUSE_INDENT)
-        p.paragraph_format.tab_stops.add_tab_stop(Pt(CLAUSE_INDENT), WD_TAB_ALIGNMENT.LEFT)
+        p.paragraph_format.left_indent = Pt(indent)
+        p.paragraph_format.first_line_indent = Pt(-indent)
+        p.paragraph_format.tab_stops.add_tab_stop(Pt(indent), WD_TAB_ALIGNMENT.LEFT)
     elif indent_mode == "uniform":
-        p.paragraph_format.left_indent = Pt(CLAUSE_INDENT)
+        p.paragraph_format.left_indent = Pt(indent)
         p.paragraph_format.first_line_indent = Pt(0)
     if blk.runs:                              # mixed-style runs (bold label, italic word, ...)
         runs = list(blk.runs)
@@ -128,7 +151,7 @@ def _body(doc, blk, size=11, indent_mode=None):
     return p
 
 
-def _bullet(doc, text, size=11, hang=False):
+def _bullet(doc, text, size=11, hang=False, indent=LETTER_TEXT_INDENT):
     # A lettered item ("a. ...") already carries its own marker in the text,
     # so it must NOT also get Word's automatic "List Bullet" glyph — same
     # double-marker bug the PDF generator guards against. Use a plain
@@ -136,9 +159,9 @@ def _bullet(doc, text, size=11, hang=False):
     m = _LETTERED_SPLIT.match(text.strip()) if hang else None
     if m:
         p = doc.add_paragraph()
-        p.paragraph_format.left_indent = Pt(LETTER_TEXT_INDENT)
-        p.paragraph_format.first_line_indent = Pt(-(LETTER_TEXT_INDENT - LETTER_MARKER_INDENT))
-        p.paragraph_format.tab_stops.add_tab_stop(Pt(LETTER_TEXT_INDENT), WD_TAB_ALIGNMENT.LEFT)
+        p.paragraph_format.left_indent = Pt(indent)
+        p.paragraph_format.first_line_indent = Pt(-(indent - LETTER_MARKER_INDENT))
+        p.paragraph_format.tab_stops.add_tab_stop(Pt(indent), WD_TAB_ALIGNMENT.LEFT)
         p.paragraph_format.space_after = Pt(4)
         _run(p, f"{m.group(1)}\t{m.group(2)}", size=size)
         return
@@ -169,7 +192,7 @@ def _table(doc, blk):
                  color=WHITE if header else NAVY)
 
 
-def _render_blocks(doc, blocks, size=11, hanging_indent=False):
+def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_INDENT):
     # Mirrors generator.py's _story(): tracks whether the previous block was a
     # short numbered sub-heading with no clause number of its own ("3.2
     # Incentive pay"), so the paragraph(s) right after it — its actual content
@@ -177,7 +200,7 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False):
     prev_subhead = False
     for blk in blocks:
         if isinstance(blk, M.Heading):
-            _heading(doc, blk.text, blk.level, hang=hanging_indent)
+            _heading(doc, blk.text, blk.level)
             # An un-numbered paragraph right after a top-level heading is that
             # section's lead-in text and needs the same indent as the rest of
             # the hanging-indent layout — see the matching comment in
@@ -185,7 +208,7 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False):
             prev_subhead = bool(hanging_indent)
         elif isinstance(blk, M.Bullet):
             is_lettered = bool(_LETTERED.match(blk.text.strip()))
-            _bullet(doc, blk.text, size, hang=hanging_indent and is_lettered)
+            _bullet(doc, blk.text, size, hang=hanging_indent and is_lettered, indent=indent)
             prev_subhead = False
         elif isinstance(blk, M.TableBlock):
             _table(doc, blk)
@@ -215,12 +238,12 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False):
                 continue
             is_numbered = bool(_NUM.match(blk.text.strip()))
             if is_numbered:
-                _body(doc, blk, size, indent_mode="hang")
+                _body(doc, blk, size, indent_mode="hang", indent=indent)
                 stripped = blk.text.strip()
                 prev_subhead = (len(stripped.split()) <= 8
                                 and not stripped.rstrip().endswith((".", ":", ";")))
             elif prev_subhead:
-                _body(doc, blk, size, indent_mode="uniform")
+                _body(doc, blk, size, indent_mode="uniform", indent=indent)
                 # leave prev_subhead as-is: a sub-heading's content can span
                 # several paragraphs, all needing the same indent.
             else:
@@ -403,8 +426,10 @@ def build_docx(policy, out_path, pdf_path=None):
 
     if policy.lead_title:
         _heading(doc, policy.title, 1)
+    hanging = getattr(policy, "hanging_indent", False)
     _render_blocks(doc, policy.blocks, size=policy.body_size or 11,
-                    hanging_indent=getattr(policy, "hanging_indent", False))
+                    hanging_indent=hanging,
+                    indent=_required_indent(policy) if hanging else CLAUSE_INDENT)
     _version_card(doc, policy)
     doc.save(out_path)
     return out_path
