@@ -48,8 +48,10 @@ _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
 _LETTERED = re.compile(r"^\(?[a-z][.)]\s")
 _LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
 CLAUSE_INDENT = 35.4
-LETTER_MARKER_INDENT = 53.4 - 42.6
-LETTER_TEXT_INDENT = 71.4 - 42.6
+# Lettered sub-items align on the same two columns as the numbered clauses —
+# see the matching comment in generator.py.
+LETTER_MARKER_INDENT = 0
+LETTER_TEXT_INDENT = CLAUSE_INDENT
 
 
 def _set_cell_bg(cell, hex_color):
@@ -176,7 +178,11 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False):
     for blk in blocks:
         if isinstance(blk, M.Heading):
             _heading(doc, blk.text, blk.level, hang=hanging_indent)
-            prev_subhead = False
+            # An un-numbered paragraph right after a top-level heading is that
+            # section's lead-in text and needs the same indent as the rest of
+            # the hanging-indent layout — see the matching comment in
+            # generator.py.
+            prev_subhead = bool(hanging_indent)
         elif isinstance(blk, M.Bullet):
             is_lettered = bool(_LETTERED.match(blk.text.strip()))
             _bullet(doc, blk.text, size, hang=hanging_indent and is_lettered)

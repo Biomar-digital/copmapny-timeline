@@ -651,7 +651,13 @@ def _story(policy):
                 flow.append(Paragraph(escape(m.group(3)), style, bulletText=m.group(1)))
             else:
                 flow.append(Paragraph(escape(b.text), style))
-            prev_subhead = False
+            # An un-numbered paragraph right after a top-level heading ("3
+            # Remuneration of the members of the Board of Directors" / "The
+            # remuneration offered to...") is that section's lead-in text, not
+            # a fresh flush-left block — it needs the same indent as the rest
+            # of the hanging-indent layout. A numbered clause right after the
+            # heading overrides this via is_numbered_subhead below regardless.
+            prev_subhead = bool(getattr(policy, "hanging_indent", False))
         elif isinstance(b, Body):
             # Justify normal running text; left-align short lines and anything
             # with a URL/long token so justification doesn't stretch the spaces.
@@ -1002,8 +1008,12 @@ def _set_heading_size(scale):
 
 
 CLAUSE_INDENT = 35.4     # measured from the official Articles of Association (42.6pt margin -> 78.0pt text)
-LETTER_MARKER_INDENT = 53.4 - 42.6   # "a." marker position relative to the margin
-LETTER_TEXT_INDENT = 71.4 - 42.6     # lettered item's own text/wrap position
+# Lettered sub-items ("a.", "b.", ...) align on the same two columns as the
+# numbered clauses: marker flush at the margin, text at CLAUSE_INDENT — per
+# Marianne's feedback that the lettered lists sat too close to the margin,
+# out of line with the rest of the articles.
+LETTER_MARKER_INDENT = 0
+LETTER_TEXT_INDENT = CLAUSE_INDENT
 
 
 def _set_clause_indent(enabled, indent=CLAUSE_INDENT):

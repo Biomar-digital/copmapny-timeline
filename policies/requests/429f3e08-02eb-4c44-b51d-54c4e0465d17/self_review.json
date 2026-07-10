@@ -1,0 +1,51 @@
+{
+  "request_id": "429f3e08-02eb-4c44-b51d-54c4e0465d17",
+  "policy": "articles-of-association",
+  "generated_at": "2026-07-10 11:55 UTC",
+  "overall": "pass",
+  "summary": "6 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "8 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants produced",
+      "status": "info",
+      "detail": "Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "67/67 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:lettered-list-aligned",
+      "label": "Lettered list items (a., b., c., ...) text aligns with numbered clause text",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}
