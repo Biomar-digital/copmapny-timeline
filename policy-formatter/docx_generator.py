@@ -9,6 +9,7 @@ differently), but it is a faithful, editable copy of the same content.
 """
 from io import BytesIO
 import os
+import re
 import tempfile
 
 from docx import Document
@@ -30,6 +31,16 @@ FOOTER = ("BioMar Group A/S · Kalkværksvej 16, 15. · 8000 Aarhus C · "
           "Denmark · Tel +45 86 20 49 70 · www.biomar.com")
 EMU_PER_PT = 12700
 PAGE_W_PT, PAGE_H_PT = 595.276, 841.890   # A4, matching the PDF
+
+# Hang-indent support for "hanging_indent" policies (Articles of Association,
+# Remuneration Policy): mirrors generator.py's CLAUSE_INDENT/_NUM/_LETTERED so
+# the editable Word copy matches the PDF's article-style layout instead of
+# flush-left wrapped lines.
+_NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
+_LETTERED = re.compile(r"^\(?[a-z][.)]\s")
+CLAUSE_INDENT = 35.4
+LETTER_MARKER_INDENT = 53.4 - 42.6
+LETTER_TEXT_INDENT = 71.4 - 42.6
 
 
 def _set_cell_bg(cell, hex_color):
@@ -60,18 +71,30 @@ def _run(p, text, *, bold=False, italic=False, size=11, color=NAVY, font=FONT):
     return r
 
 
-def _heading(doc, text, level):
+def _heading(doc, text, level, hang=False):
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(13 if level == 1 else 6)
     p.paragraph_format.space_after = Pt(8 if level == 1 else 4)
     p.paragraph_format.keep_with_next = True
+    if hang:
+        p.paragraph_format.left_indent = Pt(CLAUSE_INDENT)
+        p.paragraph_format.first_line_indent = Pt(-CLAUSE_INDENT)
     _run(p, text, bold=True, size=14 if level == 1 else 12)
 
 
-def _body(doc, blk, size=11):
+def _body(doc, blk, size=11, indent_mode=None):
+    """indent_mode: None (flush), "hang" (numbered clause — wrap aligns under
+    the clause text), or "uniform" (content of a short sub-heading above —
+    same left position on every line, no hanging first line)."""
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     p.paragraph_format.space_after = Pt(10)
+    if indent_mode == "hang":
+        p.paragraph_format.left_indent = Pt(CLAUSE_INDENT)
+        p.paragraph_format.first_line_indent = Pt(-CLAUSE_INDENT)
+    elif indent_mode == "uniform":
+        p.paragraph_format.left_indent = Pt(CLAUSE_INDENT)
+        p.paragraph_format.first_line_indent = Pt(0)
     if blk.runs:                              # mixed-style runs (bold label, italic word, ...)
         for t, b, i in blk.runs:
             _run(p, t, bold=b, italic=i, size=size)
@@ -80,8 +103,17 @@ def _body(doc, blk, size=11):
     return p
 
 
-def _bullet(doc, text, size=11):
-    p = doc.add_paragraph(style="List Bullet")
+def _bullet(doc, text, size=11, hang=False):
+    # A lettered item ("a. ...") already carries its own marker in the text,
+    # so it must NOT also get Word's automatic "List Bullet" glyph — same
+    # double-marker bug the PDF generator guards against. Use a plain
+    # paragraph with a manual hanging indent instead.
+    if hang:
+        p = doc.add_paragraph()
+        p.paragraph_format.left_indent = Pt(LETTER_TEXT_INDENT)
+        p.paragraph_format.first_line_indent = Pt(-(LETTER_TEXT_INDENT - LETTER_MARKER_INDENT))
+    else:
+        p = doc.add_paragraph(style="List Bullet")
     p.paragraph_format.space_after = Pt(4)
     _run(p, text, size=size)
 
@@ -108,20 +140,30 @@ def _table(doc, blk):
                  color=WHITE if header else NAVY)
 
 
-def _render_blocks(doc, blocks, size=11):
+def _render_blocks(doc, blocks, size=11, hanging_indent=False):
+    # Mirrors generator.py's _story(): tracks whether the previous block was a
+    # short numbered sub-heading with no clause number of its own ("3.2
+    # Incentive pay"), so the paragraph(s) right after it — its actual content
+    # — get the same indent even though they don't start with a number.
+    prev_subhead = False
     for blk in blocks:
         if isinstance(blk, M.Heading):
-            _heading(doc, blk.text, blk.level)
+            _heading(doc, blk.text, blk.level, hang=hanging_indent)
+            prev_subhead = False
         elif isinstance(blk, M.Bullet):
-            _bullet(doc, blk.text, size)
+            is_lettered = bool(_LETTERED.match(blk.text.strip()))
+            _bullet(doc, blk.text, size, hang=hanging_indent and is_lettered)
+            prev_subhead = False
         elif isinstance(blk, M.TableBlock):
             _table(doc, blk)
+            prev_subhead = False
         elif isinstance(blk, M.ImageBlock):
             try:
                 w = Emu(int(blk.width * EMU_PER_PT)) if blk.width else None
                 doc.add_picture(BytesIO(blk.data), width=w)
             except Exception:
                 pass
+            prev_subhead = False
         elif isinstance(blk, M.Columns):
             t = doc.add_table(rows=1, cols=max(len(blk.cols), 1))
             _no_table_borders(t)
@@ -133,8 +175,24 @@ def _render_blocks(doc, blocks, size=11):
                     # reuse the same renderers, but into the cell
                     _render_into_cell(cell, sub, size, first)
                     first = False
+            prev_subhead = False
         elif isinstance(blk, M.Body):
-            _body(doc, blk, size)
+            if not hanging_indent:
+                _body(doc, blk, size)
+                continue
+            is_numbered = bool(_NUM.match(blk.text.strip()))
+            if is_numbered:
+                _body(doc, blk, size, indent_mode="hang")
+                stripped = blk.text.strip()
+                prev_subhead = (len(stripped.split()) <= 8
+                                and not stripped.rstrip().endswith((".", ":", ";")))
+            elif prev_subhead:
+                _body(doc, blk, size, indent_mode="uniform")
+                # leave prev_subhead as-is: a sub-heading's content can span
+                # several paragraphs, all needing the same indent.
+            else:
+                _body(doc, blk, size)
+                prev_subhead = False
 
 
 def _render_into_cell(cell, blk, size, first):
@@ -312,7 +370,8 @@ def build_docx(policy, out_path, pdf_path=None):
 
     if policy.lead_title:
         _heading(doc, policy.title, 1)
-    _render_blocks(doc, policy.blocks, size=policy.body_size or 11)
+    _render_blocks(doc, policy.blocks, size=policy.body_size or 11,
+                    hanging_indent=getattr(policy, "hanging_indent", False))
     _version_card(doc, policy)
     doc.save(out_path)
     return out_path
