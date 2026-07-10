@@ -1,0 +1,63 @@
+{
+  "request_id": "989c7598-0789-4f67-b216-e837beb11fae",
+  "policy": "diversity-policy",
+  "generated_at": "2026-07-10 10:46 UTC",
+  "overall": "pass",
+  "summary": "9 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "6 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Signed + Unsigned)",
+      "status": "pass",
+      "detail": "produced: Signed + Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "34/34 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:equity-to-equality",
+      "label": "p.2 wording fixed to 'equality'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:equal-pay-wording",
+      "label": "p.3 wording fixed to 'work of equal value'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:remove-approved-line",
+      "label": "p.5 'Approved by the Board of Directors...' sentence removed",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}

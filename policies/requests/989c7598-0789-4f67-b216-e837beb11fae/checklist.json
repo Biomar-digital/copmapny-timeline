@@ -1,0 +1,23 @@
+[
+  {
+    "id": "equity-to-equality",
+    "label": "p.2 wording fixed to 'equality'",
+    "page": 2,
+    "present": ["diversity, equality, and inclusion"],
+    "absent": ["diversity, equity, and inclusion"]
+  },
+  {
+    "id": "equal-pay-wording",
+    "label": "p.3 wording fixed to 'work of equal value'",
+    "page": 3,
+    "present": ["equal work or work of equal value"],
+    "absent": ["equal work or like value"]
+  },
+  {
+    "id": "remove-approved-line",
+    "label": "p.5 'Approved by the Board of Directors...' sentence removed",
+    "page": 5,
+    "present": [],
+    "absent": ["Approved by the Board of Directors"]
+  }
+]

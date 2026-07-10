@@ -111,9 +111,11 @@
     "policy": "diversity-policy",
     "request_id": "989c7598-0789-4f67-b216-e837beb11fae",
     "title": "Change: diversity-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1783671505972
+    "created_at": 1783671505972,
+    "notified": false,
+    "updated_at": 1783680386712
   }
 ]
