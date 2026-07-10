@@ -1,0 +1,44 @@
+[
+  {
+    "id": "committee-headings-italic-unnumbered",
+    "label": "'Audit Committee' / 'Remuneration and Nomination Committee' unnumbered, italic",
+    "page": 15,
+    "present": ["Audit Committee", "Remuneration and Nomination Committee"],
+    "absent": ["3.1 Audit Committee", "3.2 Remuneration and Nomination Committee"]
+  },
+  {
+    "id": "independence-item-no-bullet",
+    "label": "Independence-criteria fallback sentence has no bullet",
+    "page": 7,
+    "present": ["Even if a member of the board of directors does not fall"],
+    "absent": []
+  },
+  {
+    "id": "shareholding-item-bulleted",
+    "label": "Shareholding-disclosure item is a bullet",
+    "page": 8,
+    "present": ["the number of shares, options, warrants"],
+    "absent": []
+  },
+  {
+    "id": "diversity-item-bulleted",
+    "label": "Board diversity item is a bullet",
+    "page": 6,
+    "present": ["the composition of and diversity on the board"],
+    "absent": []
+  },
+  {
+    "id": "committee-recommends-dedup",
+    "label": "'The Committee recommends' bold only on first mention per paragraph (multiple cells)",
+    "page": null,
+    "present": [],
+    "absent": []
+  },
+  {
+    "id": "herein-wording",
+    "label": "Uses 'described herein'",
+    "page": 17,
+    "present": ["described herein"],
+    "absent": ["in the following"]
+  }
+]

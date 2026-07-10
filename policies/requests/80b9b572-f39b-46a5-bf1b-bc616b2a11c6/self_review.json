@@ -1,0 +1,81 @@
+{
+  "request_id": "80b9b572-f39b-46a5-bf1b-bc616b2a11c6",
+  "policy": "corporate-governance-statement",
+  "generated_at": "2026-07-10 12:16 UTC",
+  "overall": "pass",
+  "summary": "12 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "18 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Signed + Unsigned)",
+      "status": "pass",
+      "detail": "produced: Signed + Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "21/21 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:committee-headings-italic-unnumbered",
+      "label": "'Audit Committee' / 'Remuneration and Nomination Committee' unnumbered, italic",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:independence-item-no-bullet",
+      "label": "Independence-criteria fallback sentence has no bullet",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:shareholding-item-bulleted",
+      "label": "Shareholding-disclosure item is a bullet",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:diversity-item-bulleted",
+      "label": "Board diversity item is a bullet",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:committee-recommends-dedup",
+      "label": "'The Committee recommends' bold only on first mention per paragraph (multiple cells)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:herein-wording",
+      "label": "Uses 'described herein'",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}
