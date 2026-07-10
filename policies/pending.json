@@ -163,7 +163,7 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783689346568,
-    "notified": false,
+    "notified": true,
     "updated_at": 1783691393237
   },
   {
@@ -187,7 +187,7 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783689913256,
-    "notified": false,
+    "notified": true,
     "updated_at": 1783691393237
   }
 ]
