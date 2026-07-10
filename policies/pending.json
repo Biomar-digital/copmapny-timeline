@@ -72,18 +72,6 @@
     "notified": true
   },
   {
-    "id": "becd0949-0f06-4630-a162-f40a83530581",
-    "policy": "diversity-policy",
-    "request_id": "60131f62-8a43-4311-ac5d-927f3883cd41",
-    "title": "Change: diversity-policy",
-    "status": "change_pending",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1783499881415,
-    "updated_at": 1783671284454,
-    "notified": true
-  },
-  {
     "id": "bv-marketing-1",
     "policy": "brand-voice-guidelines",
     "request_id": "311435da-ddc8-41a4-ba27-d605a59dca37",
