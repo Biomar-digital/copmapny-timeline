@@ -1,0 +1,9 @@
+[
+  {
+    "id": "equal-pay-wording-v2",
+    "label": "Body paragraph reads 'equal pay for work of equal value' (equal work or removed)",
+    "page": 3,
+    "present": ["equal pay for work of equal value"],
+    "absent": ["equal pay for equal work or work of equal value"]
+  }
+]

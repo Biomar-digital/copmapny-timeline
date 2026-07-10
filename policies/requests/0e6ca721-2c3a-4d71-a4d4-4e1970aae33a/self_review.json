@@ -1,0 +1,51 @@
+{
+  "request_id": "0e6ca721-2c3a-4d71-a4d4-4e1970aae33a",
+  "policy": "diversity-policy",
+  "generated_at": "2026-07-10 13:44 UTC",
+  "overall": "pass",
+  "summary": "7 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "6 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Signed + Unsigned)",
+      "status": "pass",
+      "detail": "produced: Signed + Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "34/34 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:equal-pay-wording-v2",
+      "label": "Body paragraph reads 'equal pay for work of equal value' (equal work or removed)",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}
