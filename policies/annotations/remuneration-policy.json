@@ -1282,5 +1282,53 @@
     "author": "Marianne Niviaq Thomsen",
     "text": "Please change to Group Legal",
     "created_at": "2026-07-08T08:14:45.460Z"
+  },
+  {
+    "id": "cef3c445-9dd9-449e-b54a-a354737f5555",
+    "file": "files/Remuneration_Policy__Policy_2026-06_non-approval.pdf",
+    "page": 2,
+    "quote": "The remuneration offered to the members of the Board of Directors shall be designed to be able to\nattract and retain competent members to the Board of Directors taking into consideration the market\npractice of comparable listed companies as well as due regard to the required competencies,\nexperience, knowledge, effort and scope of work of the members of the Board of Dire",
+    "rects": [
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7100180095959526,
+        "w": 0.9235365100814684,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7298973040597204,
+        "w": 0.9235468394548035,
+        "h": 0.014077729966042975
+      },
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7290174459368427,
+        "w": 0.9235468394548035,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7488967404006104,
+        "w": 0.9235474470649997,
+        "h": 0.014077729966042975
+      },
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7480168822777327,
+        "w": 0.9235474470649997,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7670163186186227,
+        "w": 0.7767792041764694,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "This needs to be moved in as well.",
+    "created_at": "2026-07-10T11:03:26.150Z"
   }
 ]
