@@ -98,6 +98,23 @@ def rounded_mask(size, rect, radius, blur=2):
     return mask
 
 
+def crisp_rounded_mask(size, rect, radius, supersample=8):
+    """A rounded-rect mask anti-aliased by supersampling, not blurring —
+    draw the shape at `supersample`x resolution, where the curve is
+    effectively vector-crisp, then downsample with a high-quality filter.
+    This confines the soft transition to the true ~1px edge (proper
+    anti-aliasing, same as how the reference logo itself is rendered)
+    instead of the multi-pixel gradient a Gaussian blur spreads out —
+    which is what was reading as a "blurred" border at zoom."""
+    big_size = (size[0] * supersample, size[1] * supersample)
+    big_rect = tuple(v * supersample for v in rect)
+    big_radius = radius * supersample
+    mask = Image.new("L", big_size, 0)
+    d = ImageDraw.Draw(mask)
+    d.rounded_rectangle(big_rect, radius=big_radius, fill=255)
+    return mask.resize(size, Image.LANCZOS)
+
+
 def flatten_vignette(recolored, rect, target_hex, expand=95, blur=55):
     """The original artwork has a soft square vignette/shadow behind the
     badge (barely visible navy-on-navy in the un-recolored covers); the HLS
@@ -120,13 +137,14 @@ def flatten_vignette(recolored, rect, target_hex, expand=95, blur=55):
 def stamp_badge(recolored, original, rect, radius):
     """Cut the crisp badge out of `original` and composite it onto
     `recolored` at `rect`, unmodified — erase + paste, no blending of the
-    navy card itself. blur=0.6 is just enough to avoid a jagged/stair-step
-    edge on the rounded corners at this resolution — a full 2px (the first
-    two rounds used) is wide enough to read as a soft/blurred border once
-    the badge is viewed zoomed in, since the badge itself is a small icon
-    relative to the page."""
+    navy card itself. Uses crisp_rounded_mask (supersampled, not blurred):
+    a Gaussian blur — even a small one — spreads a soft gradient across
+    several pixels, which reads as a blurred border once the badge is
+    zoomed in, since it's a small icon relative to the page. Supersampling
+    confines the anti-aliasing to the true edge, same as the reference
+    logo's own crisp corners."""
     out = recolored.convert("RGB")
-    mask = rounded_mask(out.size, rect, radius, blur=0.6)
+    mask = crisp_rounded_mask(out.size, rect, radius)
     out.paste(original.convert("RGB"), (0, 0), mask)
     return out
 
