@@ -72,17 +72,6 @@
     "notified": true
   },
   {
-    "id": "bv-marketing-1",
-    "policy": "brand-voice-guidelines",
-    "request_id": "311435da-ddc8-41a4-ba27-d605a59dca37",
-    "title": "BioMar Brand Voice Guidelines",
-    "status": "pending_review",
-    "author": "Administrator",
-    "email": "marketing@biomar.com",
-    "created_at": 1783582006226,
-    "notified": true
-  },
-  {
     "id": "9cc7bfe2-8935-462c-8cb2-e0ea42607ff2",
     "policy": "diversity-policy",
     "request_id": "989c7598-0789-4f67-b216-e837beb11fae",
