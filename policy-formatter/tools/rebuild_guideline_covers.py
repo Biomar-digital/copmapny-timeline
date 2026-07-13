@@ -120,9 +120,13 @@ def flatten_vignette(recolored, rect, target_hex, expand=95, blur=55):
 def stamp_badge(recolored, original, rect, radius):
     """Cut the crisp badge out of `original` and composite it onto
     `recolored` at `rect`, unmodified — erase + paste, no blending of the
-    navy card itself."""
+    navy card itself. blur=0.6 is just enough to avoid a jagged/stair-step
+    edge on the rounded corners at this resolution — a full 2px (the first
+    two rounds used) is wide enough to read as a soft/blurred border once
+    the badge is viewed zoomed in, since the badge itself is a small icon
+    relative to the page."""
     out = recolored.convert("RGB")
-    mask = rounded_mask(out.size, rect, radius, blur=2)
+    mask = rounded_mask(out.size, rect, radius, blur=0.6)
     out.paste(original.convert("RGB"), (0, 0), mask)
     return out
 
