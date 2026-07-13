@@ -136,11 +136,19 @@ def main():
     front_out.save(f"{ASSETS}/cover_bg_guideline.png")
     print("wrote cover_bg_guideline.png", front_out.size)
 
-    # Back cover
+    # Back cover — unlike the front, measured pixel-by-pixel on all four
+    # sides: the flat background sits right up against the badge here with
+    # NO vignette dip (front's soft shadow doesn't repeat on this page), so
+    # there's nothing to flatten. Skipping it isn't just "less risk" — a big
+    # blurred flatten rect here would have bled into real neighbours a
+    # generous expand doesn't see coming: a decorative pellet only ~3px
+    # above the badge's top edge, and the baked-in "Powered by Partnership /
+    # Driven by Innovation" text only ~37px below it (this is what actually
+    # broke last round — the flatten rect's own bottom edge landed inside
+    # the text's vertical range and partially overwrote it).
     back = Image.open(f"{ASSETS}/cover_bg_back.png")
     back_recolored = recolor_image(back, TARGET_HEX, sample_xy=(50, 50))
-    back_flat = flatten_vignette(back_recolored, rect=(680, 1658, 933, 1893), target_hex=TARGET_HEX)
-    back_out = stamp_badge(back_flat, back, rect=(680, 1658, 933, 1893), radius=20)
+    back_out = stamp_badge(back_recolored, back, rect=(680, 1658, 933, 1893), radius=20)
     back_out.save(f"{ASSETS}/cover_bg_back_guideline.png")
     print("wrote cover_bg_back_guideline.png", back_out.size)
 
