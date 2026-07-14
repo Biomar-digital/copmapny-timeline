@@ -72,18 +72,6 @@
     "notified": true
   },
   {
-    "id": "9cc7bfe2-8935-462c-8cb2-e0ea42607ff2",
-    "policy": "diversity-policy",
-    "request_id": "989c7598-0789-4f67-b216-e837beb11fae",
-    "title": "Change: diversity-policy",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1783671505972,
-    "notified": true,
-    "updated_at": 1783680386712
-  },
-  {
     "id": "ae94a79b-2223-42aa-b047-66622ce0c9d3",
     "policy": "articles-of-association",
     "request_id": "429f3e08-02eb-4c44-b51d-54c4e0465d17",
@@ -130,18 +118,6 @@
     "created_at": 1783689346568,
     "notified": true,
     "updated_at": 1783691393237
-  },
-  {
-    "id": "6884e63b-6e29-46d7-8d80-a742f53b8a11",
-    "policy": "diversity-policy",
-    "request_id": "0e6ca721-2c3a-4d71-a4d4-4e1970aae33a",
-    "title": "Change: diversity-policy",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1783689473405,
-    "notified": true,
-    "updated_at": 1783691095711
   },
   {
     "id": "5f14e4a5-0d95-4a2d-a9f7-fc007e357959",
