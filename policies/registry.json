@@ -799,6 +799,24 @@
           "requested_by": "Administrator"
         }
       ]
+    },
+    {
+      "id": "recruitment-data-statement",
+      "title": "Recruitment Data Statement",
+      "language": "English",
+      "owner": "",
+      "approver": "Executive Committee",
+      "category": "Guideline",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-07",
+          "approval_date": "",
+          "source": "Recruitment_Data_Statement.docx",
+          "notes": "Initial publication: renamed from \"Recruitment Data Policy\" to \"Recruitment Data Statement\" and corrected the contact address to BioMar's current office (Kalkværksvej 16, 15.) per the requester's first-pass note.",
+          "requested_by": "Jeppe Andersen"
+        }
+      ]
     }
   ]
 }

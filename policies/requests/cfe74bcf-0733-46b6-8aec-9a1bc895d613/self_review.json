@@ -1,0 +1,81 @@
+{
+  "request_id": "cfe74bcf-0733-46b6-8aec-9a1bc895d613",
+  "policy": "recruitment-data-statement",
+  "generated_at": "2026-07-24 07:29 UTC",
+  "overall": "attention",
+  "summary": "11 passed, 1 to review",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "4 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Unsigned)",
+      "status": "pass",
+      "detail": "produced: Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "attention",
+      "detail": "missing: approval_date, owner"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "23/23 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:title",
+      "label": "Cover reads \"Recruitment Data Statement\", not \"...Policy\"",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:address",
+      "label": "Contact address updated to current BioMar office (Kalkværksvej), old address removed",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:consent-scope",
+      "label": "Scope and purpose of consent section present",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:withdrawal",
+      "label": "Withdrawal section present",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:rights-list",
+      "label": "All 7 data-subject rights present",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:contact-block",
+      "label": "Contact information block present with CVR and DPO email",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}
