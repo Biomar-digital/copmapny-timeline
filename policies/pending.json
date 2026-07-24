@@ -130,16 +130,5 @@
     "created_at": 1783689913256,
     "notified": true,
     "updated_at": 1783691393237
-  },
-  {
-    "id": "rds-jeppe-1",
-    "policy": "recruitment-data-statement",
-    "request_id": "cfe74bcf-0733-46b6-8aec-9a1bc895d613",
-    "title": "Recruitment Data Statement",
-    "status": "pending_review",
-    "author": "Jeppe Andersen",
-    "email": "jepan@biomar.com",
-    "created_at": 1784878200000,
-    "notified": true
   }
 ]

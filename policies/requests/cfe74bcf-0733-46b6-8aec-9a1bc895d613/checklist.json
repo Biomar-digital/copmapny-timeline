@@ -1,8 +1,0 @@
-[
-  {"id":"title","label":"Cover reads \"Recruitment Data Statement\", not \"...Policy\"","present":["Recruitment Data Statement"],"absent":["Recruitment Data Policy"]},
-  {"id":"address","label":"Contact address updated to current BioMar office (Kalkværksvej), old address removed","present":["Kalkværksvej 16, 15."],"absent":["Værkmestergade"]},
-  {"id":"consent-scope","label":"Scope and purpose of consent section present","present":["The scope and purpose of your consent","for a period of 9 months"]},
-  {"id":"withdrawal","label":"Withdrawal section present","present":["Withdrawal","recruitment@biomar.com"]},
-  {"id":"rights-list","label":"All 7 data-subject rights present","present":["Right of access","Right to rectification","Right to erasure","Right to restriction of processing","Right to data portability","Right to object","Right to complain to the Data Protection Authority"]},
-  {"id":"contact-block","label":"Contact information block present with CVR and DPO email","present":["CVR 38570617","dpo@biomar.com"]}
-]
