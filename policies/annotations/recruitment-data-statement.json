@@ -33,7 +33,9 @@
     "edition": "Version 1__2026-07",
     "author": "Jeppe Andersen",
     "text": "You may withdraw your consent at any time by logging into your candidate account and submitting a request to delete your information.\n\nBy selecting \"Delete My Information\", you request that BioMar permanently removes your personally identifiable information, including contact details, personal information and job application data, from our recruitment system.\n\nYour information is not automatically deleted upon submission of the request. BioMar may contact you if additional information or clarification is required to process your request. Once the request has been completed, you will no longer be considered for current or future vacancies unless you submit a new application.",
-    "included_in": [],
+    "included_in": [
+      "4ddf2ad7-88b2-47ec-8e75-de55ea5833aa"
+    ],
     "created_at": "2026-07-29T11:10:49.768Z"
   },
   {
@@ -52,7 +54,9 @@
     "edition": "Version 1__2026-07",
     "author": "Jeppe Andersen",
     "text": "Owner: VP People, Purpose & Communication\n\nApprover: VP People, Purpose & Communication",
-    "included_in": [],
+    "included_in": [
+      "4ddf2ad7-88b2-47ec-8e75-de55ea5833aa"
+    ],
     "created_at": "2026-07-29T11:11:04.321Z"
   },
   {
@@ -71,7 +75,9 @@
     "edition": "Version 1__2026-07",
     "author": "Jeppe Andersen",
     "text": "You have the right to withdraw your consent at any time by logging into your candidate account and submitting a request to delete your information.",
-    "included_in": [],
+    "included_in": [
+      "4ddf2ad7-88b2-47ec-8e75-de55ea5833aa"
+    ],
     "created_at": "2026-07-29T11:11:54.612Z"
   }
 ]
