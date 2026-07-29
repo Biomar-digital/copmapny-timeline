@@ -1,0 +1,63 @@
+{
+  "request_id": "4ddf2ad7-88b2-47ec-8e75-de55ea5833aa",
+  "policy": "recruitment-data-statement",
+  "generated_at": "2026-07-29 12:23 UTC",
+  "overall": "attention",
+  "summary": "8 passed, 1 to review",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "5 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Unsigned)",
+      "status": "pass",
+      "detail": "produced: Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "attention",
+      "detail": "missing: approval_date"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "25/25 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:withdrawal-new",
+      "label": "p.2 Withdrawal section uses the new candidate-account deletion flow",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:howlong-line",
+      "label": "p.2/3 'How long we keep' withdraw line updated to candidate-account flow",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:owner-approver",
+      "label": "p.5 Owner and Approver both set to VP People, Purpose & Communication",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}

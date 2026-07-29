@@ -1,0 +1,5 @@
+[
+  {"id":"withdrawal-new","label":"p.2 Withdrawal section uses the new candidate-account deletion flow","present":["logging into your candidate account and submitting a request to delete your information","Delete My Information","permanently removes your personally identifiable information","not automatically deleted upon submission"],"absent":["by contacting Recruitment at recruitment@biomar.com. Upon withdrawal of your consent your profile"]},
+  {"id":"howlong-line","label":"p.2/3 'How long we keep' withdraw line updated to candidate-account flow","present":["You have the right to withdraw your consent at any time by logging into your candidate account and submitting a request to delete your information."],"absent":["You have the right to withdraw your consent at any time by contacting recruitment@biomar.com."]},
+  {"id":"owner-approver","label":"p.5 Owner and Approver both set to VP People, Purpose & Communication","page":5,"present":["VP People, Purpose & Communication"],"absent":["Executive Committee"]}
+]
