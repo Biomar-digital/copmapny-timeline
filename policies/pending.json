@@ -153,6 +153,6 @@
     "email": "jepan@biomar.com",
     "created_at": 1785323532519,
     "updated_at": 1785323600000,
-    "notified": false
+    "notified": true
   }
 ]
