@@ -35,5 +35,24 @@
     "text": "You may withdraw your consent at any time by logging into your candidate account and submitting a request to delete your information.\n\nBy selecting \"Delete My Information\", you request that BioMar permanently removes your personally identifiable information, including contact details, personal information and job application data, from our recruitment system.\n\nYour information is not automatically deleted upon submission of the request. BioMar may contact you if additional information or clarification is required to process your request. Once the request has been completed, you will no longer be considered for current or future vacancies unless you submit a new application.",
     "included_in": [],
     "created_at": "2026-07-29T11:10:49.768Z"
+  },
+  {
+    "id": "14aa5c78-8f49-451f-b00a-501a2455b4f8",
+    "file": "files/Recruitment_Data_Statement__Policy_2026-07_non-approval.pdf",
+    "page": 4,
+    "quote": "Committee",
+    "rects": [
+      {
+        "x": 0.6419306024090529,
+        "y": 0.2598193541291467,
+        "w": 0.09834611542649375,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-07",
+    "author": "Jeppe Andersen",
+    "text": "Owner: VP People, Purpose & Communication\n\nApprover: VP People, Purpose & Communication",
+    "included_in": [],
+    "created_at": "2026-07-29T11:11:04.321Z"
   }
 ]
