@@ -1,0 +1,16 @@
+{
+  "id": "4ddf2ad7-88b2-47ec-8e75-de55ea5833aa",
+  "kind": "change",
+  "status": "open",
+  "title": "recruitment-data-statement",
+  "policy": "recruitment-data-statement",
+  "edition": "Version 1__2026-07",
+  "variant": "",
+  "versions": "",
+  "author": "Jeppe Andersen",
+  "email": "jepan@biomar.com",
+  "details": "Highlights:\r\n• p.2 “You may withdraw your consent at any time by contacting Recruitment at recruitment@biomar.com.\r\nUpon withdrawal of your consent your profile including your personal data will be deleted from the\r\njob da” → You may withdraw your consent at any time by logging into your candidate account and submitting a request to delete your information.\r\n\r\nBy selecting \"Delete My Information\", you request that BioMar permanently removes your personally identifiable information, including contact details, personal information and job application data, from our recruitment system.\r\n\r\nYour information is not automatically deleted upon submission of the request. BioMar may contact you if additional information or clarification is required to process your request. Once the request has been completed, you will no longer be considered for current or future vacancies unless you submit a new application.\r\n• p.4 “Committee” → Owner: VP People, Purpose & Communication\r\n\r\nApprover: VP People, Purpose & Communication\r\n• p.2 “You have the right to withdraw your consent at any time by contacting recruitment@biomar.com.” → You have the right to withdraw your consent at any time by logging into your candidate account and submitting a request to delete your information.",
+  "upload": null,
+  "created_at": "2026-07-29T11:12:11.005Z",
+  "issue": 30
+}
