@@ -1,7 +1,7 @@
 {
   "request_id": "92742ce5-4893-4a5c-a3cd-1f3eb19fc0a5",
   "policy": "articles-of-association",
-  "generated_at": "2026-08-05 08:10 UTC",
+  "generated_at": "2026-08-05 08:22 UTC",
   "overall": "pass",
   "summary": "7 passed",
   "checks": [

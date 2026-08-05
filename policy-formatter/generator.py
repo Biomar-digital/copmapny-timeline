@@ -63,6 +63,12 @@ BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
 BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
 BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
 BODY_ITALIC = ParagraphStyle("BodyItalic", parent=BODY, fontName=B.F_ITALIC, alignment=TA_LEFT)
+# The closing "As adopted at ... / and latest amended ..." line some articles
+# of association end on is centred in the source (request 92742ce5 — Marianne's
+# reference doc has alignment=CENTER on it), not left/justified like the rest
+# of the body. Rebuilt in _set_body_size too, same as BODY_LEFT.
+BODY_CENTER = ParagraphStyle("BodyCenter", parent=BODY, alignment=TA_CENTER)
+_ADOPTED = re.compile(r"^As adopted\b", re.I)
 BODY_HANG, BODY_HANG_LEFT = BODY, BODY_LEFT   # overridden per-policy by _set_clause_indent
 BODY_INDENT, BODY_INDENT_LEFT = BODY, BODY_LEFT   # overridden per-policy by _set_clause_indent
 # Document title repeated as a lead heading on the first content page (some
@@ -669,6 +675,10 @@ def _story(policy):
             # heading overrides this via is_numbered_subhead below regardless.
             prev_subhead = bool(getattr(policy, "hanging_indent", False))
         elif isinstance(b, Body):
+            if _ADOPTED.match(b.text.strip()):
+                flow.append(Paragraph(escape(b.text), BODY_CENTER))
+                prev_subhead = False
+                continue
             # Justify normal running text; left-align short lines and anything
             # with a URL/long token so justification doesn't stretch the spaces.
             justify = len(b.text) >= 90 and "://" not in b.text
@@ -986,13 +996,14 @@ def _set_body_size(size):
     """Rebuild the body/​bullet/​column paragraph styles for a given point size so
     a policy can match its original's density (e.g. the Code of Conduct is set at
     10pt, the rest at the default 11pt). Spacing and leading scale with the size."""
-    global BODY, BODY_LEFT, BODY_BOLD, BODY_ITALIC, BULLET, COL_BODY, COL_BULLET, COL_BODY_BOLD
+    global BODY, BODY_LEFT, BODY_BOLD, BODY_ITALIC, BODY_CENTER, BULLET, COL_BODY, COL_BULLET, COL_BODY_BOLD
     BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=size,
                           leading=size * 16 / 11.0, textColor=B.BIOMAR_BLUE,
                           alignment=TA_JUSTIFY, spaceAfter=size * 11.4 / 11.0,
                           splitLongWords=0, hyphenationLang="",
                           allowWidows=0, allowOrphans=0)
     BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
+    BODY_CENTER = ParagraphStyle("BodyCenter", parent=BODY, alignment=TA_CENTER)
     BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
     BODY_ITALIC = ParagraphStyle("BodyItalic", parent=BODY, fontName=B.F_ITALIC, alignment=TA_LEFT)
     BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,

@@ -47,6 +47,8 @@ PAGE_W_PT, PAGE_H_PT = 595.276, 841.890   # A4, matching the PDF
 _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
 _LETTERED = re.compile(r"^\(?[a-z][.)]\s")
 _LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
+# See the matching comment in generator.py.
+_ADOPTED = re.compile(r"^As adopted\b", re.I)
 CLAUSE_INDENT = 35.4
 # Lettered sub-items nest one level deeper than the numbered clauses: marker
 # at `indent`, text at 2x that — see _bullet() and the matching comment in
@@ -130,6 +132,12 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     """indent_mode: None (flush), "hang" (numbered clause — wrap aligns under
     the clause text), or "uniform" (content of a short sub-heading above —
     same left position on every line, no hanging first line)."""
+    if _ADOPTED.match(blk.text.strip()):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(10)
+        _run(p, blk.text, size=size)
+        return p
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     p.paragraph_format.space_after = Pt(10)
