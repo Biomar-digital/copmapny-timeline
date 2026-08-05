@@ -1,0 +1,57 @@
+{
+  "request_id": "92742ce5-4893-4a5c-a3cd-1f3eb19fc0a5",
+  "policy": "articles-of-association",
+  "generated_at": "2026-08-05 07:50 UTC",
+  "overall": "pass",
+  "summary": "7 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "8 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants produced",
+      "status": "info",
+      "detail": "Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "67/67 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:content-intact",
+      "label": "All 15 articles and their clause text are unchanged (layout-only request)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:lettered-item-a",
+      "label": "Lettered sub-item content still present after re-indenting",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}

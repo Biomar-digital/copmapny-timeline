@@ -48,10 +48,9 @@ _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
 _LETTERED = re.compile(r"^\(?[a-z][.)]\s")
 _LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
 CLAUSE_INDENT = 35.4
-# Lettered sub-items align on the same two columns as the numbered clauses —
-# see the matching comment in generator.py.
-LETTER_MARKER_INDENT = 0
-LETTER_TEXT_INDENT = CLAUSE_INDENT
+# Lettered sub-items nest one level deeper than the numbered clauses: marker
+# at `indent`, text at 2x that — see _bullet() and the matching comment in
+# generator.py.
 # Minimum visible gap between a clause number/letter and the text tab-stopped
 # after it — same reasoning as generator.py's MIN_NUMBER_GAP: a deeply nested
 # number ("4.3.4.1") can be as wide as CLAUSE_INDENT itself, and without this
@@ -151,17 +150,20 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     return p
 
 
-def _bullet(doc, text, size=11, hang=False, indent=LETTER_TEXT_INDENT):
+def _bullet(doc, text, size=11, hang=False, indent=CLAUSE_INDENT):
     # A lettered item ("a. ...") already carries its own marker in the text,
     # so it must NOT also get Word's automatic "List Bullet" glyph — same
     # double-marker bug the PDF generator guards against. Use a plain
-    # paragraph with a manual hanging indent instead.
+    # paragraph with a manual hanging indent instead. Nests one level deeper
+    # than the numbered clauses: marker at `indent` (same column as "1.1"),
+    # text at 2x that — see generator.py's BULLET_HANG for the reasoning.
     m = _LETTERED_SPLIT.match(text.strip()) if hang else None
     if m:
+        text_indent = indent * 2
         p = doc.add_paragraph()
-        p.paragraph_format.left_indent = Pt(indent)
-        p.paragraph_format.first_line_indent = Pt(-(indent - LETTER_MARKER_INDENT))
-        p.paragraph_format.tab_stops.add_tab_stop(Pt(indent), WD_TAB_ALIGNMENT.LEFT)
+        p.paragraph_format.left_indent = Pt(text_indent)
+        p.paragraph_format.first_line_indent = Pt(-(text_indent - indent))
+        p.paragraph_format.tab_stops.add_tab_stop(Pt(text_indent), WD_TAB_ALIGNMENT.LEFT)
         p.paragraph_format.space_after = Pt(4)
         _run(p, f"{m.group(1)}\t{m.group(2)}", size=size)
         return

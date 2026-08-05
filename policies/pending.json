@@ -148,9 +148,11 @@
     "policy": "articles-of-association",
     "request_id": "92742ce5-4893-4a5c-a3cd-1f3eb19fc0a5",
     "title": "Change: articles-of-association",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1785915121718
+    "created_at": 1785915121718,
+    "notified": false,
+    "updated_at": 1785915600000
   }
 ]

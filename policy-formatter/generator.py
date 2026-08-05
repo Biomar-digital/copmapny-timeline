@@ -1011,12 +1011,15 @@ def _set_heading_size(scale):
 
 
 CLAUSE_INDENT = 35.4     # measured from the official Articles of Association (42.6pt margin -> 78.0pt text)
-# Lettered sub-items ("a.", "b.", ...) align on the same two columns as the
-# numbered clauses: marker flush at the margin, text at CLAUSE_INDENT — per
-# Marianne's feedback that the lettered lists sat too close to the margin,
-# out of line with the rest of the articles.
-LETTER_MARKER_INDENT = 0
-LETTER_TEXT_INDENT = CLAUSE_INDENT
+# Lettered sub-items ("a.", "b.", ...) nest one level deeper than the numbered
+# clauses: marker at the clause indent (same column as "1.1", "9.6", ...),
+# body text at 2x that — per Marianne's reference layout (request 92742ce5):
+# her Word doc sets leftIndent=70.8/firstLineIndent=-35.4 on these paragraphs,
+# and since that puts the "a." marker's own start already at 35.4, Word's tab
+# after it skips the explicit 35.4 tab stop (behind the cursor) and lands on
+# the implicit hanging-indent tab at leftIndent=70.8 — so the marker sits at
+# the clause indent while the text (first line and wraps alike) sits at 2x it.
+# See _set_clause_indent's BULLET_HANG for where this is applied.
 
 
 def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
@@ -1049,9 +1052,10 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
                                     bulletIndent=0, bulletFontName=B.F_DEMI,
                                     bulletFontSize=BODY_LEFT.fontSize, bulletColor=BODY_LEFT.textColor)
     BULLET_HANG = ParagraphStyle("BulletHang", parent=BULLET,
-                                 leftIndent=indent, firstLineIndent=0,
-                                 bulletIndent=0, bulletFontName=BULLET.fontName,
-                                 bulletFontSize=BULLET.fontSize, bulletColor=BULLET.textColor)
+                                 leftIndent=indent * 2, firstLineIndent=0,
+                                 bulletIndent=indent, bulletFontName=BULLET.fontName,
+                                 bulletFontSize=BULLET.fontSize, bulletColor=BULLET.textColor,
+                                 spaceAfter=4)
     # Uniform indent (NOT hanging: firstLineIndent=0) for a paragraph that has no
     # clause number of its own but is the content of a numbered sub-heading right
     # above it (e.g. "3.2 Incentive pay" / "The Board of Directors shall not..."):

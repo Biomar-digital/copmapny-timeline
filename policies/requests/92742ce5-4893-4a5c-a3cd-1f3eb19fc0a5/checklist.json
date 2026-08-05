@@ -1,0 +1,4 @@
+[
+  {"id":"content-intact","label":"All 15 articles and their clause text are unchanged (layout-only request)","present":["Name and objects","Share capital and shares","Board of Directors","Financial year","As adopted at the extraordinary general meeting"]},
+  {"id":"lettered-item-a","label":"Lettered sub-item content still present after re-indenting","present":["The notice convening the general meeting","The Board of Directors’ report on the Company’s activities"]}
+]
