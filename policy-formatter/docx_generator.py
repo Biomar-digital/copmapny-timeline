@@ -107,16 +107,23 @@ def _run(p, text, *, bold=False, italic=False, size=11, color=NAVY, font=FONT):
     return r
 
 
-def _heading(doc, text, level):
-    # No hang/tab-stop split here (unlike numbered clauses): a heading is
-    # always a single short line that never wraps, so there's no
-    # first-line-vs-wrapped-line to misalign — see the matching comment in
-    # generator.py's _story().
+def _heading(doc, text, level, hang=False, indent=CLAUSE_INDENT):
+    # A hanging_indent policy tab-aligns the heading title to the same column
+    # as its clause text below — see the matching comment in generator.py's
+    # _story(). Other policies keep the number embedded with a plain space.
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(13 if level == 1 else 6)
     p.paragraph_format.space_after = Pt(8 if level == 1 else 4)
     p.paragraph_format.keep_with_next = True
-    _run(p, text, bold=True, size=14 if level == 1 else 12)
+    size = 14 if level == 1 else 12
+    m = _NUM.match(text.strip()) if hang else None
+    if m:
+        p.paragraph_format.left_indent = Pt(indent)
+        p.paragraph_format.first_line_indent = Pt(-indent)
+        p.paragraph_format.tab_stops.add_tab_stop(Pt(indent), WD_TAB_ALIGNMENT.LEFT)
+        _run(p, f"{m.group(1)}\t{m.group(3)}", bold=True, size=size)
+    else:
+        _run(p, text, bold=True, size=size)
 
 
 def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
@@ -138,12 +145,12 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
         if indent_mode == "hang":
             m = _NUM.match(runs[0][0].strip())
             if m:
-                _run(p, f"{m.group(1)}\t", bold=True, size=size)
+                _run(p, f"{m.group(1)}\t", bold=False, size=size)
                 runs[0] = (m.group(3), runs[0][1], runs[0][2])
         for t, b, i in runs:
             _run(p, t, bold=b, italic=i, size=size)
     elif indent_mode == "hang" and (m := _NUM.match(blk.text.strip())):
-        _run(p, f"{m.group(1)}\t", bold=True, size=size)
+        _run(p, f"{m.group(1)}\t", bold=False, size=size)
         _run(p, m.group(3), bold=blk.bold, italic=getattr(blk, "italic", False), size=size)
     else:
         _run(p, blk.text, bold=blk.bold, italic=getattr(blk, "italic", False), size=size)
@@ -202,7 +209,7 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
     prev_subhead = False
     for blk in blocks:
         if isinstance(blk, M.Heading):
-            _heading(doc, blk.text, blk.level)
+            _heading(doc, blk.text, blk.level, hang=hanging_indent, indent=indent)
             # An un-numbered paragraph right after a top-level heading is that
             # section's lead-in text and needs the same indent as the rest of
             # the hanging-indent layout — see the matching comment in

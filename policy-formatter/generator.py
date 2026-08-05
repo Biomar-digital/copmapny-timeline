@@ -55,6 +55,7 @@ H1 = ParagraphStyle("H1", fontName=B.F_DEMI, fontSize=14, leading=16,
 H2 = ParagraphStyle("H2", fontName=B.F_DEMI, fontSize=12, leading=14,
                     textColor=B.BIOMAR_BLUE, spaceBefore=5.3, spaceAfter=6.2,
                     keepWithNext=1)
+H1_HANG, H2_HANG = H1, H2   # overridden per-policy by _set_clause_indent
 BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
                       textColor=B.BIOMAR_BLUE, alignment=TA_JUSTIFY, spaceAfter=11.4,
                       splitLongWords=0, hyphenationLang="",
@@ -645,15 +646,21 @@ def _story(policy):
         if i == dec_i:
             flow.append(PageBreak())
         if isinstance(b, Heading):
-            # No bulletText split here (unlike numbered clauses): a heading is
-            # always a single short line that never wraps, so there is no
-            # first-line-vs-wrapped-line to misalign — embedding the number
-            # inline (like every heading always has) reads fine, and skips
-            # the widened per-document indent that body clauses need for deep
-            # numbering, which would otherwise leave "1" and "Introduction"
-            # with an oddly large gap between them.
+            # A hanging_indent policy tab-aligns the heading title to the same
+            # column as its clause text below ("1  Name and objects" / "1.1
+            # The Company's name..." both start their text at `indent`) — per
+            # Marianne's reference layout. Other policies keep the number
+            # embedded inline with a plain space: without the rest of the
+            # article-style hang-indent system around it, tab-aligning a lone
+            # heading number would just leave "1" and "Introduction" with an
+            # oddly large, out-of-place gap between them.
             style = H1 if b.level == 1 else H2
-            flow.append(Paragraph(escape(b.text), style))
+            m = _NUM.match(b.text.strip()) if getattr(policy, "hanging_indent", False) else None
+            if m:
+                hstyle = H1_HANG if b.level == 1 else H2_HANG
+                flow.append(Paragraph(escape(m.group(3)), hstyle, bulletText=m.group(1)))
+            else:
+                flow.append(Paragraph(escape(b.text), style))
             # An un-numbered paragraph right after a top-level heading ("3
             # Remuneration of the members of the Board of Directors" / "The
             # remuneration offered to...") is that section's lead-in text, not
@@ -1038,18 +1045,21 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     with the fixed-position wrapped continuation lines below. bulletText draws
     the marker at a fixed `bulletIndent` independent of the paragraph text,
     which then starts at `leftIndent` on EVERY line, first or wrapped alike."""
-    global BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BODY_INDENT, BODY_INDENT_LEFT
+    global BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BODY_INDENT, BODY_INDENT_LEFT, H1_HANG, H2_HANG
     if not enabled:
         BODY_HANG, BODY_HANG_LEFT, BULLET_HANG = BODY, BODY_LEFT, BULLET
         BODY_INDENT, BODY_INDENT_LEFT = BODY, BODY_LEFT
+        H1_HANG, H2_HANG = H1, H2
         return
-    # H1/H2 are left alone: headings never wrap, so there's no hanging-indent
-    # need — see the Heading branch of _story() for why.
+    # The clause number is drawn in the same weight as the body text that
+    # follows it (Regular, not Demi) — per Marianne's reference layout
+    # (request 92742ce5): her doc has no bold/regular contrast between "1.1"
+    # and the clause text.
     BODY_HANG = ParagraphStyle("BodyHang", parent=BODY, leftIndent=indent, firstLineIndent=0,
-                               bulletIndent=0, bulletFontName=B.F_DEMI,
+                               bulletIndent=0, bulletFontName=B.F_REGULAR,
                                bulletFontSize=BODY.fontSize, bulletColor=BODY.textColor)
     BODY_HANG_LEFT = ParagraphStyle("BodyHangLeft", parent=BODY_LEFT, leftIndent=indent, firstLineIndent=0,
-                                    bulletIndent=0, bulletFontName=B.F_DEMI,
+                                    bulletIndent=0, bulletFontName=B.F_REGULAR,
                                     bulletFontSize=BODY_LEFT.fontSize, bulletColor=BODY_LEFT.textColor)
     BULLET_HANG = ParagraphStyle("BulletHang", parent=BULLET,
                                  leftIndent=indent * 2, firstLineIndent=0,
@@ -1063,6 +1073,18 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     # its one-and-only line flush at the margin instead of under the clause text.
     BODY_INDENT = ParagraphStyle("BodyIndent", parent=BODY, leftIndent=indent, firstLineIndent=0)
     BODY_INDENT_LEFT = ParagraphStyle("BodyIndentLeft", parent=BODY_LEFT, leftIndent=indent, firstLineIndent=0)
+    # A numbered section heading ("1 Name and objects") tab-aligns its title
+    # to the same column as the clause text below it — per Marianne's
+    # reference layout, where "Name and objects" and "The Company's name..."
+    # start at the same x. The number stays Demi (headings are bold either
+    # way, unlike clause numbers); bulletFontSize/leading track H1/H2's own
+    # (possibly head_scale-d) size, not the fixed defaults.
+    H1_HANG = ParagraphStyle("H1Hang", parent=H1, leftIndent=indent, firstLineIndent=0,
+                             bulletIndent=0, bulletFontName=B.F_DEMI,
+                             bulletFontSize=H1.fontSize, bulletColor=H1.textColor)
+    H2_HANG = ParagraphStyle("H2Hang", parent=H2, leftIndent=indent, firstLineIndent=0,
+                             bulletIndent=0, bulletFontName=B.F_DEMI,
+                             bulletFontSize=H2.fontSize, bulletColor=H2.textColor)
 
 
 # Minimum visible gap between a clause number/letter and the text that follows
