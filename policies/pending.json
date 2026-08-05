@@ -84,18 +84,6 @@
     "updated_at": 1783684530879
   },
   {
-    "id": "a5843c7f-8245-4bee-8d0a-45835f66e055",
-    "policy": "corporate-governance-statement",
-    "request_id": "80b9b572-f39b-46a5-bf1b-bc616b2a11c6",
-    "title": "Change: corporate-governance-statement",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1783681231096,
-    "notified": true,
-    "updated_at": 1783685777101
-  },
-  {
     "id": "648b6cd4-f4c1-4908-8c0a-e57ab30da9d8",
     "policy": "remuneration-policy",
     "request_id": "f7c3ed75-dbad-4167-b4b7-984ee98c54c4",
