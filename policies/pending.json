@@ -154,5 +154,15 @@
     "created_at": 1785915121718,
     "notified": true,
     "updated_at": 1785915600000
+  },
+  {
+    "id": "0d0c7f96-7660-41b4-b866-42ef56c9eeb3",
+    "policy": "remuneration-policy",
+    "request_id": "6f431758-25b1-454e-8be6-28e35c3bbc63",
+    "title": "Change: remuneration-policy",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1785924399514
   }
 ]
