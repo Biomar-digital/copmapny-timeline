@@ -561,7 +561,7 @@
     "id": "8e6f159c-9910-4ac8-b3aa-b2216072a689",
     "file": "files/Remuneration_Policy__Policy_2026-06_non-approval.pdf",
     "page": 6,
-    "quote": "(a) Members of Executive Management may be eligible to receive long-term incentives in the form of\nRSUs or PSUs. The programmes are designed to further align management compensation with the\nlong-term interests of the shareholders and the performance of the Company by linking a higher\nproportion of annual pay to the share price development of the Company as well as certain\nperformance targets with respect to PSUs. Further, the programmes support the Company\u2019s long term\nbusiness model and strategy.\n(b) The programmes are revolving and shall have a vesting or maturity period of three years from the\nrelevant date of grant until the time they vest or mature. The vesting or maturity period shall be\ndetermined by the Board of Directors prior to grant.\n(c) Grant of RSUs does not depend on the achievement of specific goals whereas grant of PSUs shall\nbe subject to achievement of specific goals, that may include with main weight on core financial KPIs",
+    "quote": "(a) Members of Executive Management may be eligible to receive long-term incentives in the form of\nRSUs or PSUs. The programmes are designed to further align management compensation with the\nlong-term interests of the shareholders and the performance of the Company by linking a higher\nproportion of annual pay to the share price development of the Company as well as certain\nperformance targets with respect to PSUs. Further, the programmes support the Company’s long term\nbusiness model and strategy.\n(b) The programmes are revolving and shall have a vesting or maturity period of three years from the\nrelevant date of grant until the time they vest or mature. The vesting or maturity period shall be\ndetermined by the Board of Directors prior to grant.\n(c) Grant of RSUs does not depend on the achievement of specific goals whereas grant of PSUs shall\nbe subject to achievement of specific goals, that may include with main weight on core financial KPIs",
     "rects": [
       {
         "x": 0.07139662849254341,
@@ -780,7 +780,7 @@
     "id": "f73cb7fb-9de6-4e64-897d-c99e6cd0a1c7",
     "file": "files/Remuneration_Policy__Policy_2026-06_non-approval.pdf",
     "page": 2,
-    "quote": "1 This remuneration policy (the \u201cRemuneration Policy\u201d) of BioMar Group A/S, CVR no. 38 57 06 17\n(the \u201cCompany\u201d) has been prepared in accordance with section 139 and 139a of the Danish\nCompanies Act and the recommendations published by the Danish Committee on Corporate\nGovernance as implemented by Nasdaq Copenhagen A/S.\n1.2 The Remuneration Policy sets out the framework for remuneration to the Board of Directors and\nthe Executive Management of the Company. The \u201cExecutive Management\u201d consists of the members of\nthe executive management of the Company registered as such with the Danish Business Authority.\n\u201cGroup\u201d refers to BioMar Group A/S as well as its subsidiaries.\n2 Objectives\n2.1 The overall objectives of this Remuneration Policy are (i) to attract, motivate and retain qualified\nmembers of the Board of Directors and Executive Management, (ii) to ensure alignment of interests\nbetween the Board of Directors, Executive Management, the Company itself and its shareholders, and\n(iii) to ens",
+    "quote": "1 This remuneration policy (the “Remuneration Policy”) of BioMar Group A/S, CVR no. 38 57 06 17\n(the “Company”) has been prepared in accordance with section 139 and 139a of the Danish\nCompanies Act and the recommendations published by the Danish Committee on Corporate\nGovernance as implemented by Nasdaq Copenhagen A/S.\n1.2 The Remuneration Policy sets out the framework for remuneration to the Board of Directors and\nthe Executive Management of the Company. The “Executive Management” consists of the members of\nthe executive management of the Company registered as such with the Danish Business Authority.\n“Group” refers to BioMar Group A/S as well as its subsidiaries.\n2 Objectives\n2.1 The overall objectives of this Remuneration Policy are (i) to attract, motivate and retain qualified\nmembers of the Board of Directors and Executive Management, (ii) to ensure alignment of interests\nbetween the Board of Directors, Executive Management, the Company itself and its shareholders, and\n(iii) to ens",
     "rects": [
       {
         "x": 0.08907481929672766,
@@ -1366,7 +1366,7 @@
     "id": "f7317abd-4b21-4106-9d68-1c4227b390b7",
     "file": "files/Remuneration_Policy__Policy_2026-06_non-approval.pdf",
     "page": 4,
-    "quote": "The remuneration to Executive Management is decided by the Board of Directors based on\nrecommendations from the Remuneration and Nomination Committee. When preparing these\nrecommendations, the Remuneration and Nomination Committee takes into account that the\nremuneration shall not exceed what is considered usual taking into account the nature and extent of\nthe work, and what is considered reasonable with regard to the Company\u2019s financial position. The\nCompany seeks to pay competitive remuneration to the members of the Executive Management,\ntaking into account the qualifications and performance of the individual mem",
+    "quote": "The remuneration to Executive Management is decided by the Board of Directors based on\nrecommendations from the Remuneration and Nomination Committee. When preparing these\nrecommendations, the Remuneration and Nomination Committee takes into account that the\nremuneration shall not exceed what is considered usual taking into account the nature and extent of\nthe work, and what is considered reasonable with regard to the Company’s financial position. The\nCompany seeks to pay competitive remuneration to the members of the Executive Management,\ntaking into account the qualifications and performance of the individual mem",
     "rects": [
       {
         "x": 0.07139662849254341,
@@ -1856,5 +1856,24 @@
     "included_in": [
       "06d465af-1897-4aa4-b370-e745b34b691a"
     ]
+  },
+  {
+    "id": "c8ef12cf-ead6-4cb2-add6-6012939d2d28",
+    "file": "files/Remuneration_Policy__Policy_2026-06_non-approval.pdf",
+    "page": 2,
+    "quote": "with se",
+    "rects": [
+      {
+        "x": 0.67147472753038,
+        "y": 0.19442204005133962,
+        "w": 0.06886836833879394,
+        "h": 0.015837517654703537
+      }
+    ],
+    "edition": "Version 1__2026-06",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Please change to \"sections\" instead of \"section\"",
+    "included_in": [],
+    "created_at": "2026-08-05T10:03:56.305Z"
   }
 ]
