@@ -1873,7 +1873,9 @@
     "edition": "Version 1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please change to \"sections\" instead of \"section\"",
-    "included_in": [],
+    "included_in": [
+      "6f431758-25b1-454e-8be6-28e35c3bbc63"
+    ],
     "created_at": "2026-08-05T10:03:56.305Z"
   },
   {
@@ -1892,7 +1894,9 @@
     "edition": "Version 1__2026-06",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please add a closing full stop.",
-    "included_in": [],
+    "included_in": [
+      "6f431758-25b1-454e-8be6-28e35c3bbc63"
+    ],
     "created_at": "2026-08-05T10:06:29.658Z"
   }
 ]
