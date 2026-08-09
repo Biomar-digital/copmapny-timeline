@@ -1,4 +1,4 @@
-name = "globa-policies"
+name = "copmapny-timeline"
 compatibility_date = "2026-06-16"
 main = "worker/index.js"
 
