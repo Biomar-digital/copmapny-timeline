@@ -166,5 +166,15 @@
     "created_at": 1785924399514,
     "notified": true,
     "updated_at": 1785924900000
+  },
+  {
+    "id": "72d49fa0-59bc-4c04-a538-ff4ac24007a1",
+    "policy": "brand-voice-guidelines",
+    "request_id": "34b0be0d-a772-41d0-93ce-cfb840d97570",
+    "title": "Change: brand-voice-guidelines",
+    "status": "change_pending",
+    "author": "Nerea Clemente Palacios",
+    "email": "nerpa@biomar.com",
+    "created_at": 1786450368183
   }
 ]
