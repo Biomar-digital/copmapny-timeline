@@ -4,11 +4,11 @@
     "policy": "articles-of-association",
     "request_id": "c8e38fc7-4041-4fde-b4c5-13c7d2cefd84",
     "title": "Change: articles-of-association",
-    "status": "pending_review",
+    "status": "change_pending",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783327759141,
-    "updated_at": 1783516205365,
+    "updated_at": 1789462969978,
     "notified": true
   },
   {
@@ -16,11 +16,11 @@
     "policy": "articles-of-association",
     "request_id": "c78577f0-146a-47b5-80e4-143459ec2ddc",
     "title": "Change: articles-of-association",
-    "status": "pending_review",
+    "status": "change_pending",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783496456255,
-    "updated_at": 1783516205365,
+    "updated_at": 1789462969978,
     "notified": true
   },
   {
@@ -28,11 +28,11 @@
     "policy": "articles-of-association",
     "request_id": "6e37e532-4f64-450a-b2fc-27ab0354b975",
     "title": "Change: articles-of-association",
-    "status": "pending_review",
+    "status": "change_pending",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783497285793,
-    "updated_at": 1783516205365,
+    "updated_at": 1789462969978,
     "notified": true
   },
   {
@@ -76,12 +76,12 @@
     "policy": "articles-of-association",
     "request_id": "429f3e08-02eb-4c44-b51d-54c4e0465d17",
     "title": "Change: articles-of-association",
-    "status": "pending_review",
+    "status": "change_pending",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783680870823,
     "notified": true,
-    "updated_at": 1783684530879
+    "updated_at": 1789462969978
   },
   {
     "id": "648b6cd4-f4c1-4908-8c0a-e57ab30da9d8",
@@ -100,12 +100,12 @@
     "policy": "articles-of-association",
     "request_id": "46721392-edc3-4646-bd26-4d35b674ed04",
     "title": "Change: articles-of-association",
-    "status": "pending_review",
+    "status": "change_pending",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1783689346568,
     "notified": true,
-    "updated_at": 1783691393237
+    "updated_at": 1789462969978
   },
   {
     "id": "5f14e4a5-0d95-4a2d-a9f7-fc007e357959",
@@ -148,12 +148,12 @@
     "policy": "articles-of-association",
     "request_id": "92742ce5-4893-4a5c-a3cd-1f3eb19fc0a5",
     "title": "Change: articles-of-association",
-    "status": "pending_review",
+    "status": "change_pending",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1785915121718,
     "notified": true,
-    "updated_at": 1785915600000
+    "updated_at": 1789462969978
   },
   {
     "id": "0d0c7f96-7660-41b4-b866-42ef56c9eeb3",
