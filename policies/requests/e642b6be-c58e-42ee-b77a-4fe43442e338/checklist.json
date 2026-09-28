@@ -1,0 +1,6 @@
+[
+  {"id":"sections","label":"All 4 sections present, correctly promoted to headings","present":["Ensure responsible governance and pre-approval of non-audit services","Uphold auditor independence through clear service classification","Maintain proactive monitoring and transparent fee reporting","Governance"]},
+  {"id":"classification","label":"3-way NAS classification present","present":["Permitted","Permitted with restrictions","Prohibited"]},
+  {"id":"no-signature-block","label":"Physical signature block not carried over (replaced by digital approval card)","absent":["Marianne Rørslev Bock","Anders Wilhjelm"]},
+  {"id":"closing","label":"Audit Committee approval closing statement present","present":["Approved by the Audit Committee."]}
+]

@@ -920,6 +920,31 @@
           "requested_by": "Marianne Niviaq Thomsen"
         }
       ]
+    },
+    {
+      "id": "non-audit-service-policy",
+      "title": "Non-Audit Services Policy",
+      "language": "English",
+      "owner": "Group Finance",
+      "approver": "Audit Committee",
+      "category": "Policy",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-09",
+          "approval_date": "",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "Non_audit_Service_Policy.docx",
+              "board_approval": true
+            }
+          ],
+          "notes": "Initial publication, restyled to the current BioMar template.",
+          "requested_by": "Marianne Niviaq Thomsen"
+        }
+      ]
     }
   ]
 }
