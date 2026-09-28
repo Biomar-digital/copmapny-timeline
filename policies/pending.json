@@ -210,5 +210,16 @@
     "email": "marni@biomar.com",
     "created_at": 1790672820000,
     "notified": true
+  },
+  {
+    "id": "dsb-marianne-1",
+    "policy": "dividend-and-share-buyback-policy",
+    "request_id": "00c3f747-8aba-4df9-b1a6-77e0a5f07ee8",
+    "title": "Dividend and Share Buyback Policy",
+    "status": "pending_review",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1790672900000,
+    "notified": false
   }
 ]

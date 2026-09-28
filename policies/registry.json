@@ -894,6 +894,32 @@
           "requested_by": "Marianne Niviaq Thomsen"
         }
       ]
+    },
+    {
+      "id": "dividend-and-share-buyback-policy",
+      "title": "Dividend and Share Buyback Policy",
+      "language": "English",
+      "owner": "",
+      "approver": "Board of Directors",
+      "category": "Policy",
+      "hanging_indent": true,
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-05",
+          "approval_date": "19-05-2026",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "Dividend_and_Share_Buyback_Policy.docx",
+              "board_approval": true
+            }
+          ],
+          "notes": "Initial publication, restyled to the current BioMar template.",
+          "requested_by": "Marianne Niviaq Thomsen"
+        }
+      ]
     }
   ]
 }
