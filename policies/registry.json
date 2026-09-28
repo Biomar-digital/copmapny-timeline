@@ -818,6 +818,32 @@
           "requested_by": "Jeppe Andersen"
         }
       ]
+    },
+    {
+      "id": "audit-committee-charter",
+      "title": "Audit Committee Charter",
+      "language": "English",
+      "owner": "",
+      "approver": "Board of Directors",
+      "category": "Policy",
+      "hanging_indent": true,
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-05",
+          "approval_date": "19-05-2026",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "Audit_Committee_Charter.docx",
+              "board_approval": true
+            }
+          ],
+          "notes": "Initial publication, restyled to the current BioMar template.",
+          "requested_by": "Marianne Niviaq Thomsen"
+        }
+      ]
     }
   ]
 }

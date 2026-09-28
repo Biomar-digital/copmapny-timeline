@@ -177,5 +177,16 @@
     "email": "nerpa@biomar.com",
     "created_at": 1786450368183,
     "notified": true
+  },
+  {
+    "id": "acc-marianne-1",
+    "policy": "audit-committee-charter",
+    "request_id": "6d575aac-a4a6-4f3c-b981-6ad0e3fc0aeb",
+    "title": "Audit Committee Charter",
+    "status": "pending_review",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1790672461000,
+    "notified": false
   }
 ]

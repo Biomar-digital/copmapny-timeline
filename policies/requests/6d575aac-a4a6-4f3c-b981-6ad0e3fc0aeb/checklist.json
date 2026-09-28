@@ -1,0 +1,5 @@
+[
+  {"id":"sections","label":"All 7 sections present","present":["Establishment and purpose","Members","Assignments","Meetings","Resolutions at the Audit Committee","Authorisation","Review of Charter"]},
+  {"id":"closing","label":"Board approval closing statement present","present":["Approved by the Board of Directors on 19 May 2026."]},
+  {"id":"deep-clauses","label":"Deeply nested clause numbers render without overlap","present":["3.1.1","3.2.1","3.3.1","3.4.1"]}
+]
