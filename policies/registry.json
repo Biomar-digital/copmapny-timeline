@@ -945,6 +945,32 @@
           "requested_by": "Marianne Niviaq Thomsen"
         }
       ]
+    },
+    {
+      "id": "remuneration-and-nomination-committee-charter",
+      "title": "Remuneration and Nomination Committee Charter",
+      "language": "English",
+      "owner": "",
+      "approver": "Board of Directors",
+      "category": "Policy",
+      "hanging_indent": true,
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-05",
+          "approval_date": "19-05-2026",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "Remuneration_and_Nomination_Committee_Charter.docx",
+              "board_approval": true
+            }
+          ],
+          "notes": "Initial publication, restyled to the current BioMar template.",
+          "requested_by": "Marianne Niviaq Thomsen"
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,7 @@
+[
+  {"id":"sections","label":"All main sections present, correctly demoted from broken Heading 1 tags","present":["Establishment and purpose","Members","Assignments","Meetings","Resolutions at the Remuneration and Nomination Committee","Authorisation","Review of Charter"]},
+  {"id":"appendix","label":"Appendix A with both sub-sections present","present":["Appendix A","Remuneration related assignments","Nomination related assignments"]},
+  {"id":"lettered-lists","label":"Lettered lists restart correctly at 'a.' for each of the 7 groups (top a-f, then Appendix's 6 restored lists)","present":["a.\tensure that the Company maintains","a.\tprepare a draft remuneration policy","a.\tannually review the compensation level","a.\tannually review and compare the remuneration level","a.\tassist with the preparation of the annual remuneration report","a.\tassist the Chair of the Board of Directors","a.\tdescribe the required qualifications"]},
+  {"id":"last-letter","label":"The 12-item Appendix list reaches letter 'l.'","present":["l.\tensure that the Remuneration and Nomination Committee on a regular basis"]},
+  {"id":"closing","label":"Board approval closing statement present","present":["Approved by the Board of Directors on 19 May 2026."]}
+]

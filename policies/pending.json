@@ -232,5 +232,16 @@
     "email": "marni@biomar.com",
     "created_at": 1790673200000,
     "notified": true
+  },
+  {
+    "id": "rnc-marianne-1",
+    "policy": "remuneration-and-nomination-committee-charter",
+    "request_id": "56f09063-64f7-43be-a08f-24a8005acbc6",
+    "title": "Remuneration and Nomination Committee Charter",
+    "status": "pending_review",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1790673500000,
+    "notified": false
   }
 ]
