@@ -243,5 +243,15 @@
     "email": "marni@biomar.com",
     "created_at": 1790673500000,
     "notified": true
+  },
+  {
+    "id": "57453b89-0737-4826-a36b-d0742f6a4dab",
+    "policy": "sanctions-export-controls-policy",
+    "request_id": "0127d41f-8a5a-4080-b61a-5403de5bed77",
+    "title": "Change: sanctions-export-controls-policy",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1790589966307
   }
 ]
