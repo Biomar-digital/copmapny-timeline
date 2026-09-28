@@ -158,7 +158,12 @@ def _heading_like(text: str) -> bool:
     # A heading is short and does not end like a running sentence. Incoming
     # Word files are often mis-styled (whole paragraphs tagged Heading 1, or
     # body sentences tagged Heading 2), so we confirm headings by shape too.
-    return len(text.split()) <= 14 and not text.rstrip().endswith((".", ":", ";"))
+    # 15 (not 14) so a genuinely short title that just happens to be wordy
+    # ("Schedule 2 – Log for monitoring events or circumstances which may
+    # constitute Inside Information", request 57ecfff2) still counts as one —
+    # a real body sentence mis-tagged as a heading almost always also ends in
+    # terminal punctuation, which the second check below still catches.
+    return len(text.split()) <= 15 and not text.rstrip().endswith((".", ":", ";"))
 
 
 def _classify(text: str, style: str):

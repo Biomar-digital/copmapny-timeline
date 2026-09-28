@@ -151,7 +151,11 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     if blk.runs:                              # mixed-style runs (bold label, italic word, ...)
         runs = list(blk.runs)
         if indent_mode == "hang":
-            m = _NUM.match(runs[0][0].strip())
+            # lstrip (not strip): keep a trailing space on the first run so a
+            # numbered clause that switches to a bold/italic run right after
+            # the number ("1.4 Inside Information is defined in **Appendix
+            # B**...") doesn't glue the two words together — request 57ecfff2.
+            m = _NUM.match(runs[0][0].lstrip())
             if m:
                 _run(p, f"{m.group(1)}\t", bold=False, size=size)
                 runs[0] = (m.group(3), runs[0][1], runs[0][2])

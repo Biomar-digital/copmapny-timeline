@@ -877,6 +877,7 @@
       "owner": "",
       "approver": "Executive Management",
       "category": "Policy",
+      "hanging_indent": true,
       "editions": [
         {
           "version": "Version 1",

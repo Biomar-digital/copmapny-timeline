@@ -107,6 +107,18 @@ _LONG = re.compile(r"\S{28,}")
 # marker) — avoids the redundant "• a." double marking.
 _LETTERED = re.compile(r"^\(?[a-z][.)]\s")
 _LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
+# A "Schedule N" section (an annex-style appendix) always starts its own page,
+# regardless of how much room is left on the current one (e.g. the Disclosure
+# Committee Charter's three schedules — request 57ecfff2).
+_SCHEDULE = re.compile(r"^schedule\s+\d", re.I)
+
+
+def _is_schedule_heading(b):
+    if not isinstance(b, Heading) or b.level != 1:
+        return False
+    t = b.text.strip()
+    m = _NUM.match(t)
+    return bool(_SCHEDULE.match(m.group(3) if m else t))
 
 
 def _breakable(t):
@@ -142,7 +154,7 @@ def _fmt(text, number=True, widow=True, lstrip=True, rstrip=True):
     return escape(t)
 
 
-def _body_markup(b):
+def _body_markup(b, strip_number=False):
     """Markup for a Body block, wrapping any run-in bold/italic segment in the
     brand's Demi/Italic face. Uses explicit <font name="Brand-Demi"/"Brand-
     Italic"> tags rather than <b>/<i> — ReportLab's <b>/<i> only resolve to a
@@ -150,14 +162,25 @@ def _body_markup(b):
     pipeline never sets up; every other styled spot in this file (clause
     numbers, table headers) already uses <font name=...> for the same reason.
     A run that is both bold and italic renders bold — there is no bundled
-    bold-italic face to combine the two."""
+    bold-italic face to combine the two.
+
+    strip_number=True drops a leading clause number ("1.4 ...") from the
+    first run instead of bolding it in place — used when the caller (a
+    hanging_indent policy) draws that number itself via bulletText, so a
+    numbered clause that happens to mix runs (e.g. an inline bold term right
+    after the number) still hang-indents like every other numbered clause
+    instead of falling back to the plain inline-bold-number layout."""
     runs = getattr(b, "runs", None)
     if not runs:
-        return _fmt(b.text)
+        return _fmt(b.text, number=not strip_number)
     n = len(runs)
     out = []
     for i, (t, bd, it) in enumerate(runs):
-        seg = _fmt(t, number=(i == 0), widow=(i == n - 1),
+        if strip_number and i == 0:
+            m = _NUM.match(t.lstrip())
+            if m:
+                t = m.group(3)
+        seg = _fmt(t, number=(i == 0 and not strip_number), widow=(i == n - 1),
                    lstrip=(i == 0), rstrip=(i == n - 1))
         if bd:
             seg = f'<font name="{B.F_DEMI}">{seg}</font>'
@@ -651,6 +674,8 @@ def _story(policy):
     for i, b in enumerate(blocks):
         if i == dec_i:
             flow.append(PageBreak())
+        if i > 0 and _is_schedule_heading(b):
+            flow.append(PageBreak())
         if isinstance(b, Heading):
             # A hanging_indent policy tab-aligns the heading title to the same
             # column as its clause text below ("1  Name and objects" / "1.1
@@ -684,7 +709,13 @@ def _story(policy):
             justify = len(b.text) >= 90 and "://" not in b.text
             is_numbered_subhead = bool(_NUM.match(b.text.strip()))
             if getattr(b, "runs", None):
-                flow.append(Paragraph(_body_markup(b), BODY if justify else BODY_LEFT))
+                if is_numbered_subhead and getattr(policy, "hanging_indent", False):
+                    m = _NUM.match(b.text.strip())
+                    style = BODY_HANG if justify else BODY_HANG_LEFT
+                    flow.append(Paragraph(_body_markup(b, strip_number=True), style,
+                                          bulletText=m.group(1)))
+                else:
+                    flow.append(Paragraph(_body_markup(b), BODY if justify else BODY_LEFT))
                 prev_subhead = False
             elif getattr(b, "italic", False):
                 # Whole-line italic sub-heading: keep the leading number inline
