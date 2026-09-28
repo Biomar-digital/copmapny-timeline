@@ -1,0 +1,4 @@
+[
+  {"id":"no-card","label":"Back cover no longer shows the Version history / Owner and approver card","absent":["Version history","Owner and approver"]},
+  {"id":"content-intact","label":"Guideline content unchanged (spot-check a section)","present":["Our Identity in Words","Preferred Vocabulary"]}
+]

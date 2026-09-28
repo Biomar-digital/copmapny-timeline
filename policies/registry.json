@@ -789,6 +789,7 @@
       "owner": "Global Marketing",
       "approver": "Executive Committee",
       "category": "Guideline",
+      "no_version_card": true,
       "editions": [
         {
           "version": "Version 1",

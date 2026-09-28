@@ -172,9 +172,10 @@
     "policy": "brand-voice-guidelines",
     "request_id": "34b0be0d-a772-41d0-93ce-cfb840d97570",
     "title": "Change: brand-voice-guidelines",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Nerea Clemente Palacios",
     "email": "nerpa@biomar.com",
-    "created_at": 1786450368183
+    "created_at": 1786450368183,
+    "notified": false
   }
 ]
