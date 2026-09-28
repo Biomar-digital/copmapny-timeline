@@ -1,6 +1,6 @@
 {
   "brand": "BioMar Group",
-  "updated": "2026-09-28 13:50:54 UTC",
+  "updated": "2026-09-28 13:56:57 UTC",
   "policies": [
     {
       "id": "diversity-policy",
@@ -125,7 +125,7 @@
           "notes": "Initial publication.",
           "requested_by": "",
           "approved_by": "",
-          "generated_at": "2026-09-28 08:41:37 UTC",
+          "generated_at": "2026-09-28 13:56:57 UTC",
           "documents": [
             {
               "label": "Policy",
@@ -134,6 +134,26 @@
                 "non_approval": "files/Remuneration_Policy__Policy_2026-06_non-approval.pdf",
                 "word": "files/Remuneration_Policy__Policy_2026-06.docx",
                 "approval": "files/Remuneration_Policy__Policy_2026-06_approval.pdf"
+              }
+            }
+          ]
+        },
+        {
+          "version": "Version 1.1",
+          "date": "2026-09",
+          "approval_date": "28-09-2026",
+          "notes": "Layout/numbering revisions: numbered section headings, bold+spaced sub-clause numbers (e.g. 4.3.4/4.3.5), converted inline lists to bulleted format, indented clauses to match the original layout, fixed 'Version' label and owner field (VP People -> Group Legal), and minor copy fixes.",
+          "requested_by": "Marianne Niviaq Thomsen",
+          "approved_by": "Marianne Niviaq Thomsen",
+          "generated_at": "2026-09-28 13:56:57 UTC",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "files": {
+                "non_approval": "files/Remuneration_Policy__Policy_2026-09_non-approval.pdf",
+                "word": "files/Remuneration_Policy__Policy_2026-09.docx",
+                "approval": "files/Remuneration_Policy__Policy_2026-09_approval.pdf"
               }
             }
           ]

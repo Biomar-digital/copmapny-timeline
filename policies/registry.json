@@ -86,6 +86,22 @@
             {
               "label": "Policy",
               "language": "English",
+              "source": "remuneration-policy__Approval__Version_1.docx",
+              "board_approval": true
+            }
+          ]
+        },
+        {
+          "version": "Version 1.1",
+          "date": "2026-09",
+          "approval_date": "28-09-2026",
+          "notes": "Layout/numbering revisions: numbered section headings, bold+spaced sub-clause numbers (e.g. 4.3.4/4.3.5), converted inline lists to bulleted format, indented clauses to match the original layout, fixed 'Version' label and owner field (VP People -> Group Legal), and minor copy fixes.",
+          "requested_by": "Marianne Niviaq Thomsen",
+          "approved_by": "Marianne Niviaq Thomsen",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
               "source": "remuneration-policy__Approval.docx",
               "board_approval": true
             }
