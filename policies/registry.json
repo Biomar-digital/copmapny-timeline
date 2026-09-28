@@ -869,6 +869,31 @@
           "requested_by": "Marianne Niviaq Thomsen"
         }
       ]
+    },
+    {
+      "id": "disclosure-committee-charter",
+      "title": "Disclosure Committee Charter",
+      "language": "English",
+      "owner": "",
+      "approver": "Executive Management",
+      "category": "Policy",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-05",
+          "approval_date": "19-05-2026",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "Disclosure_Committee_Charter.docx",
+              "board_approval": true
+            }
+          ],
+          "notes": "Initial publication, restyled to the current BioMar template.",
+          "requested_by": "Marianne Niviaq Thomsen"
+        }
+      ]
     }
   ]
 }

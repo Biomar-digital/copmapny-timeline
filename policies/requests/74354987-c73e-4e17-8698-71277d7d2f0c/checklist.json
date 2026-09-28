@@ -1,0 +1,7 @@
+[
+  {"id":"sections","label":"All main sections present","present":["Establishment and purpose","Members","Assignments","Meetings","Reporting","Confidentiality","Review of Charter"]},
+  {"id":"schedules","label":"All 3 schedules present","present":["Schedule 1","Schedule 2","Schedule 3"]},
+  {"id":"log-table","label":"Schedule 2 log table content present","present":["Log for monitoring fulfilment of items 1-3","[Date]","Persons responsible","Internal information barriers","Leakage plan"]},
+  {"id":"bullets","label":"Danish 'Opstilling' list items render as bullets, not dropped","present":["Non-public;","Precise;","The identity of the issuer","The identity of the person making the notification"]},
+  {"id":"closing","label":"Executive Management approval closing statement present","present":["This Disclosure Committee Charter has been approved by the Executive Management on 19 May 2026."]}
+]

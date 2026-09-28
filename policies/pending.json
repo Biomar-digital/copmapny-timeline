@@ -199,5 +199,16 @@
     "email": "marni@biomar.com",
     "created_at": 1790672638695,
     "notified": true
+  },
+  {
+    "id": "dcc-marianne-1",
+    "policy": "disclosure-committee-charter",
+    "request_id": "74354987-c73e-4e17-8698-71277d7d2f0c",
+    "title": "Disclosure Committee Charter",
+    "status": "pending_review",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1790672820000,
+    "notified": false
   }
 ]
