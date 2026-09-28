@@ -372,6 +372,22 @@
             {
               "label": "Policy",
               "language": "English",
+              "source": "sanctions-export-controls-policy__Policy__Version_1.docx",
+              "board_approval": false
+            }
+          ]
+        },
+        {
+          "version": "Version 1.1",
+          "date": "2026-09",
+          "approval_date": "28-09-2026",
+          "notes": "Moved Attachment A (High-Risk Sanctioned Countries) to start on its own page.",
+          "requested_by": "Marianne Niviaq Thomsen",
+          "approved_by": "Marianne Niviaq Thomsen",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
               "source": "sanctions-export-controls-policy__Policy.docx",
               "board_approval": false
             }
