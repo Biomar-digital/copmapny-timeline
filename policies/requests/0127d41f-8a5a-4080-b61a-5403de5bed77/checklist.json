@@ -1,0 +1,6 @@
+[
+  {"id": "attachment-own-page", "label": "Attachment A starts on its own page", "page": 6,
+   "present": ["ATTACHMENT A: HIGH-RISK SANCTIONED COUNTRIES"]},
+  {"id": "attachment-not-on-prev-page", "label": "Attachment A no longer shares the 'Policy Implementation and Training' / 'Policy Review' / 'Audit' page",
+   "page": 5, "absent": ["ATTACHMENT A: HIGH-RISK SANCTIONED COUNTRIES"]}
+]

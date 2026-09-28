@@ -249,10 +249,11 @@
     "policy": "sanctions-export-controls-policy",
     "request_id": "0127d41f-8a5a-4080-b61a-5403de5bed77",
     "title": "Change: sanctions-export-controls-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1790589966307
+    "created_at": 1790589966307,
+    "updated_at": 1790601720866
   },
   {
     "id": "a5d2ba67-2b34-44fc-a050-6e00ce3e7224",

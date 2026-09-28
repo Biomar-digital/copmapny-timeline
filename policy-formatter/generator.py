@@ -107,10 +107,13 @@ _LONG = re.compile(r"\S{28,}")
 # marker) — avoids the redundant "• a." double marking.
 _LETTERED = re.compile(r"^\(?[a-z][.)]\s")
 _LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
-# A "Schedule N" section (an annex-style appendix) always starts its own page,
-# regardless of how much room is left on the current one (e.g. the Disclosure
-# Committee Charter's three schedules — request 57ecfff2).
-_SCHEDULE = re.compile(r"^schedule\s+\d", re.I)
+# A "Schedule N" / "Attachment A" / "Appendix"/"Annex" section (an annex-style
+# add-on at the end of the document) always starts its own page, regardless of
+# how much room is left on the current one — e.g. the Disclosure Committee
+# Charter's three schedules (request 57ecfff2) and the Sanctions and Export
+# Controls Policy's "ATTACHMENT A: HIGH-RISK SANCTIONED COUNTRIES" (request
+# 0127d41f).
+_SCHEDULE = re.compile(r"^(schedule|attachment|appendix|annex)\s+[a-z0-9]", re.I)
 
 
 def _is_schedule_heading(b):

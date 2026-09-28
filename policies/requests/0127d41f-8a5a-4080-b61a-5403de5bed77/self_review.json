@@ -1,0 +1,57 @@
+{
+  "request_id": "0127d41f-8a5a-4080-b61a-5403de5bed77",
+  "policy": "sanctions-export-controls-policy",
+  "generated_at": "2026-09-28 13:21 UTC",
+  "overall": "pass",
+  "summary": "7 passed",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "7 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants produced",
+      "status": "info",
+      "detail": "Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "pass",
+      "detail": "complete"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "38/38 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:attachment-own-page",
+      "label": "Attachment A starts on its own page",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:attachment-not-on-prev-page",
+      "label": "Attachment A no longer shares the 'Policy Implementation and Training' / 'Policy Review' / 'Audit' page",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}

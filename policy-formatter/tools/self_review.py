@@ -38,7 +38,16 @@ REGISTRY = os.path.join(REPO, "policies", "registry.json")
 
 
 def norm(s):
-    return re.sub(r"\s+", " ", (s or "").replace("ﬁ", "fi").replace("ﬂ", "fl")).strip()
+    # generator.py's _breakable() injects a zero-width space (U+200B) after
+    # every "/", "?", "&" in long URLs/paths so they wrap in a narrow column —
+    # a rendering artifact, not a content change, so strip it before comparing
+    # a source paragraph against the rendered PDF text. The bundled fonts have
+    # no glyph for U+200B, so PyMuPDF's text extraction actually yields a NUL
+    # (\x00) for it instead of the character itself — strip both, else a long
+    # URL always "fails" coverage (e.g. sanctions-export-controls-policy's two
+    # reference links — found while working request 0127d41f).
+    return re.sub(r"\s+", " ", (s or "").replace("ﬁ", "fi").replace("ﬂ", "fl")
+                  .replace("​", "").replace("\x00", "")).strip()
 
 
 def pdf_text(path):
