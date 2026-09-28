@@ -1,0 +1,87 @@
+{
+  "request_id": "3eb6a797-6aab-4f69-9ba8-a98a184808a1",
+  "policy": "audit-committee-charter",
+  "generated_at": "2026-09-28 13:27 UTC",
+  "overall": "attention",
+  "summary": "12 passed, 1 to review",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "9 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Signed + Unsigned)",
+      "status": "pass",
+      "detail": "produced: Signed + Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "attention",
+      "detail": "missing: owner"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "82/82 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:num-1",
+      "label": "Establishment and purpose heading numbered '1'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:num-2",
+      "label": "Members heading numbered '2'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:num-3",
+      "label": "Assignments heading numbered '3'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:num-4",
+      "label": "Meetings heading numbered '4'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:num-5",
+      "label": "Resolutions heading numbered '5'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:num-6",
+      "label": "Authorisation heading numbered '6'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:num-7",
+      "label": "Review of Charter heading numbered '7'",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}
