@@ -1,0 +1,22 @@
+[
+  {"id": "num-1", "label": "Establishment and purpose heading numbered '1'", "page": 2,
+   "present": ["1 Establishment and purpose"]},
+  {"id": "num-2", "label": "Members heading numbered '2'", "page": 2,
+   "present": ["2 Members"]},
+  {"id": "num-3", "label": "Assignments heading numbered '3'", "page": 3,
+   "present": ["3 Assignments"]},
+  {"id": "num-4", "label": "Meetings heading numbered '4'", "page": 3,
+   "present": ["4 Meetings"]},
+  {"id": "num-5", "label": "Resolutions heading numbered '5'", "page": 4,
+   "present": ["5 Resolutions at the Remuneration and Nomination Committee"]},
+  {"id": "num-6", "label": "Authorisation heading numbered '6'", "page": 4,
+   "present": ["6 Authorisation"]},
+  {"id": "num-7", "label": "Review of Charter heading numbered '7'", "page": 4,
+   "present": ["7 Review of Charter"]},
+  {"id": "appendix-unnumbered", "label": "Appendix A heading itself stays unnumbered (matches reference: Overskrift2 has no numId)",
+   "page": 5, "present": ["Appendix A"], "absent": ["1 Appendix A", "8 Appendix A"]},
+  {"id": "num-appendix-1", "label": "Remuneration related assignments starts its own restarted numbering at '1'", "page": 5,
+   "present": ["1 Remuneration related assignments"]},
+  {"id": "num-appendix-2", "label": "Nomination related assignments continues the appendix's own numbering at '2' (not the main body's '8')", "page": 6,
+   "present": ["2 Nomination related assignments"], "absent": ["8 Nomination related assignments"]}
+]

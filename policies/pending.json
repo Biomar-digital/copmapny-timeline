@@ -285,10 +285,11 @@
     "policy": "dividend-and-share-buyback-policy",
     "request_id": "bcc8a706-5224-4d58-8cb0-af5851565551",
     "title": "Change: dividend-and-share-buyback-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1790600910003
+    "created_at": 1790600910003,
+    "updated_at": 1790602571912
   },
   {
     "id": "10a3c55a-0816-4ace-afd9-4ea3712afb73",
@@ -305,9 +306,10 @@
     "policy": "remuneration-and-nomination-committee-charter",
     "request_id": "797a0e82-5941-4582-8fab-c918046f8a59",
     "title": "Change: remuneration-and-nomination-committee-charter",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1790601569997
+    "created_at": 1790601569997,
+    "updated_at": 1790602571912
   }
 ]

@@ -1,0 +1,12 @@
+[
+  {"id": "num-1", "label": "Introduction heading numbered '1'", "page": 2,
+   "present": ["1 Introduction"]},
+  {"id": "num-2", "label": "Dividend policy and share buyback heading numbered '2'", "page": 2,
+   "present": ["2 Dividend policy and share buyback"]},
+  {"id": "num-3", "label": "Restrictions in financing documentation heading numbered '3'", "page": 2,
+   "present": ["3 Restrictions in financing documentation"]},
+  {"id": "num-4", "label": "Legal and regulatory requirements heading numbered '4'", "page": 2,
+   "present": ["4 Legal and regulatory requirements"]},
+  {"id": "num-5", "label": "Miscellaneous heading numbered '5'", "page": 3,
+   "present": ["5 Miscellaneous"]}
+]
