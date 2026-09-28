@@ -297,10 +297,11 @@
     "policy": "non-audit-service-policy",
     "request_id": "6221b053-71db-4225-8014-daaf9117ead2",
     "title": "Change: non-audit-service-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1790601249651
+    "created_at": 1790601249651,
+    "updated_at": 1790602802411
   },
   {
     "id": "8185ee31-00ab-4f29-8ac6-959d03663100",
