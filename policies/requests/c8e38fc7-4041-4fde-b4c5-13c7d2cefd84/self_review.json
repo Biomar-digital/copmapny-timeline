@@ -1,9 +1,9 @@
 {
   "request_id": "c8e38fc7-4041-4fde-b4c5-13c7d2cefd84",
   "policy": "articles-of-association",
-  "generated_at": "2026-07-06 09:13 UTC",
+  "generated_at": "2026-09-30 07:18 UTC",
   "overall": "pass",
-  "summary": "9 passed",
+  "summary": "11 passed",
   "checks": [
     {
       "id": "outputs",
@@ -19,9 +19,9 @@
     },
     {
       "id": "variants",
-      "label": "Variants match request (Signed + Unsigned)",
-      "status": "pass",
-      "detail": "produced: Signed + Unsigned"
+      "label": "Variants produced",
+      "status": "info",
+      "detail": "Unsigned"
     },
     {
       "id": "metadata",
@@ -42,20 +42,38 @@
       "detail": "clean"
     },
     {
-      "id": "assert:letters-no-bullet",
-      "label": "Lettered lists on p.5 use the letters as markers (no bullet dots)",
+      "id": "assert:heading-bigger",
+      "label": "Section headings render at the larger scale (head_scale 1.25)",
       "status": "pass",
       "detail": ""
     },
     {
-      "id": "assert:adoption-line",
-      "label": "Adoption statement on p.7 stands on its own line, unnumbered",
+      "id": "assert:lettered-9.6-a",
+      "label": "Section 9.6 list item (a) present, hang-indented, letter-only marker",
       "status": "pass",
       "detail": ""
     },
     {
-      "id": "assert:headings-bigger",
-      "label": "Section headings enlarged for legibility (p.2)",
+      "id": "assert:lettered-9.6-e",
+      "label": "Section 9.6 list item (e) present",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:lettered-10.1-a",
+      "label": "Section 10.1 list item (a) — the specific line flagged in request 429f3e08 — present and aligned with the rest",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:lettered-10.1-k",
+      "label": "Section 10.1 list runs through item (k) on the following page, same alignment",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:adopted-line-separate",
+      "label": "The 'As adopted...' sentence is its own paragraph with no clause number",
       "status": "pass",
       "detail": ""
     }

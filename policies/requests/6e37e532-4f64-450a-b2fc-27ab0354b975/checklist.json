@@ -1,5 +1,15 @@
 [
-  {"id":"wrap-indent","label":"Wrapped clause lines indent under the clause text (35.4pt)","present":["1.2 The object of the Company"]},
-  {"id":"headings-bigger","label":"Section headings enlarged","present":["2 Share capital and shares"]},
-  {"id":"no-signed-variant","label":"Signed variant / approval card removed","absent":["Owner and approver"]}
+  {"id": "heading-bigger", "label": "Section headings render at the larger scale (head_scale 1.25)", "page": 2,
+   "present": ["2 Share capital and shares"]},
+  {"id": "lettered-9.6-a", "label": "Section 9.6 list item (a) present, hang-indented, letter-only marker", "page": 5,
+   "present": ["a. The notice convening the general meeting"]},
+  {"id": "lettered-9.6-e", "label": "Section 9.6 list item (e) present", "page": 5,
+   "present": ["e. The forms to be used for voting by proxy or by postal vote"]},
+  {"id": "lettered-10.1-a", "label": "Section 10.1 list item (a) — the specific line flagged in request 429f3e08 — present and aligned with the rest", "page": 5,
+   "present": ["a. The Board of Directors’ report on the Company’s activities in the past financial year"]},
+  {"id": "lettered-10.1-k", "label": "Section 10.1 list runs through item (k) on the following page, same alignment", "page": 6,
+   "present": ["k. Any other business"]},
+  {"id": "adopted-line-separate", "label": "The 'As adopted...' sentence is its own paragraph with no clause number", "page": 7,
+   "present": ["As adopted at the extraordinary general meeting on 13 May 2026 and latest amended by decision of the board of directors on 19 May 2026."],
+   "absent": ["15.2 As adopted", "16 As adopted"]}
 ]

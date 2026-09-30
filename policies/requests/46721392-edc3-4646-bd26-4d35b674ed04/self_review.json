@@ -1,9 +1,9 @@
 {
   "request_id": "46721392-edc3-4646-bd26-4d35b674ed04",
   "policy": "articles-of-association",
-  "generated_at": "2026-07-10 13:48 UTC",
+  "generated_at": "2026-09-30 07:18 UTC",
   "overall": "pass",
-  "summary": "10 passed",
+  "summary": "11 passed",
   "checks": [
     {
       "id": "outputs",
@@ -19,9 +19,9 @@
     },
     {
       "id": "variants",
-      "label": "Variants match request (Unsigned)",
-      "status": "pass",
-      "detail": "produced: Unsigned"
+      "label": "Variants produced",
+      "status": "info",
+      "detail": "Unsigned"
     },
     {
       "id": "metadata",
@@ -42,26 +42,38 @@
       "detail": "clean"
     },
     {
-      "id": "assert:lettered-list-aligned",
-      "label": "Lettered list items align with numbered-clause text (already fixed this session)",
+      "id": "assert:heading-bigger",
+      "label": "Section headings render at the larger scale (head_scale 1.25)",
       "status": "pass",
       "detail": ""
     },
     {
-      "id": "assert:adoption-line-separate",
-      "label": "'As adopted at the extraordinary general meeting...' is unnumbered, its own line",
+      "id": "assert:lettered-9.6-a",
+      "label": "Section 9.6 list item (a) present, hang-indented, letter-only marker",
       "status": "pass",
       "detail": ""
     },
     {
-      "id": "assert:headings-bigger",
-      "label": "Section headings use the enlarged scale (head_scale)",
+      "id": "assert:lettered-9.6-e",
+      "label": "Section 9.6 list item (e) present",
       "status": "pass",
       "detail": ""
     },
     {
-      "id": "assert:articles-indented",
-      "label": "Numbered articles hang-indent away from the margin",
+      "id": "assert:lettered-10.1-a",
+      "label": "Section 10.1 list item (a) — the specific line flagged in request 429f3e08 — present and aligned with the rest",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:lettered-10.1-k",
+      "label": "Section 10.1 list runs through item (k) on the following page, same alignment",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:adopted-line-separate",
+      "label": "The 'As adopted...' sentence is its own paragraph with no clause number",
       "status": "pass",
       "detail": ""
     }
