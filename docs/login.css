@@ -27,6 +27,13 @@ body.login {
 }
 .lg-form input:focus { outline: 2px solid var(--sky); border-color: var(--sky); }
 .lg-note { margin: 0; font-size: 12.5px; color: #5a7898; line-height: 1.55; }
+.lg-note.lg-warn { color: #9a5a00; background: #fff6e8; border: 1px solid #f0dcae; border-radius: 8px; padding: 8px 10px; }
+.lg-link {
+  border: none; background: transparent; padding: 2px 0; margin: -4px 0 0;
+  font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--ocean);
+  cursor: pointer; text-align: left; align-self: flex-start;
+}
+.lg-link:hover { text-decoration: underline; }
 .btn.primary {
   display: flex; justify-content: center; background: var(--navy); color: #fff;
   border: 1px solid var(--navy); padding: 11px; border-radius: 9px; font-size: 14px;

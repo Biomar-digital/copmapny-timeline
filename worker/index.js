@@ -26,6 +26,7 @@ const MAX_AUTHOR = 120;
 const MAX_RECTS = 80;
 const MAX_FILE = 12 * 1024 * 1024;
 const SESSION_MS = 30 * 24 * 3600 * 1000;
+const RESET_MS = 60 * 60 * 1000; // password-reset link lifetime: 1 hour
 
 // ====================================================================== utils
 
@@ -118,6 +119,8 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS inbox_state (user_id TEXT PRIMARY KEY, last_seen INTEGER NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS wallet (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, label TEXT, image TEXT NOT NULL, created_at INTEGER NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS pending_change (id TEXT PRIMARY KEY, policy TEXT NOT NULL, request_id TEXT, title TEXT, status TEXT NOT NULL DEFAULT 'change_pending', updated_at INTEGER, created_at INTEGER NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS password_resets (
+     token TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires INTEGER NOT NULL, created_at INTEGER NOT NULL)`,
 ];
 
 // Additive migrations for DBs created before a column existed (ignore errors).
@@ -278,19 +281,23 @@ async function sendEmail(env, subject, html, to) {
   return { ok: false, skipped: true };
 }
 
-// Consistent branded layout for every notification email.
-function emailHtml(heading, intro, rows) {
+// Consistent branded layout for every notification email. `cta` overrides the
+// default "Open the library" button (e.g. a one-time password-reset link) —
+// {label, href}.
+function emailHtml(heading, intro, rows, cta) {
   const APP = "https://globa-policies.marketing-70b.workers.dev";
   const tr = (rows || []).filter(Boolean).map(([k, v]) =>
     `<tr><td style="padding:5px 14px 5px 0;color:#6b87a4;white-space:nowrap;vertical-align:top">${escapeHtml(k)}</td>` +
     `<td style="padding:5px 0;color:#1c4076">${v}</td></tr>`).join("");
+  const ctaLabel = (cta && cta.label) || "Open the library";
+  const ctaHref = (cta && cta.href) || APP;
   return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;border:1px solid #e3e8ef;border-radius:10px;overflow:hidden">
     <div style="background:#1c4076;color:#fff;padding:14px 20px;font-weight:700;letter-spacing:.2px">BioMar Policy Library</div>
     <div style="padding:20px 22px">
       <h2 style="margin:0 0 8px;color:#1c4076;font-size:18px">${escapeHtml(heading)}</h2>
       ${intro ? `<p style="margin:0 0 14px;color:#43607f;line-height:1.5">${escapeHtml(intro)}</p>` : ""}
       ${tr ? `<table style="font-size:14px;border-collapse:collapse">${tr}</table>` : ""}
-      <p style="margin:18px 0 0"><a href="${APP}" style="background:#1c4076;color:#fff;text-decoration:none;padding:9px 16px;border-radius:8px;display:inline-block;font-weight:600">Open the library</a></p>
+      <p style="margin:18px 0 0"><a href="${ctaHref}" style="background:#1c4076;color:#fff;text-decoration:none;padding:9px 16px;border-radius:8px;display:inline-block;font-weight:600">${escapeHtml(ctaLabel)}</a></p>
     </div>
   </div>`;
 }
@@ -359,6 +366,49 @@ async function handleAuth(request, env, path) {
     await env.DB.prepare("INSERT INTO sessions (token,user_id,expires) VALUES (?,?,?)")
       .bind(token, u.id, Date.now() + SESSION_MS).run();
     return json({ ok: true, user: { name: u.name, email: u.email, role: u.role } }, 200, { "Set-Cookie": sessionCookie(token) });
+  }
+
+  if (path === "/api/auth/forgot-password" && request.method === "POST") {
+    let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
+    const email = String(p.email || "").trim().toLowerCase().slice(0, 200);
+    if (EMAIL_RE.test(email)) {
+      const u = await env.DB.prepare("SELECT id, name, status FROM users WHERE email=?").bind(email).first();
+      if (u && u.status === "approved") {
+        // Only one live link per account — a fresh request supersedes any earlier one.
+        await env.DB.prepare("DELETE FROM password_resets WHERE user_id=?").bind(u.id).run();
+        const token = randomHex(32);
+        await env.DB.prepare("INSERT INTO password_resets (token,user_id,expires,created_at) VALUES (?,?,?,?)")
+          .bind(token, u.id, Date.now() + RESET_MS, Date.now()).run();
+        const APP = "https://globa-policies.marketing-70b.workers.dev";
+        await sendEmail(env, "[BioMar Policy Library] Reset your password",
+          emailHtml("Reset your password",
+            `${u.name}, we received a request to reset your Policy Library password. This link expires in 1 hour and can only be used once. If you didn't request this, you can safely ignore this email.`,
+            [], { label: "Choose a new password", href: `${APP}/reset-password?token=${token}` }),
+          email).catch(() => {});
+      }
+    }
+    // Same response either way — don't reveal whether an address has an account.
+    return json({ ok: true });
+  }
+
+  if (path === "/api/auth/reset-password" && request.method === "POST") {
+    let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
+    const token = String(p.token || "");
+    const password = String(p.password || "");
+    if (!/^[0-9a-f]{64}$/.test(token)) return json({ error: "This reset link is invalid or has expired." }, 400);
+    if (password.length < 8) return json({ error: "Password must be at least 8 characters." }, 400);
+    const row = await env.DB.prepare("SELECT user_id, expires FROM password_resets WHERE token=?").bind(token).first();
+    if (!row || row.expires < Date.now()) {
+      if (row) await env.DB.prepare("DELETE FROM password_resets WHERE token=?").bind(token).run();
+      return json({ error: "This reset link is invalid or has expired." }, 400);
+    }
+    const salt = randomHex(16);
+    const hash = await pbkdf2(password, salt);
+    await env.DB.prepare("UPDATE users SET pw_hash=?, pw_salt=? WHERE id=?").bind(hash, salt, row.user_id).run();
+    await env.DB.prepare("DELETE FROM password_resets WHERE token=?").bind(token).run();
+    // A password reset invalidates every existing session (e.g. on another device).
+    await env.DB.prepare("DELETE FROM sessions WHERE user_id=?").bind(row.user_id).run();
+    return json({ ok: true });
   }
 
   if (path === "/api/auth/logout" && request.method === "POST") {
@@ -770,7 +820,8 @@ async function handleMyRequests(request, env, user) {
 
 // ==================================================================== gate
 
-const PUBLIC_ASSETS = new Set(["/login", "/login.html", "/login.js", "/login.css", "/styles.css", "/favicon.png", "/favicon.ico"]);
+const PUBLIC_ASSETS = new Set(["/login", "/login.html", "/login.js", "/login.css",
+  "/reset-password", "/reset-password.html", "/reset-password.js", "/styles.css", "/favicon.png", "/favicon.ico"]);
 function isPublicAsset(path) { return PUBLIC_ASSETS.has(path) || path.startsWith("/assets/"); }
 
 // Serve a static asset, but force revalidation of HTML/JS/CSS and the generated

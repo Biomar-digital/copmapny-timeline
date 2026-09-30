@@ -29,6 +29,7 @@
       <label>Password<input id="siPass" type="password" autocomplete="current-password" required /></label>
       <button type="submit" class="btn primary">Sign in</button>
       <p class="lg-status" id="siStatus"></p>
+      <button type="button" class="lg-link" data-tab="forgot">Forgot password?</button>
     </form>
 
     <!-- Register -->
@@ -37,8 +38,18 @@
       <label>Full name<input id="rgName" type="text" autocomplete="name" required /></label>
       <label>Email<input id="rgEmail" type="email" autocomplete="email" required /></label>
       <label>Password <span class="lg-hint">(min. 8 characters)</span><input id="rgPass" type="password" autocomplete="new-password" required /></label>
+      <p class="lg-note lg-warn">For your security, please don't reuse your BioMar network/email password here — choose a different one just for the Policy Library.</p>
       <button type="submit" class="btn primary">Request access</button>
       <p class="lg-status" id="rgStatus"></p>
+    </form>
+
+    <!-- Forgot password -->
+    <form id="forgotForm" class="lg-form" hidden>
+      <p class="lg-note">Enter your account email — if it matches an approved account, we'll send a link to reset your password.</p>
+      <label>Email<input id="fgEmail" type="email" autocomplete="username" required /></label>
+      <button type="submit" class="btn primary">Send reset link</button>
+      <p class="lg-status" id="fgStatus"></p>
+      <button type="button" class="lg-link" data-tab="signin">Back to sign in</button>
     </form>
   </div>
 
