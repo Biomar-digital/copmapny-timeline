@@ -6,6 +6,7 @@ tables) because that is everything the BioMar policy template expresses. The
 mapping from Word styles to our block types lives here so the generator stays
 purely about layout.
 """
+import re
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -177,6 +178,9 @@ def _glossary_table(item) -> bool:
     return True
 
 
+_LEAD_CLAUSE_NUM = re.compile(r'^\d+(\.\d+)*\.?\s+')
+
+
 def _heading_like(text: str) -> bool:
     # A heading is short and does not end like a running sentence. Incoming
     # Word files are often mis-styled (whole paragraphs tagged Heading 1, or
@@ -186,7 +190,11 @@ def _heading_like(text: str) -> bool:
     # constitute Inside Information", request 57ecfff2) still counts as one —
     # a real body sentence mis-tagged as a heading almost always also ends in
     # terminal punctuation, which the second check below still catches.
-    return len(text.split()) <= 15 and not text.rstrip().endswith((".", ":", ";"))
+    # A literal clause number we added back onto the title ("3 Responsibility
+    # of the Board of ...") shouldn't count against that budget — it's not
+    # part of the title's own wordiness, just the restored section number.
+    shape_text = _LEAD_CLAUSE_NUM.sub("", text, count=1)
+    return len(shape_text.split()) <= 15 and not text.rstrip().endswith((".", ":", ";"))
 
 
 def _classify(text: str, style: str):

@@ -1,7 +1,7 @@
 {
   "request_id": "21e2a25c-a6e2-4672-8798-5e69d8081fd8",
   "policy": "diversity-policy",
-  "generated_at": "2026-07-01 11:56 UTC",
+  "generated_at": "2026-10-07 14:00 UTC",
   "overall": "pass",
   "summary": "6 passed",
   "checks": [
@@ -19,9 +19,9 @@
     },
     {
       "id": "variants",
-      "label": "Variants match request (Signed + Unsigned)",
-      "status": "pass",
-      "detail": "produced: Signed + Unsigned"
+      "label": "Variants produced",
+      "status": "info",
+      "detail": "Signed + Unsigned"
     },
     {
       "id": "metadata",
@@ -33,13 +33,19 @@
       "id": "coverage",
       "label": "All source content appears in the PDF",
       "status": "pass",
-      "detail": "35/35 passages found"
+      "detail": "34/34 passages found"
     },
     {
       "id": "ligatures",
       "label": "No raw ligatures left",
       "status": "pass",
       "detail": "clean"
+    },
+    {
+      "id": "assert:section-headings-numbered",
+      "label": "Top-level section headings carry the original's literal numbers (style-inherited Word numbering, invisible to the extractor, restored as literal text)",
+      "status": "pass",
+      "detail": ""
     }
   ]
 }

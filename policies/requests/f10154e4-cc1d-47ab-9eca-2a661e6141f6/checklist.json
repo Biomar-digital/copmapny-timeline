@@ -16,5 +16,7 @@
   {"id": "glossary-table-no-fake-header", "label": "The Offer document / Duties of the Company glossary table has no artificial header band",
    "present": ["Offer document", "Duties of the Company"]},
   {"id": "contact-table-present", "label": "Appendix B's contact tables (BioMar + Legal advisor) are present",
-   "present": ["Jens Bjerg Sørensen", "Rikke Schiøtt Petersen"]}
+   "present": ["Jens Bjerg Sørensen", "Rikke Schiøtt Petersen"]},
+  {"id": "section-headings-numbered", "label": "Top-level section headings carry the original's literal numbers, including the Appendix A sub-sections' own restarted 1-4 sequence (style-inherited Word numbering, invisible to the extractor, restored as literal text)",
+   "present": ["1\tIntroduction", "7\tCommunication", "4\tPublic offers in Denmark"]}
 ]

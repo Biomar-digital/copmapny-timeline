@@ -1,9 +1,9 @@
 {
   "request_id": "dd261ac0-83d1-47ff-88f6-9b891935bc60",
   "policy": "management-instructions",
-  "generated_at": "2026-10-07 11:16 UTC",
+  "generated_at": "2026-10-07 13:59 UTC",
   "overall": "attention",
-  "summary": "9 passed, 1 to review",
+  "summary": "10 passed, 1 to review",
   "checks": [
     {
       "id": "outputs",
@@ -62,6 +62,12 @@
     {
       "id": "assert:lettered-9.1",
       "label": "9.1's lettered list (a)-(c) renders with hang-indent bullets",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:section-headings-numbered",
+      "label": "Top-level section headings carry the original's literal numbers (style-inherited Word numbering, invisible to the extractor, restored as literal text)",
       "status": "pass",
       "detail": ""
     }

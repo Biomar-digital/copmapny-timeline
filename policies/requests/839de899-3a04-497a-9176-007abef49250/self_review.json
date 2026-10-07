@@ -1,9 +1,9 @@
 {
   "request_id": "839de899-3a04-497a-9176-007abef49250",
   "policy": "rules-of-procedure-board-of-directors",
-  "generated_at": "2026-10-07 11:21 UTC",
+  "generated_at": "2026-10-07 13:59 UTC",
   "overall": "attention",
-  "summary": "11 passed, 1 to review",
+  "summary": "12 passed, 1 to review",
   "checks": [
     {
       "id": "outputs",
@@ -74,6 +74,12 @@
     {
       "id": "assert:subheadings-auto",
       "label": "Numbered sub-headings like 3.5/4.9/7.1 render via the existing hanging-indent mechanism",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:section-headings-numbered",
+      "label": "Top-level section headings carry the original's literal numbers (style-inherited Word numbering, invisible to the extractor, restored as literal text)",
       "status": "pass",
       "detail": ""
     }

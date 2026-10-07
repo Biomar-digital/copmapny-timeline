@@ -10,5 +10,7 @@
   {"id": "lettered-11.1", "label": "11.1's lettered list (a)-(c) renders with hang-indent bullets",
    "present": ["a share register, including the shareholdings"]},
   {"id": "subheadings-auto", "label": "Numbered sub-headings like 3.5/4.9/7.1 render via the existing hanging-indent mechanism",
-   "present": ["3.5", "Resolutions", "4.9", "Organisation"]}
+   "present": ["3.5", "Resolutions", "4.9", "Organisation"]},
+  {"id": "section-headings-numbered", "label": "Top-level section headings carry the original's literal numbers (style-inherited Word numbering, invisible to the extractor, restored as literal text)",
+   "present": ["1\tIntroduction", "17\tReview and amendment of the Rules of Procedure"]}
 ]

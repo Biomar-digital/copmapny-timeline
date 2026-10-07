@@ -2,5 +2,6 @@
   {"id":"sections","label":"All 7 sections present","present":["Purpose","Context","Scope of Application","Our Commitment","Data Ethics Values in BioMar","Management Commitment","Review of Policy and publication"]},
   {"id":"values","label":"All 6 data ethics values present as run-in labels","present":["Knowledge and adherence","Informed consent","Privacy and security","Equality and fairness","Focusing on public good","Security safeguard and privacy expectation alignment"]},
   {"id":"no-signature-table","label":"Blank signature-block table not carried over (replaced by digital approval card)","absent":["_____________________________________"]},
-  {"id":"closing","label":"Board review closing statement present","present":["As reviewed by the Board of Directors of BioMar on 26 February 2026."]}
+  {"id":"closing","label":"Board review closing statement present","present":["As reviewed by the Board of Directors of BioMar on 26 February 2026."]},
+  {"id":"section-headings-numbered","label":"Top-level section headings carry the original's literal numbers (style-inherited Word numbering, invisible to the extractor, restored as literal text)","present":["1\tPurpose","7\tReview of Policy and publication"]}
 ]
