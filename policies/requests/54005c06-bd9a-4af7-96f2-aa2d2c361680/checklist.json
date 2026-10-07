@@ -1,0 +1,33 @@
+[
+  {
+    "id": "heading-3-present",
+    "label": "'3. Multi-channel IR communication' heading present",
+    "present": [
+      "Multi-channel IR communication"
+    ]
+  },
+  {
+    "id": "heading-4-7-numbered",
+    "label": "Headings 4-7 are numbered consecutively after the manually-typed '3.'",
+    "present": [
+      "Active investor engagement",
+      "Strong IR governance and compliance",
+      "Adoption and publication"
+    ]
+  },
+  {
+    "id": "authorized-persons-list",
+    "label": "The 5 authorized-persons items under section 5 render as a bulleted list",
+    "present": [
+      "The Chair of the Board of Directors",
+      "The VP, People, Purpose & Communication"
+    ]
+  },
+  {
+    "id": "adopted-sentence-kept",
+    "label": "The adoption attribution sentence is kept",
+    "present": [
+      "The IR Policy has been adopted by the Board of Directors on 19 May 2026."
+    ]
+  }
+]

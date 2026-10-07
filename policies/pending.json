@@ -318,5 +318,16 @@
     "created_at": 1790584098603,
     "updated_at": 1791362841579,
     "notified": true
+  },
+  {
+    "id": "9bbce2e4-7eb1-4393-9a16-4f8ede5c36ee",
+    "policy": "investor-relations-policy",
+    "request_id": "54005c06-bd9a-4af7-96f2-aa2d2c361680",
+    "title": "Change: investor-relations-policy",
+    "status": "pending_review",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1790584242942,
+    "updated_at": 1791363704758
   }
 ]
