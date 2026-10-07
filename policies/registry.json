@@ -996,12 +996,28 @@
             {
               "label": "Policy",
               "language": "English",
-              "source": "Remuneration_and_Nomination_Committee_Charter.docx",
+              "source": "Remuneration_and_Nomination_Committee_Charter__Version_1.docx",
               "board_approval": true
             }
           ],
           "notes": "Initial publication, restyled to the current BioMar template.",
           "requested_by": "Marianne Niviaq Thomsen"
+        },
+        {
+          "version": "Version 1.1",
+          "date": "2026-10",
+          "approval_date": "07-10-2026",
+          "notes": "Numbered the 7 main-body headings and the 2 Appendix A sub-headings (request 797a0e82); centred the closing approval sentence and enlarged the Appendix A heading to match the section heading below it (request 5a290cd1).",
+          "requested_by": "Marianne Niviaq Thomsen",
+          "approved_by": "Marianne Niviaq Thomsen",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "Remuneration_and_Nomination_Committee_Charter.docx",
+              "board_approval": true
+            }
+          ]
         }
       ]
     },
