@@ -231,5 +231,15 @@
     "created_at": 1790601569997,
     "updated_at": 1790602571912,
     "notified": true
+  },
+  {
+    "id": "6ad95eee-f8c0-4a7f-ad5d-3da537c68d18",
+    "policy": "audit-committee-charter",
+    "request_id": "2622d7f3-9337-4486-b265-43c7bc6b28e3",
+    "title": "Change: audit-committee-charter",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1791357659693
   }
 ]
