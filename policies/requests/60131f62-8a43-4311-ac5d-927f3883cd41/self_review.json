@@ -1,9 +1,9 @@
 {
   "request_id": "60131f62-8a43-4311-ac5d-927f3883cd41",
   "policy": "diversity-policy",
-  "generated_at": "2026-07-08 12:32 UTC",
+  "generated_at": "2026-10-07 08:08 UTC",
   "overall": "pass",
-  "summary": "6 passed",
+  "summary": "9 passed",
   "checks": [
     {
       "id": "outputs",
@@ -33,13 +33,31 @@
       "id": "coverage",
       "label": "All source content appears in the PDF",
       "status": "pass",
-      "detail": "35/35 passages found"
+      "detail": "34/34 passages found"
     },
     {
       "id": "ligatures",
       "label": "No raw ligatures left",
       "status": "pass",
       "detail": "clean"
+    },
+    {
+      "id": "assert:equality-1",
+      "label": "'diversity, equity and inclusion' fixed to 'equality'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:equality-2",
+      "label": "'strengthen diversity and equity' fixed to 'equality' (consistency with the rest of the document)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:equal-pay-wording",
+      "label": "'equal pay for equal work or work of equal value' simplified to 'equal pay for work of equal value'",
+      "status": "pass",
+      "detail": ""
     }
   ]
 }

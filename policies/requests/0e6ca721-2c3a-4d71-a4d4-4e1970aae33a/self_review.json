@@ -1,9 +1,9 @@
 {
   "request_id": "0e6ca721-2c3a-4d71-a4d4-4e1970aae33a",
   "policy": "diversity-policy",
-  "generated_at": "2026-07-10 13:44 UTC",
+  "generated_at": "2026-10-07 08:08 UTC",
   "overall": "pass",
-  "summary": "7 passed",
+  "summary": "9 passed",
   "checks": [
     {
       "id": "outputs",
@@ -42,8 +42,20 @@
       "detail": "clean"
     },
     {
-      "id": "assert:equal-pay-wording-v2",
-      "label": "Body paragraph reads 'equal pay for work of equal value' (equal work or removed)",
+      "id": "assert:equality-1",
+      "label": "'diversity, equity and inclusion' fixed to 'equality'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:equality-2",
+      "label": "'strengthen diversity and equity' fixed to 'equality' (consistency with the rest of the document)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:equal-pay-wording",
+      "label": "'equal pay for equal work or work of equal value' simplified to 'equal pay for work of equal value'",
       "status": "pass",
       "detail": ""
     }

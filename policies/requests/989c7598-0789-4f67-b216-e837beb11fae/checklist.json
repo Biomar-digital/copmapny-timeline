@@ -1,23 +1,11 @@
 [
-  {
-    "id": "equity-to-equality",
-    "label": "p.2 wording fixed to 'equality'",
-    "page": 2,
-    "present": ["diversity, equality, and inclusion"],
-    "absent": ["diversity, equity, and inclusion"]
-  },
-  {
-    "id": "equal-pay-wording",
-    "label": "p.3 wording fixed to 'work of equal value'",
-    "page": 3,
-    "present": ["equal work or work of equal value"],
-    "absent": ["equal work or like value"]
-  },
-  {
-    "id": "remove-approved-line",
-    "label": "p.5 'Approved by the Board of Directors...' sentence removed",
-    "page": 5,
-    "present": [],
-    "absent": ["Approved by the Board of Directors"]
-  }
+  {"id": "equality-1", "label": "'diversity, equity and inclusion' fixed to 'equality'", "page": 2,
+   "present": ["diversity, equality and inclusion in their organisations"],
+   "absent": ["diversity, equity and inclusion"]},
+  {"id": "equality-2", "label": "'strengthen diversity and equity' fixed to 'equality' (consistency with the rest of the document)",
+   "present": ["strengthen diversity and equality"],
+   "absent": ["strengthen diversity and equity"]},
+  {"id": "equal-pay-wording", "label": "'equal pay for equal work or work of equal value' simplified to 'equal pay for work of equal value'",
+   "present": ["support the principle of equal pay for work of equal value"],
+   "absent": ["equal pay for equal work or work of equal value"]}
 ]
