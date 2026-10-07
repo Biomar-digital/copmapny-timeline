@@ -1,0 +1,10 @@
+[
+  {"id": "no-section-numbers", "label": "Top-level section headings no longer carry literal numbers",
+   "absent": ["1\tEstablishment", "2\tMembers", "3\tAssignments", "8\tSchedule 1"]},
+  {"id": "headings-present-unnumbered", "label": "Section headings are still present without numbers",
+   "present": ["Establishment and purpose", "Members", "Assignments", "Meetings", "Reporting", "Confidentiality", "Review of Charter"]},
+  {"id": "subclauses-unnumbered", "label": "The 1.1-1.5 sub-clauses under Establishment and purpose no longer carry numbers",
+   "absent": ["1.1\tThe Executive Management", "1.5\tIn addition to the general"]},
+  {"id": "schedule-pagebreaks-kept", "label": "Each Schedule still starts its own page (unrelated earlier fix, unaffected)",
+   "present": ["Schedule 1 – Definition of Inside Information", "Schedule 2 – Log for monitoring"]}
+]

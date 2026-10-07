@@ -372,9 +372,10 @@
     "policy": "disclosure-committee-charter",
     "request_id": "713a9da8-3b3f-4f65-8441-a7e0b9f54cd9",
     "title": "Change: disclosure-committee-charter",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1791370905479
+    "created_at": 1791370905479,
+    "updated_at": 1791371290460
   }
 ]
