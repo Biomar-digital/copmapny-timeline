@@ -1,0 +1,10 @@
+[
+  {"id": "no-signature-blocks", "label": "Physical board/executive signature blocks dropped",
+   "absent": ["Jens Bjerg Sørensen", "Carlos Armando Diaz Verdugo", "[Signature page"]},
+  {"id": "approved-by-kept", "label": "The short approval attribution sentence is kept, centred",
+   "present": ["Approved by the Board of Directors on 19 May 2026."]},
+  {"id": "lettered-5.1", "label": "5.1's lettered list (a)-(f) renders with hang-indent bullets",
+   "present": ["Commercial performance update", "Any other events or circumstances that the Board"]},
+  {"id": "lettered-9.1", "label": "9.1's lettered list (a)-(c) renders with hang-indent bullets",
+   "present": ["Agreements between the Company (or a Group company"]}
+]
