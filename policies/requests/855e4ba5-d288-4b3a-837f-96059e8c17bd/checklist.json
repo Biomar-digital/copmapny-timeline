@@ -1,23 +1,21 @@
 [
-  {
-    "id": "table-order",
-    "label": "Table restored to original position (before 'Management structure')",
-    "present": ["Management structure", "The composition, organisation and evaluation of the board of directors"]
-  },
-  {
-    "id": "p10-remove-bullet",
-    "label": "p.10 'Even if a member of the board...' no longer a bullet",
-    "present": ["Even if a member of the board of directors does not fall"],
-    "absent": ["• Even if a member of the board of directors does not fall"]
-  },
-  {
-    "id": "p11-add-bullet",
-    "label": "p.11 'the number of shares, options, warrants...' is now a bullet",
-    "present": ["• the number of shares, options, warrants"]
-  },
-  {
-    "id": "p9-add-bullet",
-    "label": "p.9 'the composition of and diversity on the board' is now a bullet",
-    "present": ["• the composition of and diversity on the board"]
-  }
+  {"id": "mgmt-structure-after-table", "label": "'Management structure' and the narrative sections sit after the compliance table, not before it",
+   "page": 14, "present": ["Management structure"]},
+  {"id": "table-before-narrative", "label": "The compliance table itself starts right after the intro (page 3), confirming it precedes the narrative sections",
+   "page": 3, "present": ["Recommendation", "Complies"]},
+  {"id": "bold-first-only-1.2.1", "label": "'The Committee recommends' is bold only the first time within 1.2.1's cell (two occurrences in one paragraph)",
+   "page": 3, "present": ["1.2.1. The Committee recommends that the board of"]},
+  {"id": "hyphenation-3.4.2", "label": "3.4.2's 'Why' explanation column has hyphenation applied (narrow cell actually breaks mid-word with a hyphen)",
+   "page": 9, "present": ["the board commit-", "reholder compo-"]},
+  {"id": "no-bullet-3.2.1-caveat", "label": "3.2.1's trailing 'Even if a member...' sentence has no bullet (plain paragraph, not a list item)",
+   "present": ["Even if a member of the board of directors does not fall within the above-stated criteria"]},
+  {"id": "bullet-3.1.1-diversity", "label": "3.1.1's 'the composition of and diversity on the board of directors' is a bulleted list item",
+   "present": ["the composition of and diversity on the board of directors."]},
+  {"id": "bullet-3.3.2-shares", "label": "3.3.2's 'the number of shares, options, warrants...' is a bulleted list item",
+   "present": ["the number of shares, options, warrants, etc. that the member holds"]},
+  {"id": "herein-not-in-the-following", "label": "'is described herein' (not 'in the following')",
+   "present": ["BioMar’s position on each recommendation is described herein"],
+   "absent": ["is described in the following"]},
+  {"id": "3.1-3.2-unnumbered-italic", "label": "The 'Audit Committee' / 'Remuneration and Nomination Committee' sub-headings are unnumbered and italic",
+   "present": ["Audit Committee", "Remuneration and Nomination Committee"]}
 ]

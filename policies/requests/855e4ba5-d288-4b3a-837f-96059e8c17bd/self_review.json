@@ -1,9 +1,9 @@
 {
   "request_id": "855e4ba5-d288-4b3a-837f-96059e8c17bd",
   "policy": "corporate-governance-statement",
-  "generated_at": "2026-07-06 10:03 UTC",
+  "generated_at": "2026-10-07 08:18 UTC",
   "overall": "pass",
-  "summary": "10 passed",
+  "summary": "15 passed",
   "checks": [
     {
       "id": "outputs",
@@ -42,26 +42,56 @@
       "detail": "clean"
     },
     {
-      "id": "assert:table-order",
-      "label": "Table restored to original position (before 'Management structure')",
+      "id": "assert:mgmt-structure-after-table",
+      "label": "'Management structure' and the narrative sections sit after the compliance table, not before it",
       "status": "pass",
       "detail": ""
     },
     {
-      "id": "assert:p10-remove-bullet",
-      "label": "p.10 'Even if a member of the board...' no longer a bullet",
+      "id": "assert:table-before-narrative",
+      "label": "The compliance table itself starts right after the intro (page 3), confirming it precedes the narrative sections",
       "status": "pass",
       "detail": ""
     },
     {
-      "id": "assert:p11-add-bullet",
-      "label": "p.11 'the number of shares, options, warrants...' is now a bullet",
+      "id": "assert:bold-first-only-1.2.1",
+      "label": "'The Committee recommends' is bold only the first time within 1.2.1's cell (two occurrences in one paragraph)",
       "status": "pass",
       "detail": ""
     },
     {
-      "id": "assert:p9-add-bullet",
-      "label": "p.9 'the composition of and diversity on the board' is now a bullet",
+      "id": "assert:hyphenation-3.4.2",
+      "label": "3.4.2's 'Why' explanation column has hyphenation applied (narrow cell actually breaks mid-word with a hyphen)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:no-bullet-3.2.1-caveat",
+      "label": "3.2.1's trailing 'Even if a member...' sentence has no bullet (plain paragraph, not a list item)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:bullet-3.1.1-diversity",
+      "label": "3.1.1's 'the composition of and diversity on the board of directors' is a bulleted list item",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:bullet-3.3.2-shares",
+      "label": "3.3.2's 'the number of shares, options, warrants...' is a bulleted list item",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:herein-not-in-the-following",
+      "label": "'is described herein' (not 'in the following')",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:3.1-3.2-unnumbered-italic",
+      "label": "The 'Audit Committee' / 'Remuneration and Nomination Committee' sub-headings are unnumbered and italic",
       "status": "pass",
       "detail": ""
     }
