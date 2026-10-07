@@ -140,17 +140,6 @@
     "notified": true
   },
   {
-    "id": "rnc-marianne-1",
-    "policy": "remuneration-and-nomination-committee-charter",
-    "request_id": "56f09063-64f7-43be-a08f-24a8005acbc6",
-    "title": "Remuneration and Nomination Committee Charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1790673500000,
-    "notified": true
-  },
-  {
     "id": "a5d2ba67-2b34-44fc-a050-6e00ce3e7224",
     "policy": "audit-committee-charter",
     "request_id": "3eb6a797-6aab-4f69-9ba8-a98a184808a1",
@@ -184,18 +173,6 @@
     "email": "marni@biomar.com",
     "created_at": 1790601249651,
     "updated_at": 1790602802411,
-    "notified": true
-  },
-  {
-    "id": "8185ee31-00ab-4f29-8ac6-959d03663100",
-    "policy": "remuneration-and-nomination-committee-charter",
-    "request_id": "797a0e82-5941-4582-8fab-c918046f8a59",
-    "title": "Change: remuneration-and-nomination-committee-charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1790601569997,
-    "updated_at": 1790602571912,
     "notified": true
   },
   {
@@ -268,18 +245,6 @@
     "email": "marni@biomar.com",
     "created_at": 1783671504533,
     "updated_at": 1791360529236,
-    "notified": true
-  },
-  {
-    "id": "1ccf4460-4475-4414-a32a-40247b9a6d23",
-    "policy": "remuneration-and-nomination-committee-charter",
-    "request_id": "5a290cd1-0cec-4c38-b641-bdc4f74e239e",
-    "title": "Change: remuneration-and-nomination-committee-charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1791360717614,
-    "updated_at": 1791362045928,
     "notified": true
   },
   {
