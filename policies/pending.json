@@ -384,9 +384,10 @@
     "policy": "internal-rules-disclosure-obligations",
     "request_id": "e33c62d2-4fc6-4bbf-94db-e75afa733d41",
     "title": "Change: internal-rules-disclosure-obligations",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1791371453225
+    "created_at": 1791371453225,
+    "updated_at": 1791371522381
   }
 ]
