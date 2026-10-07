@@ -1,0 +1,12 @@
+[
+  {"id": "lettered-3.1.1-a", "label": "3.1.1's list starts at (a), hang-indented, no bullet glyph", "page": 3,
+   "present": ["a. Oversee the periodic financial"]},
+  {"id": "lettered-3.1.1-l", "label": "3.1.1's list ends at (l)", "page": 3,
+   "present": ["l. Review and evaluate unusual transactions"]},
+  {"id": "lettered-3.2.1-q", "label": "3.2.1's list (17 items) runs through (q)", "page": 5,
+   "present": ["q. Pre-approve all non-audit services"]},
+  {"id": "lettered-3.3.1-n", "label": "3.3.1's list ends at (n)", "page": 6,
+   "present": ["n. Oversee the Group’s whistleblower system"]},
+  {"id": "lettered-3.4.1-c", "label": "3.4.1's list (3 items) is lettered a-c, not a-n restart", "page": 6,
+   "present": ["a. Review the Company’s Data Ethics Policy", "c. Oversee effects of expected changes to legislation."]}
+]
