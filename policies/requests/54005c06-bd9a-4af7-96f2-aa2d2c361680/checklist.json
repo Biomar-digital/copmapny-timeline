@@ -1,33 +1,14 @@
 [
-  {
-    "id": "heading-3-present",
-    "label": "'3. Multi-channel IR communication' heading present",
-    "present": [
-      "Multi-channel IR communication"
-    ]
-  },
-  {
-    "id": "heading-4-7-numbered",
-    "label": "Headings 4-7 are numbered consecutively after the manually-typed '3.'",
-    "present": [
-      "Active investor engagement",
-      "Strong IR governance and compliance",
-      "Adoption and publication"
-    ]
-  },
-  {
-    "id": "authorized-persons-list",
-    "label": "The 5 authorized-persons items under section 5 render as a bulleted list",
-    "present": [
-      "The Chair of the Board of Directors",
-      "The VP, People, Purpose & Communication"
-    ]
-  },
-  {
-    "id": "adopted-sentence-kept",
-    "label": "The adoption attribution sentence is kept",
-    "present": [
-      "The IR Policy has been adopted by the Board of Directors on 19 May 2026."
-    ]
-  }
+  {"id": "heading-1-2-numbered", "label": "'1. Introduction' and '2. Equal, timely and adequate disclosure' numbered (style-level auto-numbering inherited from Heading 1, numId=27)",
+   "present": ["1.\tIntroduction", "2.\tEqual, timely and adequate disclosure"]},
+  {"id": "heading-3-present", "label": "'3. Multi-channel IR communication' heading present, continuing the sequence",
+   "present": ["3.\tMulti-channel IR communication"]},
+  {"id": "heading-4-7-numbered", "label": "Headings 4-7 are numbered consecutively",
+   "present": ["4.\tActive investor engagement", "7.\tAdoption and publication"]},
+  {"id": "inline-bullets-split", "label": "The 6 activities under section 4 render as a real bulleted list, not inline prose with literal bullet characters",
+   "present": ["Investor roadshows", "Capital Market Days and similar events"]},
+  {"id": "authorized-persons-list", "label": "The 5 authorized-persons items under section 5 render as a bulleted list",
+   "present": ["The Chair of the Board of Directors", "The VP, People, Purpose & Communication"]},
+  {"id": "adopted-sentence-kept", "label": "The adoption attribution sentence is kept",
+   "present": ["The IR Policy has been adopted by the Board of Directors on 19 May 2026."]}
 ]

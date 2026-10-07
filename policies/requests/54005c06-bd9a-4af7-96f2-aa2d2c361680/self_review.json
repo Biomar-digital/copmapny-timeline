@@ -1,9 +1,9 @@
 {
   "request_id": "54005c06-bd9a-4af7-96f2-aa2d2c361680",
   "policy": "investor-relations-policy",
-  "generated_at": "2026-10-07 09:01 UTC",
+  "generated_at": "2026-10-07 13:21 UTC",
   "overall": "attention",
-  "summary": "9 passed, 1 to review",
+  "summary": "11 passed, 1 to review",
   "checks": [
     {
       "id": "outputs",
@@ -42,14 +42,26 @@
       "detail": "clean"
     },
     {
+      "id": "assert:heading-1-2-numbered",
+      "label": "'1. Introduction' and '2. Equal, timely and adequate disclosure' numbered (style-level auto-numbering inherited from Heading 1, numId=27)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
       "id": "assert:heading-3-present",
-      "label": "'3. Multi-channel IR communication' heading present",
+      "label": "'3. Multi-channel IR communication' heading present, continuing the sequence",
       "status": "pass",
       "detail": ""
     },
     {
       "id": "assert:heading-4-7-numbered",
-      "label": "Headings 4-7 are numbered consecutively after the manually-typed '3.'",
+      "label": "Headings 4-7 are numbered consecutively",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:inline-bullets-split",
+      "label": "The 6 activities under section 4 render as a real bulleted list, not inline prose with literal bullet characters",
       "status": "pass",
       "detail": ""
     },

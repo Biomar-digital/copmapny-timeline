@@ -8,5 +8,9 @@
   {"id": "definitions-table-no-fake-header", "label": "Appendix A definitions table has no artificial header band on its first entry",
    "present": ["Board of Directors", "Capital Markets Act", "Shares issued by the Company."]},
   {"id": "appendix-b-present", "label": "Appendix B Inside Information definition text is present",
-   "present": ["Article 7(1)(a) of the Market Abuse Regulation defines Inside Information"]}
+   "present": ["Article 7(1)(a) of the Market Abuse Regulation defines Inside Information"]},
+  {"id": "num-1", "label": "'1 Introduction' heading numbered (style-level auto-numbering inherited from Heading 1, found via numId=27 on the style definition)",
+   "present": ["1\tIntroduction"]},
+  {"id": "num-10", "label": "All 10 main-body headings numbered 1-10 sequentially, ending with spokespersons",
+   "present": ["10\tThe Company’s spokespersons"]}
 ]
