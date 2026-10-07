@@ -953,7 +953,15 @@ def _draw_version_card(c, policy):
         if k < len(rows_l):
             la, va = rows_l[k]
             c.drawRightString(L_LABEL_R, ry, la)
+            # Shrink the version-date value if it would overflow into the
+            # column divider (e.g. a long month name with no approval date
+            # to make room for, such as "September 2026").
+            size, avail = 8.0, DIVIDER - L_VALUE - 8
+            while size > 6 and c.stringWidth(va, B.F_LIGHT, size) > avail:
+                size -= 0.5
+            c.setFont(B.F_LIGHT, size)
             c.drawString(L_VALUE, ry, va)
+            c.setFont(B.F_LIGHT, 8)
         if k < len(rows_r):
             lb, vb = rows_r[k]
             c.drawString(R_LABEL, ry, lb)
