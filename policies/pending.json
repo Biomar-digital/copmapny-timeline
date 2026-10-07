@@ -267,5 +267,15 @@
     "created_at": 1783671504533,
     "updated_at": 1791360529236,
     "notified": true
+  },
+  {
+    "id": "1ccf4460-4475-4414-a32a-40247b9a6d23",
+    "policy": "remuneration-and-nomination-committee-charter",
+    "request_id": "5a290cd1-0cec-4c38-b641-bdc4f74e239e",
+    "title": "Change: remuneration-and-nomination-committee-charter",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1791360717614
   }
 ]
