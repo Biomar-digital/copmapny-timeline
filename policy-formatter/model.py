@@ -16,6 +16,7 @@ from docx.text.paragraph import Paragraph as _Paragraph
 from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
 from docx.oxml.ns import qn
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
 # ---- block types ----------------------------------------------------------
@@ -30,6 +31,8 @@ class Body:
     bold: bool = False
     runs: list = None        # optional [(text, bold, italic)] for mixed-style runs
     italic: bool = False     # whole paragraph set in italic (e.g. a sub-heading)
+    center: bool = False     # paragraph is explicitly centred in the source (e.g.
+                             # a closing "Approved by ..." / "As adopted ..." line)
 
 @dataclass
 class Bullet:
@@ -189,13 +192,17 @@ def _body_from_runs(item, text):
     alli = bool(rlist) and all(i for _, _, i in rlist)
     mixed_bold = any(b for _, b, _ in rlist) and not allb
     mixed_italic = any(i for _, _, i in rlist) and not alli
+    # An explicitly centred paragraph (e.g. a closing "Approved by ..." line)
+    # keeps that centring regardless of bold/italic — a short sentence like
+    # this on its own line is never mid-paragraph mixed-style content.
+    center = item.alignment == WD_ALIGN_PARAGRAPH.CENTER
     if mixed_bold or mixed_italic:
-        return Body(text=text, runs=rlist)
+        return Body(text=text, runs=rlist, center=center)
     # A paragraph fully in italic (and not bold) is a run-in sub-heading; keep
     # the italic so the generator can render it (bold takes precedence).
     if alli and not allb:
-        return Body(text=text, italic=True)
-    return Body(text=text, bold=allb)
+        return Body(text=text, italic=True, center=center)
+    return Body(text=text, bold=allb, center=center)
 
 
 def parse_docx(path: str, title: Optional[str] = None,

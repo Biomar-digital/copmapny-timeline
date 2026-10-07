@@ -703,7 +703,7 @@ def _story(policy):
             # heading overrides this via is_numbered_subhead below regardless.
             prev_subhead = bool(getattr(policy, "hanging_indent", False))
         elif isinstance(b, Body):
-            if _ADOPTED.match(b.text.strip()):
+            if _ADOPTED.match(b.text.strip()) or getattr(b, "center", False):
                 flow.append(Paragraph(escape(b.text), BODY_CENTER))
                 prev_subhead = False
                 continue

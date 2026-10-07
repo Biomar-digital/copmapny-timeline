@@ -132,7 +132,7 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     """indent_mode: None (flush), "hang" (numbered clause — wrap aligns under
     the clause text), or "uniform" (content of a short sub-heading above —
     same left position on every line, no hanging first line)."""
-    if _ADOPTED.match(blk.text.strip()):
+    if _ADOPTED.match(blk.text.strip()) or getattr(blk, "center", False):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.paragraph_format.space_after = Pt(10)
