@@ -129,17 +129,6 @@
     "notified": true
   },
   {
-    "id": "dsb-marianne-1",
-    "policy": "dividend-and-share-buyback-policy",
-    "request_id": "00c3f747-8aba-4df9-b1a6-77e0a5f07ee8",
-    "title": "Dividend and Share Buyback Policy",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1790672900000,
-    "notified": true
-  },
-  {
     "id": "nas-marianne-1",
     "policy": "non-audit-service-policy",
     "request_id": "e642b6be-c58e-42ee-b77a-4fe43442e338",
@@ -183,18 +172,6 @@
     "email": "marni@biomar.com",
     "created_at": 1790590499129,
     "updated_at": 1790600749199,
-    "notified": true
-  },
-  {
-    "id": "b38c8aa5-9651-4c3f-93c6-11c5880dd781",
-    "policy": "dividend-and-share-buyback-policy",
-    "request_id": "bcc8a706-5224-4d58-8cb0-af5851565551",
-    "title": "Change: dividend-and-share-buyback-policy",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1790600910003,
-    "updated_at": 1790602571912,
     "notified": true
   },
   {
