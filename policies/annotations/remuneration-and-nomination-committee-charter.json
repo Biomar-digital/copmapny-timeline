@@ -15,7 +15,9 @@
     "edition": "Version 1__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please move to the center as shown in the attached.",
-    "included_in": [],
+    "included_in": [
+      "5a290cd1-0cec-4c38-b641-bdc4f74e239e"
+    ],
     "created_at": "2026-10-07T08:10:56.360Z"
   },
   {
@@ -34,7 +36,9 @@
     "edition": "Version 1__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please make heading bigger to match the heading just below.",
-    "included_in": [],
+    "included_in": [
+      "5a290cd1-0cec-4c38-b641-bdc4f74e239e"
+    ],
     "created_at": "2026-10-07T08:11:41.679Z"
   }
 ]
