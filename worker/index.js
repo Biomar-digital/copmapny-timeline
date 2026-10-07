@@ -250,7 +250,7 @@ async function ghCreateIssue(env, title, body, labels) {
 }
 // Send an email via Brevo (preferred) or Resend, to `to` (defaults to the admin
 // NOTIFY_EMAIL). Credentials live only in Worker secrets, never in the repo.
-async function sendEmail(env, subject, html, to) {
+async function sendEmail(env, subject, html, to, attachments) {
   // NOTIFY_EMAIL (or an explicit `to`) may be a comma-separated list — every
   // address receives the notification.
   const recipients = String(to || env.NOTIFY_EMAIL || "")
@@ -261,20 +261,26 @@ async function sendEmail(env, subject, html, to) {
   const m = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(fromRaw);
   const fromName = m ? (m[1] || "BioMar Policies") : "BioMar Policies";
   const fromAddr = m ? m[2] : fromRaw;
+  // {name, content (base64)}[] — e.g. a PDF to notify digital@biomar.com with.
+  const atts = (attachments || []).filter(a => a && a.name && a.content);
 
   if (env.BREVO_API_KEY) {
+    const body = { sender: { name: fromName, email: fromAddr }, to: recipients.map((e) => ({ email: e })), subject, htmlContent: html };
+    if (atts.length) body.attachment = atts.map(a => ({ content: a.content, name: a.name }));
     const r = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({ sender: { name: fromName, email: fromAddr }, to: recipients.map((e) => ({ email: e })), subject, htmlContent: html }),
+      body: JSON.stringify(body),
     });
     return { ok: r.ok, status: r.status };
   }
   if (env.RESEND_API_KEY) {
+    const body = { from: fromRaw, to: recipients, subject, html };
+    if (atts.length) body.attachments = atts.map(a => ({ filename: a.name, content: a.content }));
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: fromRaw, to: recipients, subject, html }),
+      body: JSON.stringify(body),
     });
     return { ok: r.ok, status: r.status };
   }
@@ -818,6 +824,58 @@ async function handleMyRequests(request, env, user) {
   return json({ requests: mine });
 }
 
+// =================================================== /api/notify-deploy
+// "This policy should be uploaded/updated on the website" — any signed-in
+// visitor can flag it; pulls the currently-live PDF(s) straight from the
+// deployed static assets (so it's exactly what's on the site right now, not
+// a possibly-ahead-of-deploy GitHub copy) and emails digital@biomar.com with
+// them attached.
+async function fetchAssetB64(env, request, relPath) {
+  const origin = new URL(request.url).origin;
+  const url = new URL(relPath.replace(/^\/+/, ""), origin + "/");
+  const res = await env.ASSETS.fetch(new Request(url.toString()));
+  if (!res.ok) return null;
+  const buf = new Uint8Array(await res.arrayBuffer());
+  return bytesToB64(buf);
+}
+
+async function handleNotifyDeploy(request, env, user) {
+  if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
+  let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
+  const policyId = safePolicyId(p.policy);
+  if (!policyId) return json({ error: "Invalid policy." }, 400);
+
+  const libRes = await env.ASSETS.fetch(new Request(new URL("library.json", new URL(request.url).origin + "/").toString()));
+  if (!libRes.ok) return json({ error: "Could not load the library." }, 502);
+  const lib = await libRes.json().catch(() => null);
+  const policy = lib && (lib.policies || []).find(x => x.id === policyId);
+  if (!policy) return json({ error: "Policy not found." }, 404);
+  const ed = (policy.editions || [])[policy.editions.length - 1];
+  const docsList = (ed && ed.documents) || [];
+  if (!docsList.length) return json({ error: "No document to send." }, 404);
+
+  const attachments = [];
+  for (const doc of docsList) {
+    const files = doc.files || {};
+    const rel = files.approval || files.non_approval;
+    if (!rel) continue;
+    const b64 = await fetchAssetB64(env, request, rel);
+    if (!b64) continue;
+    attachments.push({ name: rel.split("/").pop(), content: b64 });
+  }
+  if (!attachments.length) return json({ error: "Could not fetch the document file(s)." }, 502);
+
+  const r = await sendEmail(env,
+    `[BioMar Policy Library] Please update the website — ${policy.title}`,
+    emailHtml("Website update needed",
+      `${user.name} flagged that "${policy.title}" has an approved change and should be uploaded/updated on biomar.com. The current PDF is attached.`,
+      [["Policy", escapeHtml(policy.title)], ["Flagged by", escapeHtml(user.name)]]),
+    "digital@biomar.com", attachments);
+  if (!r.ok) return json({ error: "Could not send the email." }, 502);
+  await recordEvent(env, "notify_deploy", `${user.name} flagged "${policy.title}" for a website update`, policyId, user.name);
+  return json({ ok: true });
+}
+
 // ==================================================================== gate
 
 const PUBLIC_ASSETS = new Set(["/login", "/login.html", "/login.js", "/login.css",
@@ -864,6 +922,7 @@ export default {
       if (path === "/api/wallet") return handleWallet(request, env, user);
       if (path === "/api/pending") return handlePending(request, env, user);
       if (path === "/api/my-requests") return handleMyRequests(request, env, user);
+      if (path === "/api/notify-deploy") return handleNotifyDeploy(request, env, user);
       return json({ error: "Not found." }, 404);
     }
 

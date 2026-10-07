@@ -159,7 +159,25 @@ function moreMenu(p) {
     <div class="pop-list" hidden>
       <button type="button" data-more="edit">Request change or edit</button>
       <button type="button" data-more="history">Version history</button>
+      <button type="button" data-more="notify">This policy should be uploaded or updated on the website</button>
     </div></div>`;
+}
+
+// Any signed-in visitor can flag that the currently-live PDF should go up on
+// biomar.com — emails digital@biomar.com with the PDF attached.
+async function notifyWebsiteUpdate(p) {
+  if (!await confirmDialog(
+    `Email digital@biomar.com the current PDF for "${p.title}" and ask them to upload/update it on the website?`,
+    { ok: "Send" })) return;
+  try {
+    const res = await fetch("api/notify-deploy", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ policy: p.id }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok || !d.ok) throw new Error(d.error || "failed");
+    toast("digital@biomar.com notified");
+  } catch { toast("Could not send the notification", "err"); }
 }
 
 const STEPS = ["Requested", "In progress", "In review", "Done"];
@@ -225,6 +243,7 @@ function card(p) {
   if (more) {
     more.querySelector('[data-more="edit"]').addEventListener("click", () => { closePops(); openEditChooser(p); });
     more.querySelector('[data-more="history"]').addEventListener("click", () => { closePops(); openHistory(p); });
+    more.querySelector('[data-more="notify"]').addEventListener("click", () => { closePops(); notifyWebsiteUpdate(p); });
   }
   wireStatusActions(el, p);
   return el;
