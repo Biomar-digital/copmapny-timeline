@@ -118,17 +118,6 @@
     "notified": true
   },
   {
-    "id": "dep-marianne-1",
-    "policy": "data-ethics-policy",
-    "request_id": "ceca2f4b-e98a-478e-9700-3620ecbd5c7b",
-    "title": "Data Ethics Policy",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1790672638695,
-    "notified": true
-  },
-  {
     "id": "dcc-marianne-1",
     "policy": "disclosure-committee-charter",
     "request_id": "74354987-c73e-4e17-8698-71277d7d2f0c",
