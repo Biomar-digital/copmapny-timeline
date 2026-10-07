@@ -157,6 +157,26 @@ def _cell_text(cell) -> str:
     return "\n".join(out)
 
 
+def _glossary_table(item) -> bool:
+    """A table where every row's first cell is entirely bold and no other
+    cell is (a "Term: definition" glossary) has no real header row — each
+    row, including the first, is an equal data entry. Without this check
+    the generator's default TableBlock(header=True) would band the first
+    definition as a column header, which is wrong when the source never
+    had one."""
+    def cell_bold(c):
+        runs = [r for p in c.paragraphs for r in p.runs if r.text.strip()]
+        return bool(runs) and all(r.bold for r in runs)
+    rows = item.rows
+    if len(rows) < 2:
+        return False
+    for row in rows:
+        cells = row.cells
+        if not cell_bold(cells[0]) or any(cell_bold(c) for c in cells[1:]):
+            return False
+    return True
+
+
 def _heading_like(text: str) -> bool:
     # A heading is short and does not end like a running sentence. Incoming
     # Word files are often mis-styled (whole paragraphs tagged Heading 1, or
@@ -238,7 +258,7 @@ def parse_docx(path: str, title: Optional[str] = None,
             rows = [[_cell_text(c) for c in row.cells] for row in item.rows]
             rows = [r for r in rows if any(r)]
             if rows:
-                blocks.append(TableBlock(rows=rows))
+                blocks.append(TableBlock(rows=rows, header=not _glossary_table(item)))
             continue
 
         for data, iw, ih in _para_images(item):

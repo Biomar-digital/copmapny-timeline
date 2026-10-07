@@ -306,5 +306,16 @@
     "created_at": 1791362264031,
     "updated_at": 1791362329024,
     "notified": true
+  },
+  {
+    "id": "4cb9d5a2-6112-434d-9efb-c1c27b399dd1",
+    "policy": "internal-rules-disclosure-obligations",
+    "request_id": "2427043b-cabb-408c-897f-540ffb886ef6",
+    "title": "Change: internal-rules-disclosure-obligations",
+    "status": "pending_review",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1790584098603,
+    "updated_at": 1791362841579
   }
 ]

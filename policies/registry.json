@@ -1004,6 +1004,32 @@
           "requested_by": "Marianne Niviaq Thomsen"
         }
       ]
+    },
+    {
+      "id": "internal-rules-disclosure-obligations",
+      "title": "Internal Rules for Compliance with Disclosure Obligations",
+      "language": "English",
+      "owner": "",
+      "approver": "Board of Directors",
+      "category": "Policy",
+      "hanging_indent": true,
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-10",
+          "approval_date": "19-05-2026",
+          "documents": [
+            {
+              "label": "Policy",
+              "language": "English",
+              "source": "Internal_Rules_for_Compliance_with_Disclosure_Obligations.docx",
+              "board_approval": true
+            }
+          ],
+          "notes": "Initial publication, restyled to the current BioMar template.",
+          "requested_by": "Marianne Niviaq Thomsen"
+        }
+      ]
     }
   ]
 }
