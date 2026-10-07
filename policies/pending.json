@@ -342,5 +342,16 @@
     "created_at": 1790584296356,
     "updated_at": 1791363917247,
     "notified": true
+  },
+  {
+    "id": "c45c48b1-0cef-4c7d-af3d-2f341f356c09",
+    "policy": "rules-of-procedure-board-of-directors",
+    "request_id": "d983c8ba-4c10-4613-8ac3-e1c993a6001e",
+    "title": "Change: rules-of-procedure-board-of-directors",
+    "status": "pending_review",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1790584584022,
+    "updated_at": 1791364465700
   }
 ]
