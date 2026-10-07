@@ -1,0 +1,20 @@
+[
+  {"id": "no-toc", "label": "Manual table-of-contents page dropped",
+   "absent": ["Contents:"]},
+  {"id": "approved-by-kept", "label": "The short approval attribution sentence is kept, centred",
+   "present": ["Approved by the Board of Directors on 19 May 2026."]},
+  {"id": "clause-1.2.1-not-heading", "label": "1.2.1 renders as a small clause intro, not an oversized heading",
+   "present": ["This Manual is prepared for situations where"]},
+  {"id": "scope-ab-lettered", "label": "1.2.1's (a)/(b) Takeover Scenario definitions render as a lettered list",
+   "present": ["the Board of Directors, or the Executive Management", "A public takeover offer for the shares"]},
+  {"id": "coc-ab-lettered", "label": "The Change of Control (a)/(b) thresholds render as a lettered list",
+   "present": ["at least one third (33.33%) of the voting rights"]},
+  {"id": "section4-list", "label": "4.1's (a)-(h) initial-considerations list renders with hang-indent bullets",
+   "present": ["Decide whether disclosure of a company announcement", "Identify the facts and analyse the details"]},
+  {"id": "section6-list", "label": "6.1's (a)-(o) further-considerations list renders with hang-indent bullets",
+   "present": ["How to secure, to the widest extent possible", "wash-clean"]},
+  {"id": "glossary-table-no-fake-header", "label": "The Offer document / Duties of the Company glossary table has no artificial header band",
+   "present": ["Offer document", "Duties of the Company"]},
+  {"id": "contact-table-present", "label": "Appendix B's contact tables (BioMar + Legal advisor) are present",
+   "present": ["Jens Bjerg Sørensen", "Rikke Schiøtt Petersen"]}
+]
