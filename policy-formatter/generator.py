@@ -176,13 +176,33 @@ def _body_markup(b, strip_number=False):
     runs = getattr(b, "runs", None)
     if not runs:
         return _fmt(b.text, number=not strip_number)
+    if strip_number:
+        # The clause number + following whitespace can land entirely inside
+        # run 0 ("1.4 text..." all one run) or, when Word happens to split a
+        # run right after the number (seen on a mixed bold/italic clause),
+        # spread across runs 0-1 ("1.1" / "\tThe text..."). Matching against
+        # the full concatenated text first and then consuming that many
+        # characters run-by-run (dropping any run the number fully consumes)
+        # strips it correctly either way, instead of only checking run 0 in
+        # isolation and silently leaving the number in place — and visible
+        # twice, once as the bulletText and once in the body — when it
+        # doesn't fit inside that single run.
+        m = _NUM.match(b.text.strip())
+        if m:
+            skip = len(m.group(1)) + len(m.group(2))
+            new_runs = []
+            for t, bd, it in runs:
+                if skip <= 0:
+                    new_runs.append((t, bd, it))
+                elif len(t) <= skip:
+                    skip -= len(t)
+                else:
+                    new_runs.append((t[skip:], bd, it))
+                    skip = 0
+            runs = new_runs
     n = len(runs)
     out = []
     for i, (t, bd, it) in enumerate(runs):
-        if strip_number and i == 0:
-            m = _NUM.match(t.lstrip())
-            if m:
-                t = m.group(3)
         seg = _fmt(t, number=(i == 0 and not strip_number), widow=(i == n - 1),
                    lstrip=(i == 0), rstrip=(i == n - 1))
         if bd:
