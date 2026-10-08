@@ -10,5 +10,7 @@
   {"id": "authorized-persons-list", "label": "The 5 authorized-persons items under section 5 render as a bulleted list",
    "present": ["The Chair of the Board of Directors", "The VP, People, Purpose & Communication"]},
   {"id": "adopted-sentence-kept", "label": "The adoption attribution sentence is kept",
-   "present": ["The IR Policy has been adopted by the Board of Directors on 19 May 2026."]}
+   "present": ["The IR Policy has been adopted by the Board of Directors on 19 May 2026."]},
+  {"id": "num-1.1-1.2", "label": "Introduction's 2 sub-clauses numbered 1.1/1.2 (direct per-paragraph numId, missed by the earlier heading-only pass; the second was 'List Paragraph'-styled and retagged to Normal so it renders via the clause-number path instead of a bare bullet)",
+   "present": ["1.1\tThis Investor Relations policy", "1.2\tThe IR Policy defines how the Company communicates"]}
 ]

@@ -1,9 +1,9 @@
 {
   "request_id": "34314272-3ba4-4e8b-bf39-ff68b9c3e74d",
   "policy": "investor-relations-policy",
-  "generated_at": "2026-10-07 13:21 UTC",
+  "generated_at": "2026-10-08 07:30 UTC",
   "overall": "attention",
-  "summary": "11 passed, 1 to review",
+  "summary": "12 passed, 1 to review",
   "checks": [
     {
       "id": "outputs",
@@ -74,6 +74,12 @@
     {
       "id": "assert:adopted-sentence-kept",
       "label": "The adoption attribution sentence is kept",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:num-1.1-1.2",
+      "label": "Introduction's 2 sub-clauses numbered 1.1/1.2 (direct per-paragraph numId, missed by the earlier heading-only pass; the second was 'List Paragraph'-styled and retagged to Normal so it renders via the clause-number path instead of a bare bullet)",
       "status": "pass",
       "detail": ""
     }

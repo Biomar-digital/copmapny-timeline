@@ -12,5 +12,12 @@
   {"id": "num-1", "label": "'1 Introduction' heading numbered (style-level auto-numbering inherited from Heading 1, found via numId=27 on the style definition)",
    "present": ["1\tIntroduction"]},
   {"id": "num-10", "label": "All 10 main-body headings numbered 1-10 sequentially, ending with spokespersons",
-   "present": ["10\tThe Company’s spokespersons"]}
+   "present": ["10\tThe Company’s spokespersons"]},
+  {"id": "num-1.1-1.5", "label": "Introduction's 5 sub-clauses numbered 1.1-1.5 (direct per-paragraph numId on a 'List Paragraph'-styled clause, invisible to the heading-only pass; retagged to Normal so it flows through the clause-number path instead of rendering as a bare bullet)",
+   "present": ["1.1\tThese Internal Rules have been prepared", "1.5\tThese rules are reviewed regularly"]},
+  {"id": "lettered-4.3", "label": "4.3's (a)/(b) lettered sub-items render with letters, not a plain bullet",
+   "present": ["(a)\tThe Company is conducting negotiations", "(b)\tthe Company is planning to buy or sell"]},
+  {"id": "num-7.5-lettered", "label": "7.5 numbered (continues from 7.1-7.4) and its (a)-(e) lettered sub-items render with letters, not a plain bullet",
+   "present": ["7.5\tAll company announcements shall be prepared", "(a)\tEach announcement shall have a heading",
+               "(e)\tthe announcement shall provide sufficient guidance"]}
 ]
