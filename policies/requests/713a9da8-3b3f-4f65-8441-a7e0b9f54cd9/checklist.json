@@ -1,38 +1,244 @@
 [
-  {"id": "num-1", "label": "Section 1 heading numbered '1'", "page": 2,
-   "present": ["1 Establishment and purpose"]},
-  {"id": "num-1.1", "label": "Clause 1.1 numbered", "page": 2,
-   "present": ["1.1 The Executive Management"]},
-  {"id": "num-1.2", "label": "Clause 1.2 numbered", "page": 2,
-   "present": ["1.2 The objective"]},
-  {"id": "num-1.3", "label": "Clause 1.3 numbered", "page": 2,
-   "present": ["1.3 Unless otherwise defined"]},
-  {"id": "num-1.4", "label": "Clause 1.4 numbered (mixed-run paragraph with bold 'Appendix B')", "page": 2,
-   "present": ["1.4 Inside Information is defined in Appendix B"]},
-  {"id": "num-1.5", "label": "Clause 1.5 numbered (mixed-run paragraph with bold 'Schedule 8.1')", "page": 2,
-   "present": ["1.5 In addition to the general obligation"]},
-  {"id": "num-2", "label": "Members heading numbered '2'", "page": 2,
-   "present": ["2 Members"]},
-  {"id": "num-3", "label": "Assignments heading numbered '3'", "page": 2,
-   "present": ["3 Assignments"]},
-  {"id": "num-4", "label": "Meetings heading numbered '4'", "page": 5,
-   "present": ["4 Meetings"]},
-  {"id": "num-5", "label": "Reporting heading numbered '5'", "page": 5,
-   "present": ["5 Reporting"]},
-  {"id": "num-6", "label": "Confidentiality heading numbered '6'", "page": 6,
-   "present": ["6 Confidentiality"]},
-  {"id": "num-7", "label": "Review of Charter heading numbered '7'", "page": 6,
-   "present": ["7 Review of Charter"]},
-  {"id": "num-8", "label": "Schedule 1 heading numbered '8'", "page": 7,
-   "present": ["8 Schedule 1 – Definition of Inside Information"]},
-  {"id": "num-9", "label": "Schedule 2 heading numbered '9'", "page": 8,
-   "present": ["9 Schedule 2 – Log for monitoring events"]},
-  {"id": "num-10", "label": "Schedule 3 heading numbered '10'", "page": 9,
-   "present": ["10 Schedule 3 – Notification of delayed disclosure"]},
-  {"id": "sched-1-own-page", "label": "Schedule 1 starts on its own page (not carried over from Review of Charter's page)",
-   "page": 6, "absent": ["Schedule 1 – Definition"]},
-  {"id": "sched-2-own-page", "label": "Schedule 2 starts on its own page (not sharing Schedule 1's page)",
-   "page": 7, "absent": ["Schedule 2 – Log for monitoring"]},
-  {"id": "sched-3-own-page", "label": "Schedule 3 starts on its own page (not sharing Schedule 2's page)",
-   "page": 8, "absent": ["Schedule 3 – Notification"]}
+  {
+    "id": "num-1",
+    "label": "Section 1 heading numbered '1'",
+    "page": 2,
+    "present": [
+      "1 Establishment and purpose"
+    ]
+  },
+  {
+    "id": "num-1.1",
+    "label": "Clause 1.1 numbered",
+    "page": 2,
+    "present": [
+      "1.1 The Executive Management"
+    ]
+  },
+  {
+    "id": "num-1.2",
+    "label": "Clause 1.2 numbered",
+    "page": 2,
+    "present": [
+      "1.2 The objective"
+    ]
+  },
+  {
+    "id": "num-1.3",
+    "label": "Clause 1.3 numbered",
+    "page": 2,
+    "present": [
+      "1.3 Unless otherwise defined"
+    ]
+  },
+  {
+    "id": "num-1.4",
+    "label": "Clause 1.4 numbered (mixed-run paragraph with bold 'Appendix B')",
+    "page": 2,
+    "present": [
+      "1.4 Inside Information is defined in Appendix B"
+    ]
+  },
+  {
+    "id": "num-1.5",
+    "label": "Clause 1.5 numbered (mixed-run paragraph with bold 'Schedule 8.1')",
+    "page": 2,
+    "present": [
+      "1.5 In addition to the general obligation"
+    ]
+  },
+  {
+    "id": "num-2",
+    "label": "Members heading numbered '2'",
+    "page": 2,
+    "present": [
+      "2 Members"
+    ]
+  },
+  {
+    "id": "num-2-clauses",
+    "label": "Members clauses 2.1/2.2 numbered (were entirely missing: style-inherited numbering for sections 2-7 had never been added)",
+    "present": [
+      "2.1 The Disclosure Committee shall consist",
+      "2.2 The Chief Legal Officer"
+    ]
+  },
+  {
+    "id": "num-3",
+    "label": "Assignments heading numbered '3'",
+    "page": 2,
+    "present": [
+      "3 Assignments"
+    ]
+  },
+  {
+    "id": "num-3-clauses",
+    "label": "Assignments sub-clauses 3.1-3.9 numbered",
+    "present": [
+      "3.1 Identify Inside Information",
+      "3.2 Provide recommendations",
+      "3.3 Process for delay of disclosure",
+      "3.4 Keep majority shareholder informed",
+      "3.5 Process for company announcements",
+      "3.6 Process in relation to financial results",
+      "3.7 The Disclosure Committee may delegate",
+      "3.8 The Disclosure Committee may engage external advisors",
+      "3.9 The Disclosure Committee may contact and consult Nasdaq"
+    ]
+  },
+  {
+    "id": "lettered-3.1",
+    "label": "3.1's (a)-(c) lettered sub-items render with letters, not a plain bullet",
+    "present": [
+      "(a) Assist the Executive Management with establishing",
+      "(b) Ensure establishment of confidentiality lists",
+      "(c) Monitor and review developments"
+    ]
+  },
+  {
+    "id": "lettered-3.3",
+    "label": "3.3's (a)-(g) lettered sub-items render with letters, not a plain bullet",
+    "present": [
+      "(a) Applicable from 5 June 2026",
+      "(g) Assist on disclosure of the leakage announcement"
+    ]
+  },
+  {
+    "id": "lettered-3.5",
+    "label": "3.5's (a)-(e) lettered sub-items render with letters, not a plain bullet",
+    "present": [
+      "(a) When disclosure is required immediately",
+      "(e) Submit the explanation to the Danish Financial Supervisory Authority"
+    ]
+  },
+  {
+    "id": "num-4",
+    "label": "Meetings heading numbered '4'",
+    "page": 5,
+    "present": [
+      "4 Meetings"
+    ]
+  },
+  {
+    "id": "num-4-clauses",
+    "label": "Meetings clauses 4.1-4.5 numbered",
+    "present": [
+      "4.1 The Disclosure Committee meets regularly",
+      "4.5 Members of the Board of Directors and the Executive Management"
+    ]
+  },
+  {
+    "id": "num-5",
+    "label": "Reporting heading numbered '5'",
+    "page": 6,
+    "present": [
+      "5 Reporting"
+    ]
+  },
+  {
+    "id": "num-5-clause",
+    "label": "Reporting clause 5.1 numbered",
+    "present": [
+      "5.1 The Disclosure Committee will regularly inform"
+    ]
+  },
+  {
+    "id": "num-6",
+    "label": "Confidentiality heading numbered '6'",
+    "page": 6,
+    "present": [
+      "6 Confidentiality"
+    ]
+  },
+  {
+    "id": "num-6-clause",
+    "label": "Confidentiality clause 6.1 numbered",
+    "present": [
+      "6.1 Members of the Disclosure Committee have a duty"
+    ]
+  },
+  {
+    "id": "num-7",
+    "label": "Review of Charter heading numbered '7'",
+    "page": 6,
+    "present": [
+      "7 Review of Charter"
+    ]
+  },
+  {
+    "id": "num-7-clauses",
+    "label": "Review of Charter clauses 7.1/7.2 numbered",
+    "present": [
+      "7.1 The Disclosure Committee shall review",
+      "7.2 This Disclosure Committee Charter has been approved"
+    ]
+  },
+  {
+    "id": "num-8",
+    "label": "Schedule 1 heading numbered '8'",
+    "page": 7,
+    "present": [
+      "8 Schedule 1 – Definition of Inside Information"
+    ]
+  },
+  {
+    "id": "num-9",
+    "label": "Schedule 2 heading numbered '9'",
+    "page": 8,
+    "present": [
+      "9 Schedule 2 – Log for monitoring events"
+    ]
+  },
+  {
+    "id": "sched-2-numbered",
+    "label": "Schedule 2's 3 items render as '1./2./3.' (referenced by the table below as 'items 1-3'), not unmarked plain paragraphs",
+    "present": [
+      "1. It is the assessment that immediate disclosure",
+      "2. delay of disclosure is not likely to mislead",
+      "3. the Company is able to ensure the confidentiality"
+    ]
+  },
+  {
+    "id": "num-10",
+    "label": "Schedule 3 heading numbered '10'",
+    "page": 9,
+    "present": [
+      "10 Schedule 3 – Notification of delayed disclosure"
+    ]
+  },
+  {
+    "id": "sched-3-numbered",
+    "label": "Schedule 3's 5 items render as '1./2./3./4./5.', not a generic bullet",
+    "present": [
+      "1. The identity of the issuer",
+      "2. The identity of the person making the notification",
+      "3. Description of the Inside Information",
+      "4. Date and time of the decision",
+      "5. The identity of all natural persons responsible"
+    ]
+  },
+  {
+    "id": "sched-1-own-page",
+    "label": "Schedule 1 starts on its own page (not carried over from Review of Charter's page)",
+    "page": 6,
+    "absent": [
+      "Schedule 1 – Definition"
+    ]
+  },
+  {
+    "id": "sched-2-own-page",
+    "label": "Schedule 2 starts on its own page (not sharing Schedule 1's page)",
+    "page": 7,
+    "absent": [
+      "Schedule 2 – Log for monitoring"
+    ]
+  },
+  {
+    "id": "sched-3-own-page",
+    "label": "Schedule 3 starts on its own page (not sharing Schedule 2's page)",
+    "page": 8,
+    "absent": [
+      "Schedule 3 – Notification"
+    ]
+  }
 ]

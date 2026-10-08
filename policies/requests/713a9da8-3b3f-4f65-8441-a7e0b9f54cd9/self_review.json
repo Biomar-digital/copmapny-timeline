@@ -1,9 +1,9 @@
 {
   "request_id": "713a9da8-3b3f-4f65-8441-a7e0b9f54cd9",
   "policy": "disclosure-committee-charter",
-  "generated_at": "2026-10-07 13:20 UTC",
+  "generated_at": "2026-10-08 07:20 UTC",
   "overall": "attention",
-  "summary": "23 passed, 1 to review",
+  "summary": "34 passed, 1 to review",
   "checks": [
     {
       "id": "outputs",
@@ -33,7 +33,7 @@
       "id": "coverage",
       "label": "All source content appears in the PDF",
       "status": "pass",
-      "detail": "62/62 passages found"
+      "detail": "63/63 passages found"
     },
     {
       "id": "ligatures",
@@ -84,8 +84,38 @@
       "detail": ""
     },
     {
+      "id": "assert:num-2-clauses",
+      "label": "Members clauses 2.1/2.2 numbered (were entirely missing: style-inherited numbering for sections 2-7 had never been added)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
       "id": "assert:num-3",
       "label": "Assignments heading numbered '3'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:num-3-clauses",
+      "label": "Assignments sub-clauses 3.1-3.9 numbered",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:lettered-3.1",
+      "label": "3.1's (a)-(c) lettered sub-items render with letters, not a plain bullet",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:lettered-3.3",
+      "label": "3.3's (a)-(g) lettered sub-items render with letters, not a plain bullet",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:lettered-3.5",
+      "label": "3.5's (a)-(e) lettered sub-items render with letters, not a plain bullet",
       "status": "pass",
       "detail": ""
     },
@@ -96,8 +126,20 @@
       "detail": ""
     },
     {
+      "id": "assert:num-4-clauses",
+      "label": "Meetings clauses 4.1-4.5 numbered",
+      "status": "pass",
+      "detail": ""
+    },
+    {
       "id": "assert:num-5",
       "label": "Reporting heading numbered '5'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:num-5-clause",
+      "label": "Reporting clause 5.1 numbered",
       "status": "pass",
       "detail": ""
     },
@@ -108,8 +150,20 @@
       "detail": ""
     },
     {
+      "id": "assert:num-6-clause",
+      "label": "Confidentiality clause 6.1 numbered",
+      "status": "pass",
+      "detail": ""
+    },
+    {
       "id": "assert:num-7",
       "label": "Review of Charter heading numbered '7'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:num-7-clauses",
+      "label": "Review of Charter clauses 7.1/7.2 numbered",
       "status": "pass",
       "detail": ""
     },
@@ -126,8 +180,20 @@
       "detail": ""
     },
     {
+      "id": "assert:sched-2-numbered",
+      "label": "Schedule 2's 3 items render as '1./2./3.' (referenced by the table below as 'items 1-3'), not unmarked plain paragraphs",
+      "status": "pass",
+      "detail": ""
+    },
+    {
       "id": "assert:num-10",
       "label": "Schedule 3 heading numbered '10'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:sched-3-numbered",
+      "label": "Schedule 3's 5 items render as '1./2./3./4./5.', not a generic bullet",
       "status": "pass",
       "detail": ""
     },
