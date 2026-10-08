@@ -12,5 +12,13 @@
   {"id": "adopted-sentence-kept", "label": "The adoption attribution sentence is kept",
    "present": ["The IR Policy has been adopted by the Board of Directors on 19 May 2026."]},
   {"id": "num-1.1-1.2", "label": "Introduction's 2 sub-clauses numbered 1.1/1.2 (direct per-paragraph numId, missed by the earlier heading-only pass; the second was 'List Paragraph'-styled and retagged to Normal so it renders via the clause-number path instead of a bare bullet)",
-   "present": ["1.1\tThis Investor Relations policy", "1.2\tThe IR Policy defines how the Company communicates"]}
+   "present": ["1.1\tThis Investor Relations policy", "1.2\tThe IR Policy defines how the Company communicates"]},
+  {"id": "num-3.1-and-sublist", "label": "3.1 and its 3.1.1-3.1.5 sub-items numbered (a 3-level numId the first audit pass didn't look for, since these paragraphs carry no style name containing 'list')",
+   "present": ["3.1\tBioMar has adopted a multi-channel", "3.1.1\tThe IR website provides",
+               "3.1.5\tSocial media channels"]},
+  {"id": "num-4-5-6-7-subclauses", "label": "Sections 4-7's sub-clauses (4.1-4.4, 5.1-5.2, 6.1-6.6, 7.1-7.2) numbered — same direct-numId gap, found on a second, more thorough pass after the first one reported this document fully fixed",
+   "present": ["4.1\tBioMar maintains an open, honest", "4.4\tA silent period of four weeks",
+               "5.1\tThe following persons are authorized", "5.2\tInvestor activities and disclosure obligations",
+               "6.1\tBioMar publishes company announcements", "6.6\tIn addition, the Company will not comment",
+               "7.1\tThe IR Policy has been adopted", "7.2\tThe IR Policy is reviewed annually"]}
 ]

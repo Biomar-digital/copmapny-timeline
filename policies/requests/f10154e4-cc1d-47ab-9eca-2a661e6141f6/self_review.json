@@ -1,9 +1,9 @@
 {
   "request_id": "f10154e4-cc1d-47ab-9eca-2a661e6141f6",
   "policy": "takeover-response-manual",
-  "generated_at": "2026-10-07 13:59 UTC",
+  "generated_at": "2026-10-08 07:58 UTC",
   "overall": "attention",
-  "summary": "15 passed, 1 to review",
+  "summary": "16 passed, 1 to review",
   "checks": [
     {
       "id": "outputs",
@@ -98,6 +98,12 @@
     {
       "id": "assert:section-headings-numbered",
       "label": "Top-level section headings carry the original's literal numbers, including the Appendix A sub-sections' own restarted 1-4 sequence (style-inherited Word numbering, invisible to the extractor, restored as literal text)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:table-roman-lettered-lists",
+      "label": "The two numbered lists inside the 'Specific liability in Takeover Scenarios' table cell (i.-iv., then a restarted i.-ii.) and the lettered a.-f. list inside the 'Offer document' table cell are present — a distinct blind spot from the body-text one: model.py's table-cell renderer only ever adds a bullet for 'List Paragraph'-styled cells and has no numbered/lettered handling at all, so these numId-only markers (direct numId, no literal marker) were silently dropped",
       "status": "pass",
       "detail": ""
     }

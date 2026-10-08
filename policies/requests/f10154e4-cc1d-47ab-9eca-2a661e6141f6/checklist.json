@@ -18,5 +18,11 @@
   {"id": "contact-table-present", "label": "Appendix B's contact tables (BioMar + Legal advisor) are present",
    "present": ["Jens Bjerg Sørensen", "Rikke Schiøtt Petersen"]},
   {"id": "section-headings-numbered", "label": "Top-level section headings carry the original's literal numbers, including the Appendix A sub-sections' own restarted 1-4 sequence (style-inherited Word numbering, invisible to the extractor, restored as literal text)",
-   "present": ["1\tIntroduction", "7\tCommunication", "4\tPublic offers in Denmark"]}
+   "present": ["1\tIntroduction", "7\tCommunication", "4\tPublic offers in Denmark"]},
+  {"id": "table-roman-lettered-lists", "label": "The two numbered lists inside the 'Specific liability in Takeover Scenarios' table cell (i.-iv., then a restarted i.-ii.) and the lettered a.-f. list inside the 'Offer document' table cell are present — a distinct blind spot from the body-text one: model.py's table-cell renderer only ever adds a bullet for 'List Paragraph'-styled cells and has no numbered/lettered handling at all, so these numId-only markers (direct numId, no literal marker) were silently dropped",
+   "present": ["i.\tThe Board of Directors and the Executive Management have a fundamental",
+               "iv.\tThe Board of Directors and the Executive Management may be held liable",
+               "i.\tpossible conflicting interests between the Company",
+               "ii.\tpossible conflicting interests between different groups",
+               "a.\tThe identity of the offeror(s)", "f.\tDetails of related party arrangements"]}
 ]
