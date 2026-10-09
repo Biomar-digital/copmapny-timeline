@@ -460,7 +460,8 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791531874916,
-    "updated_at": 1791534760939
+    "updated_at": 1791534760939,
+    "notified": true
   },
   {
     "id": "adb72b1e-0857-41c2-9133-6971ff99b244",
@@ -471,7 +472,8 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791532570310,
-    "updated_at": 1791534760939
+    "updated_at": 1791534760939,
+    "notified": true
   },
   {
     "id": "83d69ec4-be17-44bf-858d-3c8290dcb6dc",
@@ -482,6 +484,7 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791532666913,
-    "updated_at": 1791534760939
+    "updated_at": 1791534760939,
+    "notified": true
   }
 ]
