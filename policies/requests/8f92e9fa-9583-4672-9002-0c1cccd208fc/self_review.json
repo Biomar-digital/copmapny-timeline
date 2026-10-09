@@ -1,7 +1,7 @@
 {
   "request_id": "8f92e9fa-9583-4672-9002-0c1cccd208fc",
   "policy": "disclosure-committee-charter",
-  "generated_at": "2026-10-09 09:08 UTC",
+  "generated_at": "2026-10-09 09:34 UTC",
   "overall": "attention",
   "summary": "35 passed, 1 to review",
   "checks": [
@@ -9,7 +9,7 @@
       "id": "outputs",
       "label": "Rendered PDF exists and is non-empty",
       "status": "pass",
-      "detail": "11 pages"
+      "detail": "10 pages"
     },
     {
       "id": "word",
@@ -193,7 +193,7 @@
     },
     {
       "id": "assert:sched2-footnotes",
-      "label": "Schedule 2's two Word footnotes (attached to the table's 'Log for monitoring...' band and 'Persons responsible' row) are included as visible note rows — footnotes have no rendering mechanism in this pipeline at all, so they were silently dropped entirely (request 3d497671, \"include the notes to schedule 2\")",
+      "label": "Schedule 2's two Word footnotes (on the table's 'Log for monitoring...' band and 'Persons responsible' row) render as small superscript-marked notes right after the table — footnotes have no rendering mechanism in this pipeline at all, so they were silently dropped entirely at first (request 3d497671, \"include the notes to schedule 2\"); a first attempt inserted them as extra table rows, which the requester flagged as still wrong (\"the footnotes ... are still incorporated into the table\") — fixed to parse the real footnote references/text and render them as separate small-print notes, not rows",
       "status": "pass",
       "detail": ""
     },

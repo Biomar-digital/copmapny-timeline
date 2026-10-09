@@ -734,6 +734,14 @@ def _story(policy):
             # heading overrides this via is_numbered_subhead below regardless.
             prev_subhead = bool(getattr(policy, "hanging_indent", False))
         elif isinstance(b, Body):
+            if _is_footnote(b.text):
+                # A table-cell footnote (e.g. Disclosure Committee Charter's
+                # Schedule 2 log table, request 3d497671) renders as a small
+                # note right after the table, never as an extra row inside
+                # it — same small-print treatment as a Columns-block footnote.
+                flow.append(Paragraph(_fmt(b.text), COL_FOOTNOTE))
+                prev_subhead = False
+                continue
             if _ADOPTED.match(b.text.strip()) or getattr(b, "center", False):
                 flow.append(Paragraph(escape(b.text), BODY_CENTER))
                 prev_subhead = False

@@ -49,6 +49,10 @@ _LETTERED = re.compile(r"^\(?[a-z][.)]\s")
 _LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
 # See the matching comment in generator.py.
 _ADOPTED = re.compile(r"^As adopted\b", re.I)
+
+
+def _is_footnote(text):
+    return text.lstrip()[:1] in "¹²³⁴⁵⁶⁷⁸⁹"
 CLAUSE_INDENT = 35.4
 # Lettered sub-items nest one level deeper than the numbered clauses: marker
 # at `indent`, text at 2x that — see _bullet() and the matching comment in
@@ -132,6 +136,14 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     """indent_mode: None (flush), "hang" (numbered clause — wrap aligns under
     the clause text), or "uniform" (content of a short sub-heading above —
     same left position on every line, no hanging first line)."""
+    if _is_footnote(blk.text):
+        # A table-cell footnote (e.g. Disclosure Committee Charter's
+        # Schedule 2 log table, request 3d497671) renders as a small note
+        # right after the table, never as an extra row inside it.
+        p = doc.add_paragraph()
+        p.paragraph_format.space_after = Pt(4)
+        _run(p, blk.text, size=7.5)
+        return p
     if _ADOPTED.match(blk.text.strip()) or getattr(blk, "center", False):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER

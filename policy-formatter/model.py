@@ -149,15 +149,57 @@ def _clean(text: str) -> str:
     return text.replace("\t", " ").replace("​", "").strip()
 
 
-def _cell_text(cell) -> str:
+_SUPER_DIGITS = str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹")
+
+
+def _superscript(raw_id: str) -> str:
+    return raw_id.translate(_SUPER_DIGITS)
+
+
+_FOOTNOTE_REF = re.compile(r'<w:footnoteReference[^>]*w:id="(-?\d+)"')
+
+
+def _load_footnotes(doc) -> dict:
+    """Word footnote id -> body text, read directly from the document's
+    footnotes part (word/footnotes.xml) — a document part python-docx does
+    not expose at all, so a footnote reference attached to a table cell
+    (e.g. Disclosure Committee Charter's Schedule 2, request 3d497671) is
+    otherwise invisible to this parser and gets silently dropped."""
+    try:
+        rel = next(r for r in doc.part.rels.values() if r.reltype.endswith("/footnotes"))
+    except StopIteration:
+        return {}
+    from lxml import etree
+    root = etree.fromstring(rel.target_part.blob)
+    notes = {}
+    for fn in root.findall(qn("w:footnote")):
+        if fn.get(qn("w:type")) in ("separator", "continuationSeparator"):
+            continue
+        fid = fn.get(qn("w:id"))
+        text = "".join(t.text or "" for t in fn.findall(".//" + qn("w:t")))
+        notes[fid] = _clean(text)
+    return notes
+
+
+def _cell_text(cell, footnotes=None, notes_out=None) -> str:
     """Join a table cell's paragraphs, marking 'List Paragraph' items with a
     leading bullet so the generator can render them as a bulleted list inside the
-    cell (the source keeps these as real list items; flattening loses them)."""
+    cell (the source keeps these as real list items; flattening loses them).
+    A footnote reference on the paragraph gets a superscript marker appended
+    inline, with the actual note text collected into `notes_out` to render as
+    a small note block after the table — never as an extra row inside it."""
     out = []
     for p in cell.paragraphs:
         t = _clean(p.text)
         if not t:
             continue
+        if footnotes:
+            for fid in _FOOTNOTE_REF.findall(p._p.xml):
+                note = footnotes.get(fid)
+                if note:
+                    t += _superscript(fid)
+                    if notes_out is not None:
+                        notes_out.append((_superscript(fid), note))
         style = (p.style.name if p.style else "").lower()
         out.append("• " + t if "list" in style else t)
     return "\n".join(out)
@@ -242,6 +284,7 @@ def _body_from_runs(item, text, style=""):
 def parse_docx(path: str, title: Optional[str] = None,
                year: Optional[str] = None, **meta) -> Policy:
     doc = docx.Document(path)
+    footnotes = _load_footnotes(doc)
     blocks = []
     doc_title = None
 
@@ -270,7 +313,8 @@ def parse_docx(path: str, title: Optional[str] = None,
                 if any(cols):
                     blocks.append(Columns(cols=cols))
                 continue
-            rows = [[_cell_text(c) for c in row.cells] for row in item.rows]
+            table_notes = []
+            rows = [[_cell_text(c, footnotes, table_notes) for c in row.cells] for row in item.rows]
             # Drop genuinely blank padding rows, but only when the table also
             # has real content elsewhere — an entirely empty table (e.g. a
             # single-cell fill-in/answer box left blank for the reader to
@@ -281,6 +325,17 @@ def parse_docx(path: str, title: Optional[str] = None,
                 rows = non_empty
             if rows:
                 blocks.append(TableBlock(rows=rows, header=not _glossary_table(item)))
+            # Footnotes attached to a table cell (e.g. a merged band row,
+            # which python-docx reports once per spanned cell) render as
+            # small notes right after the table itself, not as extra rows
+            # inside it — request 3d497671, "the footnotes ... are still
+            # incorporated into the table".
+            seen_markers = set()
+            for marker, note in table_notes:
+                if marker in seen_markers:
+                    continue
+                seen_markers.add(marker)
+                blocks.append(Body(text=f"{marker} {note}"))
             continue
 
         for data, iw, ih in _para_images(item):
