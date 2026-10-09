@@ -470,5 +470,15 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791532570310
+  },
+  {
+    "id": "83d69ec4-be17-44bf-858d-3c8290dcb6dc",
+    "policy": "investor-relations-policy",
+    "request_id": "21972c69-62dd-40d6-b000-f7a07a318da1",
+    "title": "Change: investor-relations-policy",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1791532666913
   }
 ]
