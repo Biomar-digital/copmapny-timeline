@@ -460,5 +460,15 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791531874916
+  },
+  {
+    "id": "adb72b1e-0857-41c2-9133-6971ff99b244",
+    "policy": "internal-rules-disclosure-obligations",
+    "request_id": "8e11e275-8f7b-4713-bd83-48f7fcc54410",
+    "title": "Change: internal-rules-disclosure-obligations",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1791532570310
   }
 ]
