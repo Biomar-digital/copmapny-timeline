@@ -224,6 +224,11 @@ def _bullet(doc, text, size=11, hang=False, plain_hang=False, indent=CLAUSE_INDE
 def _table(doc, blk):
     rows = blk.rows
     ncol = max(len(r) for r in rows)
+    # A standalone single-cell table is a plain fill-in/answer box (e.g.
+    # Schedule 3's notification template, request 3d497671), never a header
+    # band — the source table style has no shading even when the cell is
+    # filled in (e.g. the CVR number box).
+    plain_box = len(rows) == 1 and ncol == 1
     t = doc.add_table(rows=0, cols=ncol)
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
     try:
@@ -236,7 +241,7 @@ def _table(doc, blk):
             txt = row[ci] if ci < len(row) else ""
             cell = cells[ci]
             cell.paragraphs[0].text = ""
-            header = blk.header and ri == 0
+            header = blk.header and ri == 0 and not plain_box
             if header:
                 _set_cell_bg(cell, "1C4076")
             _run(cell.paragraphs[0], txt, bold=header, size=8.5,

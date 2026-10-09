@@ -469,6 +469,17 @@ def _table_flowables(block):
     on a section band (which would orphan it from its rows)."""
     ncols = max(len(r) for r in block.rows)
     rows = [list(r) + [""] * (ncols - len(r)) for r in block.rows]
+    if len(rows) == 1 and ncols == 1:
+        # A standalone single-cell table is a plain fill-in/answer box (e.g.
+        # Schedule 3's notification template, request 3d497671), never a
+        # header band — there is no body row for a "header" to introduce, and
+        # the source table style has no shading even when the cell is filled
+        # in (e.g. the CVR number box).
+        text = rows[0][0].strip()
+        cell = Paragraph(escape(text) if text else "&nbsp;", CELL)
+        t = Table([[cell]], colWidths=[_CONTENT_W])
+        t.setStyle(TableStyle(_BASE_TSTYLE + [("BOX", (0, 0), (-1, -1), 0.7, B.TABLE_GRID)]))
+        return [t]
     hdr = 0
     if block.header and rows and not _band(rows[0]):
         hdr = 1

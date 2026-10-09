@@ -271,7 +271,14 @@ def parse_docx(path: str, title: Optional[str] = None,
                     blocks.append(Columns(cols=cols))
                 continue
             rows = [[_cell_text(c) for c in row.cells] for row in item.rows]
-            rows = [r for r in rows if any(r)]
+            # Drop genuinely blank padding rows, but only when the table also
+            # has real content elsewhere — an entirely empty table (e.g. a
+            # single-cell fill-in/answer box left blank for the reader to
+            # complete, Schedule 3's notification template, request 3d497671)
+            # must still render as a visible empty box, not vanish outright.
+            non_empty = [r for r in rows if any(r)]
+            if non_empty:
+                rows = non_empty
             if rows:
                 blocks.append(TableBlock(rows=rows, header=not _glossary_table(item)))
             continue
