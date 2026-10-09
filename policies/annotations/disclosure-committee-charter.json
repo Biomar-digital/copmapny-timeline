@@ -131,5 +131,24 @@
     "text": "Please move the bullet points inwards as in the attached document.",
     "included_in": [],
     "created_at": "2026-10-09T07:34:50.509Z"
+  },
+  {
+    "id": "8a1bd712-f69d-41ff-9af5-abebb04af124",
+    "file": "files/Disclosure_Committee_Charter__Policy_2026-05_non-approval.pdf",
+    "page": 7,
+    "quote": "Inside Information is information which i",
+    "rects": [
+      {
+        "x": 0.13089381890299626,
+        "y": 0.19751440080287053,
+        "w": 0.3602956813497696,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-05",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Please align the text with the above heading (with the number 8 as the starting point) as shown in the attached document.",
+    "included_in": [],
+    "created_at": "2026-10-09T07:36:22.594Z"
   }
 ]
