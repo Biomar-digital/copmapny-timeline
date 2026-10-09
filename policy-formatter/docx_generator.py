@@ -184,7 +184,7 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     return p
 
 
-def _bullet(doc, text, size=11, hang=False, indent=CLAUSE_INDENT):
+def _bullet(doc, text, size=11, hang=False, plain_hang=False, indent=CLAUSE_INDENT):
     # A lettered item ("a. ...") already carries its own marker in the text,
     # so it must NOT also get Word's automatic "List Bullet" glyph — same
     # double-marker bug the PDF generator guards against. Use a plain
@@ -200,10 +200,25 @@ def _bullet(doc, text, size=11, hang=False, indent=CLAUSE_INDENT):
         p.paragraph_format.tab_stops.add_tab_stop(Pt(text_indent), WD_TAB_ALIGNMENT.LEFT)
         p.paragraph_format.space_after = Pt(4)
         _run(p, f"{m.group(1)}\t{m.group(2)}", size=size)
-        return
+        return p
+    if plain_hang:
+        # A plain "•" bullet in a hanging_indent policy: same deeper indent as
+        # the lettered items above instead of Word's own default "List
+        # Bullet" indent, so it doesn't sit further left/outward than the
+        # hang-indented body text around it (request 3d497671, "move the
+        # bullet points inwards").
+        text_indent = indent * 2
+        p = doc.add_paragraph()
+        p.paragraph_format.left_indent = Pt(text_indent)
+        p.paragraph_format.first_line_indent = Pt(-(text_indent - indent))
+        p.paragraph_format.tab_stops.add_tab_stop(Pt(text_indent), WD_TAB_ALIGNMENT.LEFT)
+        p.paragraph_format.space_after = Pt(8)
+        _run(p, f"•\t{text}", size=size)
+        return p
     p = doc.add_paragraph(style="List Bullet")
     p.paragraph_format.space_after = Pt(4)
     _run(p, text, size=size)
+    return p
 
 
 def _table(doc, blk):
@@ -234,7 +249,7 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
     # Incentive pay"), so the paragraph(s) right after it — its actual content
     # — get the same indent even though they don't start with a number.
     prev_subhead = False
-    for blk in blocks:
+    for idx, blk in enumerate(blocks):
         if isinstance(blk, M.Heading):
             _heading(doc, blk.text, blk.level, hang=hanging_indent, indent=indent)
             # An un-numbered paragraph right after a top-level heading is that
@@ -244,7 +259,16 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
             prev_subhead = bool(hanging_indent)
         elif isinstance(blk, M.Bullet):
             is_lettered = bool(_LETTERED.match(blk.text.strip()))
-            _bullet(doc, blk.text, size, hang=hanging_indent and is_lettered, indent=indent)
+            plain_hang = hanging_indent and not is_lettered
+            p = _bullet(doc, blk.text, size, hang=hanging_indent and is_lettered,
+                        plain_hang=plain_hang, indent=indent)
+            # Extra breathing room once the list ends — see the matching
+            # comment in generator.py (request 3d497671). Scoped to
+            # hanging_indent plain bullets only, like the deeper indent above.
+            if plain_hang:
+                nxt = blocks[idx + 1] if idx + 1 < len(blocks) else None
+                if not isinstance(nxt, M.Bullet):
+                    p.paragraph_format.space_after = Pt((p.paragraph_format.space_after or Pt(0)).pt + 6)
             prev_subhead = False
         elif isinstance(blk, M.TableBlock):
             _table(doc, blk)
@@ -269,6 +293,10 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
                     first = False
             prev_subhead = False
         elif isinstance(blk, M.Body):
+            if getattr(blk, "flush", False):
+                _body(doc, blk, size)
+                prev_subhead = False
+                continue
             if not hanging_indent:
                 _body(doc, blk, size)
                 continue

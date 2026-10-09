@@ -201,9 +201,17 @@
   {
     "id": "num-10",
     "label": "Schedule 3 heading numbered '10'",
-    "page": 9,
+    "page": 10,
     "present": [
       "10 Schedule 3 – Notification of delayed disclosure"
+    ]
+  },
+  {
+    "id": "sched2-footnotes",
+    "label": "Schedule 2's two Word footnotes (attached to the table's 'Log for monitoring...' band and 'Persons responsible' row) are included as visible note rows — footnotes have no rendering mechanism in this pipeline at all, so they were silently dropped entirely (request 3d497671, \"include the notes to schedule 2\")",
+    "present": [
+      "Any changes to the fulfilment of the conditions noted above",
+      "The area of responsibility covers: deciding about the start of the delay"
     ]
   },
   {

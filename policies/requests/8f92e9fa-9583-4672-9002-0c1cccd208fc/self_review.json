@@ -1,15 +1,15 @@
 {
   "request_id": "8f92e9fa-9583-4672-9002-0c1cccd208fc",
   "policy": "disclosure-committee-charter",
-  "generated_at": "2026-10-08 07:20 UTC",
+  "generated_at": "2026-10-09 08:14 UTC",
   "overall": "attention",
-  "summary": "34 passed, 1 to review",
+  "summary": "35 passed, 1 to review",
   "checks": [
     {
       "id": "outputs",
       "label": "Rendered PDF exists and is non-empty",
       "status": "pass",
-      "detail": "10 pages"
+      "detail": "11 pages"
     },
     {
       "id": "word",
@@ -188,6 +188,12 @@
     {
       "id": "assert:num-10",
       "label": "Schedule 3 heading numbered '10'",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:sched2-footnotes",
+      "label": "Schedule 2's two Word footnotes (attached to the table's 'Log for monitoring...' band and 'Persons responsible' row) are included as visible note rows — footnotes have no rendering mechanism in this pipeline at all, so they were silently dropped entirely (request 3d497671, \"include the notes to schedule 2\")",
       "status": "pass",
       "detail": ""
     },

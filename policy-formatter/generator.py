@@ -727,6 +727,16 @@ def _story(policy):
                 flow.append(Paragraph(escape(b.text), BODY_CENTER))
                 prev_subhead = False
                 continue
+            if getattr(b, "flush", False):
+                # A schedule's un-numbered "Header"-styled intro line ("Inside
+                # Information is information which is:") sits flush with its
+                # heading's own number, not indented like a regular lead-in —
+                # request 3d497671. Bypasses prev_subhead entirely regardless
+                # of what the preceding heading set it to.
+                justify = len(b.text) >= 90 and "://" not in b.text
+                flow.append(Paragraph(escape(b.text), BODY if justify else BODY_LEFT))
+                prev_subhead = False
+                continue
             # Justify normal running text; left-align short lines and anything
             # with a URL/long token so justification doesn't stretch the spaces.
             justify = len(b.text) >= 90 and "://" not in b.text
@@ -790,6 +800,17 @@ def _story(policy):
                                       bulletText=lm.group(1)))     # letter is the marker
             elif _LETTERED.match(b.text.strip()):
                 flow.append(Paragraph(_fmt(b.text), BULLET_HANG))     # letter is the marker (no hang)
+            elif getattr(policy, "hanging_indent", False):
+                flow.append(Paragraph(_fmt(b.text), BULLET_PLAIN_HANG, bulletText="•"))
+                # Extra breathing room once the list ends (request 3d497671,
+                # "more spacing ... at the end of a list") — scoped to
+                # hanging_indent policies only, matching the deeper-indent
+                # treatment above; other policies' bullet spacing is
+                # untouched. The next block is a fresh paragraph/heading/
+                # table, not another item of this same list.
+                nxt = blocks[i + 1] if i + 1 < len(blocks) else None
+                if not isinstance(nxt, Bullet):
+                    flow.append(Spacer(1, 6))
             else:
                 flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):
@@ -1118,9 +1139,9 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     with the fixed-position wrapped continuation lines below. bulletText draws
     the marker at a fixed `bulletIndent` independent of the paragraph text,
     which then starts at `leftIndent` on EVERY line, first or wrapped alike."""
-    global BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BODY_INDENT, BODY_INDENT_LEFT, H1_HANG, H2_HANG
+    global BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BULLET_PLAIN_HANG, BODY_INDENT, BODY_INDENT_LEFT, H1_HANG, H2_HANG
     if not enabled:
-        BODY_HANG, BODY_HANG_LEFT, BULLET_HANG = BODY, BODY_LEFT, BULLET
+        BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BULLET_PLAIN_HANG = BODY, BODY_LEFT, BULLET, BULLET
         BODY_INDENT, BODY_INDENT_LEFT = BODY, BODY_LEFT
         H1_HANG, H2_HANG = H1, H2
         return
@@ -1139,6 +1160,16 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
                                  bulletIndent=indent, bulletFontName=BULLET.fontName,
                                  bulletFontSize=BULLET.fontSize, bulletColor=BULLET.textColor,
                                  spaceAfter=4)
+    # A plain "•" bullet (no letter/number of its own) in a hanging_indent
+    # policy — same deeper indent as the lettered items above, instead of the
+    # library's small default BULLET indent, so a plain bulleted list doesn't
+    # sit further left/outward than the hang-indented body text around it
+    # (request 3d497671, "move the bullet points inwards"). A touch more
+    # spaceAfter than BULLET_HANG's 4pt — the same request also asked for
+    # more breathing room between list items.
+    BULLET_PLAIN_HANG = ParagraphStyle("BulletPlainHang", parent=BULLET,
+                                       leftIndent=indent * 2, firstLineIndent=0,
+                                       bulletIndent=indent, spaceAfter=8)
     # Uniform indent (NOT hanging: firstLineIndent=0) for a paragraph that has no
     # clause number of its own but is the content of a numbered sub-heading right
     # above it (e.g. "3.2 Incentive pay" / "The Board of Directors shall not..."):

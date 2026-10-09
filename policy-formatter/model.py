@@ -34,6 +34,11 @@ class Body:
     italic: bool = False     # whole paragraph set in italic (e.g. a sub-heading)
     center: bool = False     # paragraph is explicitly centred in the source (e.g.
                              # a closing "Approved by ..." / "As adopted ..." line)
+    flush: bool = False      # source style is "Header" — a schedule's un-numbered
+                             # intro line ("Inside Information is information
+                             # which is:"), which sits flush with the heading's
+                             # own number rather than indented like a heading's
+                             # lead-in clause text (request 3d497671)
 
 @dataclass
 class Bullet:
@@ -209,7 +214,7 @@ def _classify(text: str, style: str):
     return "body", 0
 
 
-def _body_from_runs(item, text):
+def _body_from_runs(item, text, style=""):
     """Build a Body, keeping per-run (bold, italic) — a run-in bold label, a
     word or two in italic within an otherwise plain sentence, etc. — when the
     paragraph mixes styles; otherwise collapse to a single bold/italic flag
@@ -224,13 +229,14 @@ def _body_from_runs(item, text):
     # keeps that centring regardless of bold/italic — a short sentence like
     # this on its own line is never mid-paragraph mixed-style content.
     center = item.alignment == WD_ALIGN_PARAGRAPH.CENTER
+    flush = (style or "").lower() == "header"
     if mixed_bold or mixed_italic:
-        return Body(text=text, runs=rlist, center=center)
+        return Body(text=text, runs=rlist, center=center, flush=flush)
     # A paragraph fully in italic (and not bold) is a run-in sub-heading; keep
     # the italic so the generator can render it (bold takes precedence).
     if alli and not allb:
-        return Body(text=text, italic=True, center=center)
-    return Body(text=text, bold=allb, center=center)
+        return Body(text=text, italic=True, center=center, flush=flush)
+    return Body(text=text, bold=allb, center=center, flush=flush)
 
 
 def parse_docx(path: str, title: Optional[str] = None,
@@ -252,13 +258,14 @@ def parse_docx(path: str, title: Optional[str] = None,
                         t = _clean(para.text)
                         if not t:
                             continue
-                        kind, level = _classify(t, para.style.name if para.style else "Normal")
+                        pstyle = para.style.name if para.style else "Normal"
+                        kind, level = _classify(t, pstyle)
                         if kind == "heading":
                             sub.append(Heading(level=level, text=t))
                         elif kind == "bullet":
                             sub.append(Bullet(text=t))
                         else:
-                            sub.append(_body_from_runs(para, t))
+                            sub.append(_body_from_runs(para, t, pstyle))
                     cols.append(sub)
                 if any(cols):
                     blocks.append(Columns(cols=cols))
@@ -295,7 +302,7 @@ def parse_docx(path: str, title: Optional[str] = None,
         elif kind == "bullet":
             blocks.append(Bullet(text=text))
         else:
-            blocks.append(_body_from_runs(item, text))
+            blocks.append(_body_from_runs(item, text, style))
 
     if title is None:
         title = doc_title or "Policy"
