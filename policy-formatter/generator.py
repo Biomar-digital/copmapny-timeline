@@ -101,6 +101,12 @@ CELL_GAP = ParagraphStyle("CellGap", parent=CELL, spaceBefore=3.5)      # paragr
 
 
 _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
+# A bare integer marker ("1.", "2.", ...) with no decimal part — as opposed to
+# a real clause number ("4.5", "1.1"). On its own this is ambiguous (Investor
+# Relations Policy's own top-level headings use bare "1.", "2." numbering too)
+# so callers only treat it as a nested list — see the BODY_HANG_DEEP comment —
+# when it follows a colon-ending decimal clause.
+_BARE_NUM = re.compile(r"^\d+\.$")
 _LONG = re.compile(r"\S{28,}")
 # A list item already lettered ("a. …", "b) …", "(a) …") carries its own marker,
 # so it is rendered as an indented item WITHOUT a bullet glyph (the letter is the
@@ -705,12 +711,28 @@ def _story(policy):
     # that sub-heading's actual content and must hang-indent to match it,
     # or the page reads as misaligned ("straight lines" the original keeps).
     prev_subhead = False
+    # True right after a decimal-numbered clause whose text ends with ":"
+    # (e.g. "4.5 ... the Company shall:") — the bare-numbered items that
+    # follow ("1.", "2.", ...) are that clause's own nested list, not fresh
+    # top-level clauses, so they nest one level deeper (BODY_HANG_DEEP).
+    nested_num_indent = False
+    # Once we're inside a Schedule/Appendix/Attachment section, its own
+    # sub-headings (e.g. Internal Rules' Schedule 8.1 "1 Annual reports", "2
+    # Interim reports", ... each a flat enumerated topic with plain-prose
+    # body, no "N.N" clause children at all) must NOT extend the hang-indent
+    # "lead-in text" treatment to their body paragraphs the way a genuine
+    # numbered article heading does — request 6ee28068, the amended
+    # reference flushes all of Schedule 8.1's and Appendix B's body text
+    # left while leaving the main numbered sections (1-10) indented.
+    in_schedule = False
     for i, b in enumerate(blocks):
         if i == dec_i:
             flow.append(PageBreak())
         if i > 0 and _is_schedule_heading(b):
             flow.append(PageBreak())
         if isinstance(b, Heading):
+            if _is_schedule_heading(b):
+                in_schedule = True
             # A hanging_indent policy tab-aligns the heading title to the same
             # column as its clause text below ("1  Name and objects" / "1.1
             # The Company's name..." both start their text at `indent`) — per
@@ -732,7 +754,8 @@ def _story(policy):
             # a fresh flush-left block — it needs the same indent as the rest
             # of the hanging-indent layout. A numbered clause right after the
             # heading overrides this via is_numbered_subhead below regardless.
-            prev_subhead = bool(getattr(policy, "hanging_indent", False))
+            prev_subhead = bool(getattr(policy, "hanging_indent", False)) and not in_schedule
+            nested_num_indent = False
         elif isinstance(b, Body):
             if _is_footnote(b.text):
                 # A table-cell footnote (e.g. Disclosure Committee Charter's
@@ -741,10 +764,12 @@ def _story(policy):
                 # it — same small-print treatment as a Columns-block footnote.
                 flow.append(Paragraph(_fmt(b.text), COL_FOOTNOTE))
                 prev_subhead = False
+                nested_num_indent = False
                 continue
             if _ADOPTED.match(b.text.strip()) or getattr(b, "center", False):
                 flow.append(Paragraph(escape(b.text), BODY_CENTER))
                 prev_subhead = False
+                nested_num_indent = False
                 continue
             if getattr(b, "flush", False):
                 # A schedule's un-numbered "Header"-styled intro line ("Inside
@@ -755,6 +780,7 @@ def _story(policy):
                 justify = len(b.text) >= 90 and "://" not in b.text
                 flow.append(Paragraph(escape(b.text), BODY if justify else BODY_LEFT))
                 prev_subhead = False
+                nested_num_indent = False
                 continue
             # Justify normal running text; left-align short lines and anything
             # with a URL/long token so justification doesn't stretch the spaces.
@@ -769,14 +795,17 @@ def _story(policy):
                 else:
                     flow.append(Paragraph(_body_markup(b), BODY if justify else BODY_LEFT))
                 prev_subhead = False
+                nested_num_indent = False
             elif getattr(b, "italic", False):
                 # Whole-line italic sub-heading: keep the leading number inline
                 # (no bold) and set the entire line in the oblique face.
                 flow.append(Paragraph(_fmt(b.text, number=False), BODY_ITALIC))
                 prev_subhead = is_numbered_subhead
+                nested_num_indent = False
             elif getattr(b, "bold", False):
                 flow.append(Paragraph(_fmt(b.text), BODY_BOLD))
                 prev_subhead = is_numbered_subhead
+                nested_num_indent = False
             else:
                 # A numbered clause ("1.1 The Company's...") hang-indents (when
                 # the policy opts in) so wrapped lines align under the clause
@@ -788,9 +817,12 @@ def _story(policy):
                 # wraps would sit flush at the margin, out of line with the rest.
                 # Anything else uses the plain style.
                 if is_numbered_subhead:
-                    style = BODY_HANG if justify else BODY_HANG_LEFT
+                    m = _NUM.match(b.text.strip())
+                    deep = (bool(_BARE_NUM.match(m.group(1))) and nested_num_indent
+                            and getattr(policy, "hanging_indent", False))
+                    style = ((BODY_HANG_DEEP if deep else BODY_HANG) if justify
+                             else (BODY_HANG_DEEP_LEFT if deep else BODY_HANG_LEFT))
                     if getattr(policy, "hanging_indent", False):
-                        m = _NUM.match(b.text.strip())
                         flow.append(Paragraph(_fmt(m.group(3), number=False), style, bulletText=m.group(1)))
                     else:
                         flow.append(Paragraph(_fmt(b.text), style))
@@ -809,10 +841,17 @@ def _story(policy):
                     stripped = b.text.strip()
                     prev_subhead = (len(stripped.split()) <= 8
                                     and not stripped.rstrip().endswith((".", ":", ";")))
+                    # A bare-numbered item ("1.") doesn't change the nested-list
+                    # state (it IS the nested list; a sibling "2." right after
+                    # it is still part of the same list). A decimal-numbered
+                    # clause ("4.5 ... shall:") sets it fresh for what follows.
+                    if not _BARE_NUM.match(m.group(1)):
+                        nested_num_indent = stripped.endswith(":")
                 # else: leave prev_subhead as-is — a sub-heading's content can
                 # span several paragraphs, all of which need the same indent.
         elif isinstance(b, Bullet):
             prev_subhead = False
+            nested_num_indent = False
             if _LETTERED.match(b.text.strip()) and getattr(policy, "hanging_indent", False):
                 lm = _LETTERED_SPLIT.match(b.text.strip())
                 flow.append(Paragraph(_fmt(lm.group(2), number=False), BULLET_HANG,
@@ -834,6 +873,7 @@ def _story(policy):
                 flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):
             prev_subhead = False
+            nested_num_indent = False
             if _is_signature_form(b):
                 flow.extend(_signature_card_flowables(b))
             else:
@@ -842,9 +882,11 @@ def _story(policy):
                 flow.append(Spacer(1, 8))
         elif isinstance(b, ImageBlock):
             prev_subhead = False
+            nested_num_indent = False
             flow.extend(_image_flowables(b))
         elif isinstance(b, Columns):
             prev_subhead = False
+            nested_num_indent = False
             flow.extend(_columns_flowables(b))
         if i == sig_i:
             flow.append(PageBreak())     # definitions/refs start on the next page
@@ -1158,9 +1200,10 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     with the fixed-position wrapped continuation lines below. bulletText draws
     the marker at a fixed `bulletIndent` independent of the paragraph text,
     which then starts at `leftIndent` on EVERY line, first or wrapped alike."""
-    global BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BULLET_PLAIN_HANG, BODY_INDENT, BODY_INDENT_LEFT, H1_HANG, H2_HANG
+    global BODY_HANG, BODY_HANG_LEFT, BODY_HANG_DEEP, BODY_HANG_DEEP_LEFT, BULLET_HANG, BULLET_PLAIN_HANG, BODY_INDENT, BODY_INDENT_LEFT, H1_HANG, H2_HANG
     if not enabled:
         BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BULLET_PLAIN_HANG = BODY, BODY_LEFT, BULLET, BULLET
+        BODY_HANG_DEEP, BODY_HANG_DEEP_LEFT = BODY, BODY_LEFT
         BODY_INDENT, BODY_INDENT_LEFT = BODY, BODY_LEFT
         H1_HANG, H2_HANG = H1, H2
         return
@@ -1174,6 +1217,17 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     BODY_HANG_LEFT = ParagraphStyle("BodyHangLeft", parent=BODY_LEFT, leftIndent=indent, firstLineIndent=0,
                                     bulletIndent=0, bulletFontName=B.F_REGULAR,
                                     bulletFontSize=BODY_LEFT.fontSize, bulletColor=BODY_LEFT.textColor)
+    # A bare-numbered item ("1.", "2.", ...) that is really a nested list
+    # under a decimal-numbered clause ("4.5 ... shall:") — not a clause in
+    # its own right — nests one level deeper, same geometry as BULLET_HANG's
+    # lettered items: marker at `indent`, text at 2x that (request 6ee28068,
+    # Internal Rules' 4.5/4.6 notification steps).
+    BODY_HANG_DEEP = ParagraphStyle("BodyHangDeep", parent=BODY, leftIndent=indent * 2, firstLineIndent=0,
+                                    bulletIndent=indent, bulletFontName=B.F_REGULAR,
+                                    bulletFontSize=BODY.fontSize, bulletColor=BODY.textColor)
+    BODY_HANG_DEEP_LEFT = ParagraphStyle("BodyHangDeepLeft", parent=BODY_LEFT, leftIndent=indent * 2, firstLineIndent=0,
+                                         bulletIndent=indent, bulletFontName=B.F_REGULAR,
+                                         bulletFontSize=BODY_LEFT.fontSize, bulletColor=BODY_LEFT.textColor)
     BULLET_HANG = ParagraphStyle("BulletHang", parent=BULLET,
                                  leftIndent=indent * 2, firstLineIndent=0,
                                  bulletIndent=indent, bulletFontName=BULLET.fontName,

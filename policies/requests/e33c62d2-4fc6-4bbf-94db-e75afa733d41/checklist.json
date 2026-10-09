@@ -21,5 +21,9 @@
    "present": ["7.5\tAll company announcements shall be prepared", "(a)\tEach announcement shall have a heading",
                "(e)\tthe announcement shall provide sufficient guidance"]},
   {"id": "plain-bullet-indent", "label": "Plain (non-lettered) bulleted lists — the spokesperson contact list and Schedule 8.1's item-10 circumstances list — now use the same deeper hanging indent as the document's lettered sub-items, not the shallower default bullet indent (generator.py previously always used the shallow BULLET style for plain bullets regardless of hanging_indent, visually misaligning them against the clause text above; request e33c62d2, \"same structure/numbering as shown in the attached\")",
-   "present": ["The Chair of the Board of Directors", "Major expansions or reductions in the Company’s activities."]}
+   "present": ["The Chair of the Board of Directors", "Major expansions or reductions in the Company’s activities."]},
+  {"id": "schedule-8.1-flush", "label": "Schedule 8.1's 17 numbered sub-sections (\"1 Annual reports\", ..., \"17 Treasury shares\") and Appendix B's body text sit flush left, not indented to match a clause's lead-in text — every heading in a hanging_indent document previously set that indent unconditionally, but these sub-headings have no \"N.N\" clause children at all (request 6ee28068, the amended reference flushes Schedule 8.1/Appendix B while keeping the main numbered sections 1-10 indented)",
+   "present": ["The Company shall disclose the following information irrespective of whether", "Article 7(1)(a) of the Market Abuse Regulation defines Inside Information"]},
+  {"id": "nested-numbered-list-4.5", "label": "Clause 4.5's bare-numbered \"1./2.\" notification steps nest one level deeper, matching the lettered (a)/(b) items elsewhere, instead of sitting at the same indent as a top-level decimal clause (request 6ee28068)",
+   "present": ["Upon disclosure to the market, notify the Danish Financial Supervisory Authority", "upon request of the Danish Financial Supervisory Authority, submit a written explanation"]}
 ]

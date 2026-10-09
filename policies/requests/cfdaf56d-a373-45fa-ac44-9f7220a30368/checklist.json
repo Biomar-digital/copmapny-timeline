@@ -6,5 +6,9 @@
   {"id": "lettered-5.1", "label": "5.1's lettered list (a)-(f) renders with hang-indent bullets",
    "present": ["Commercial performance update", "Any other events or circumstances that the Board"]},
   {"id": "lettered-9.1", "label": "9.1's lettered list (a)-(c) renders with hang-indent bullets",
-   "present": ["Agreements between the Company (or a Group company"]}
+   "present": ["Agreements between the Company (or a Group company"]},
+  {"id": "section-headings-numbered", "label": "Top-level section headings carry the original's literal numbers (style-inherited Word numbering, invisible to the extractor, restored as literal text)",
+   "present": ["1\tThe Company", "13\tAmendment of the Management Instructions"]},
+  {"id": "nested-numbered-lists-4.1-4.3", "label": "4.1's and 4.3's bare-numbered \"1./2./3./4.\" and \"1.-7.\" lists nest one level deeper, matching the lettered (a)/(b) items elsewhere, instead of sitting at the same indent as a top-level decimal clause (same fix as request 6ee28068 on Internal Rules — a generic bug, not specific to that document)",
+   "present": ["implementing and executing the Company’s strategy as determined by the Board", "Adoption of new strategy or changes to existing strategy"]}
 ]

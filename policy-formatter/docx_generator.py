@@ -47,12 +47,22 @@ PAGE_W_PT, PAGE_H_PT = 595.276, 841.890   # A4, matching the PDF
 _NUM = re.compile(r"^(\d+(?:\.\d+)*\.?)(\s+)(.*)$", re.S)
 _LETTERED = re.compile(r"^\(?[a-z][.)]\s")
 _LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
-# See the matching comment in generator.py.
+# See the matching comments in generator.py.
 _ADOPTED = re.compile(r"^As adopted\b", re.I)
+_SCHEDULE = re.compile(r"^(schedule|attachment|appendix|annex)\s+[a-z0-9]", re.I)
+_BARE_NUM = re.compile(r"^\d+\.$")
 
 
 def _is_footnote(text):
     return text.lstrip()[:1] in "¹²³⁴⁵⁶⁷⁸⁹"
+
+
+def _is_schedule_heading(blk):
+    if not isinstance(blk, M.Heading) or blk.level != 1:
+        return False
+    t = blk.text.strip()
+    m = _NUM.match(t)
+    return bool(_SCHEDULE.match(m.group(3) if m else t))
 CLAUSE_INDENT = 35.4
 # Lettered sub-items nest one level deeper than the numbered clauses: marker
 # at `indent`, text at 2x that — see _bullet() and the matching comment in
@@ -134,8 +144,11 @@ def _heading(doc, text, level, hang=False, indent=CLAUSE_INDENT):
 
 def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     """indent_mode: None (flush), "hang" (numbered clause — wrap aligns under
-    the clause text), or "uniform" (content of a short sub-heading above —
-    same left position on every line, no hanging first line)."""
+    the clause text), "hang_deep" (a bare-numbered item, "1.", "2.", that is
+    really a nested list under a decimal clause — same geometry as a lettered
+    item: marker at `indent`, text at 2x that), or "uniform" (content of a
+    short sub-heading above — same left position on every line, no hanging
+    first line)."""
     if _is_footnote(blk.text):
         # A table-cell footnote (e.g. Disclosure Committee Charter's
         # Schedule 2 log table, request 3d497671) renders as a small note
@@ -157,12 +170,17 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
         p.paragraph_format.left_indent = Pt(indent)
         p.paragraph_format.first_line_indent = Pt(-indent)
         p.paragraph_format.tab_stops.add_tab_stop(Pt(indent), WD_TAB_ALIGNMENT.LEFT)
+    elif indent_mode == "hang_deep":
+        text_indent = indent * 2
+        p.paragraph_format.left_indent = Pt(text_indent)
+        p.paragraph_format.first_line_indent = Pt(-(text_indent - indent))
+        p.paragraph_format.tab_stops.add_tab_stop(Pt(text_indent), WD_TAB_ALIGNMENT.LEFT)
     elif indent_mode == "uniform":
         p.paragraph_format.left_indent = Pt(indent)
         p.paragraph_format.first_line_indent = Pt(0)
     if blk.runs:                              # mixed-style runs (bold label, italic word, ...)
         runs = list(blk.runs)
-        if indent_mode == "hang":
+        if indent_mode in ("hang", "hang_deep"):
             # Match against the full concatenated text, not just run 0 —
             # Word can split a run right after the clause number (e.g. a
             # mixed-italic clause whose number ends up alone in its own run,
@@ -188,7 +206,7 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
                 runs = new_runs
         for t, b, i in runs:
             _run(p, t, bold=b, italic=i, size=size)
-    elif indent_mode == "hang" and (m := _NUM.match(blk.text.strip())):
+    elif indent_mode in ("hang", "hang_deep") and (m := _NUM.match(blk.text.strip())):
         _run(p, f"{m.group(1)}\t", bold=False, size=size)
         _run(p, m.group(3), bold=blk.bold, italic=getattr(blk, "italic", False), size=size)
     else:
@@ -266,14 +284,23 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
     # Incentive pay"), so the paragraph(s) right after it — its actual content
     # — get the same indent even though they don't start with a number.
     prev_subhead = False
+    # See the matching comments in generator.py's _story().
+    in_schedule = False
+    nested_num_indent = False
     for idx, blk in enumerate(blocks):
         if isinstance(blk, M.Heading):
+            if _is_schedule_heading(blk):
+                in_schedule = True
             _heading(doc, blk.text, blk.level, hang=hanging_indent, indent=indent)
             # An un-numbered paragraph right after a top-level heading is that
             # section's lead-in text and needs the same indent as the rest of
             # the hanging-indent layout — see the matching comment in
-            # generator.py.
-            prev_subhead = bool(hanging_indent)
+            # generator.py. Not once we're inside a Schedule/Appendix section
+            # (e.g. Internal Rules' Schedule 8.1 "1 Annual reports", ...): its
+            # sub-headings have no "N.N" clause children at all, so their body
+            # text stays flush (request 6ee28068).
+            prev_subhead = bool(hanging_indent) and not in_schedule
+            nested_num_indent = False
         elif isinstance(blk, M.Bullet):
             is_lettered = bool(_LETTERED.match(blk.text.strip()))
             plain_hang = hanging_indent and not is_lettered
@@ -287,9 +314,11 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
                 if not isinstance(nxt, M.Bullet):
                     p.paragraph_format.space_after = Pt((p.paragraph_format.space_after or Pt(0)).pt + 6)
             prev_subhead = False
+            nested_num_indent = False
         elif isinstance(blk, M.TableBlock):
             _table(doc, blk)
             prev_subhead = False
+            nested_num_indent = False
         elif isinstance(blk, M.ImageBlock):
             try:
                 w = Emu(int(blk.width * EMU_PER_PT)) if blk.width else None
@@ -297,6 +326,7 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
             except Exception:
                 pass
             prev_subhead = False
+            nested_num_indent = False
         elif isinstance(blk, M.Columns):
             t = doc.add_table(rows=1, cols=max(len(blk.cols), 1))
             _no_table_borders(t)
@@ -309,20 +339,29 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
                     _render_into_cell(cell, sub, size, first)
                     first = False
             prev_subhead = False
+            nested_num_indent = False
         elif isinstance(blk, M.Body):
             if getattr(blk, "flush", False):
                 _body(doc, blk, size)
                 prev_subhead = False
+                nested_num_indent = False
                 continue
             if not hanging_indent:
                 _body(doc, blk, size)
                 continue
             is_numbered = bool(_NUM.match(blk.text.strip()))
             if is_numbered:
-                _body(doc, blk, size, indent_mode="hang", indent=indent)
+                m = _NUM.match(blk.text.strip())
+                deep = bool(_BARE_NUM.match(m.group(1))) and nested_num_indent
+                _body(doc, blk, size, indent_mode="hang_deep" if deep else "hang", indent=indent)
                 stripped = blk.text.strip()
                 prev_subhead = (len(stripped.split()) <= 8
                                 and not stripped.rstrip().endswith((".", ":", ";")))
+                # A bare-numbered item ("1.") is itself the nested list, so it
+                # doesn't change the state; a decimal clause ("4.5 ... shall:")
+                # sets it fresh for whatever bare items follow.
+                if not _BARE_NUM.match(m.group(1)):
+                    nested_num_indent = stripped.endswith(":")
             elif prev_subhead:
                 _body(doc, blk, size, indent_mode="uniform", indent=indent)
                 # leave prev_subhead as-is: a sub-heading's content can span
@@ -330,6 +369,7 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
             else:
                 _body(doc, blk, size)
                 prev_subhead = False
+                nested_num_indent = False
 
 
 def _render_into_cell(cell, blk, size, first):
