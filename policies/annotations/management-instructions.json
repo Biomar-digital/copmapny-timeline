@@ -33,7 +33,9 @@
     "edition": "Version 1__2026-10",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please move inwards to align with the text in the below clause.",
-    "included_in": [],
+    "included_in": [
+      "a11bc6a5-f880-4bc6-b34e-1e845fa8800d"
+    ],
     "created_at": "2026-10-13T12:21:56.315Z"
   },
   {
@@ -52,7 +54,9 @@
     "edition": "Version 1__2026-10",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please remove full stop",
-    "included_in": [],
+    "included_in": [
+      "a11bc6a5-f880-4bc6-b34e-1e845fa8800d"
+    ],
     "created_at": "2026-10-13T12:22:53.881Z"
   }
 ]
