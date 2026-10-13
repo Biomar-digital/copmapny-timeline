@@ -693,7 +693,9 @@
     "edition": "Version 1__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please make bold",
-    "included_in": [],
+    "included_in": [
+      "5c77202f-ec99-4d4d-a76e-0d03fa669282"
+    ],
     "created_at": "2026-10-13T12:09:44.754Z"
   },
   {
@@ -712,7 +714,9 @@
     "edition": "Version 1__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Please make bold",
-    "included_in": [],
+    "included_in": [
+      "5c77202f-ec99-4d4d-a76e-0d03fa669282"
+    ],
     "created_at": "2026-10-13T12:10:15.164Z"
   },
   {
@@ -773,7 +777,9 @@
     "edition": "Version 1__2026-05",
     "author": "Marianne Niviaq Thomsen",
     "text": "Place at the bottom of the page",
-    "included_in": [],
+    "included_in": [
+      "5c77202f-ec99-4d4d-a76e-0d03fa669282"
+    ],
     "created_at": "2026-10-13T12:11:30.843Z"
   }
 ]
