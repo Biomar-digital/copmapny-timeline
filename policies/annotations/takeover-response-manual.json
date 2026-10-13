@@ -149,5 +149,24 @@
     "text": "Amend format to align with the attached document",
     "included_in": [],
     "created_at": "2026-10-13T12:38:52.420Z"
+  },
+  {
+    "id": "cb1046f9-99dc-4a0f-a3ed-fa233855b8a4",
+    "file": "files/Takeover_Response_Manual__Policy_2026-10_non-approval.pdf",
+    "page": 7,
+    "quote": "Appendix A – Introduction to the legal framework",
+    "rects": [
+      {
+        "x": 0.07139662849254341,
+        "y": 0.2830118643368757,
+        "w": 0.4529870345098287,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-10",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Please move appendix to separate page as in the attached document",
+    "included_in": [],
+    "created_at": "2026-10-13T12:40:33.608Z"
   }
 ]
