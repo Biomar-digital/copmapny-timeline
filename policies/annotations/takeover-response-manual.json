@@ -17,5 +17,24 @@
     "text": "Amend format to align with the attached document",
     "included_in": [],
     "created_at": "2026-10-13T12:33:26.164Z"
+  },
+  {
+    "id": "eccc2a10-79c3-4299-9729-83e9dfc3e39d",
+    "file": "files/Takeover_Response_Manual__Policy_2026-10_non-approval.pdf",
+    "page": 2,
+    "quote": "Scope",
+    "rects": [
+      {
+        "x": 0.13089381890299626,
+        "y": 0.5236118175944129,
+        "w": 0.05733128791487624,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-10",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Amend format to align with the attached document",
+    "included_in": [],
+    "created_at": "2026-10-13T12:33:33.653Z"
   }
 ]
