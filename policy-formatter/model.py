@@ -94,9 +94,16 @@ def _para_images(item):
         if not rid:
             continue
         try:
-            data = item.part.related_parts[rid].blob
+            part = item.part.related_parts[rid]
         except KeyError:
             continue
+        if part.content_type in ("image/x-emf", "image/x-wmf"):
+            # A vector metafile Word keeps alongside a raster fallback for
+            # the same drawing (e.g. mc:AlternateContent) — PIL/ReportLab
+            # cannot decode either format, and the usable PNG/JPEG sibling
+            # is picked up separately from its own <a:blip>.
+            continue
+        data = part.blob
         w = h = 0.0
         ext = p.find(".//" + qn("wp:extent"))
         if ext is not None:
@@ -181,48 +188,86 @@ def _load_footnotes(doc) -> dict:
     return notes
 
 
+def _para_footnotes(para, footnotes, notes_out) -> str:
+    """Rebuild a paragraph's text with any footnote reference(s) replaced by
+    a superscript marker AT THE EXACT POSITION they occur — a reference can
+    sit mid-sentence ("a dependent[1] child"), so appending markers at the
+    end of the whole paragraph (the earlier, table-only version of this)
+    would misplace them. Handles Word's customMarkFollows: some references
+    carry their own literal mark instead of using the id (e.g. a schedule
+    restarting its own footnotes at "1" rather than continuing the document's
+    running count) — that mark lives as ordinary run text alongside the
+    (otherwise empty) footnoteReference run itself. The matching note text is
+    collected into notes_out, with that same leading mark (Word also bakes
+    it into the footnote body) stripped so it isn't shown twice."""
+    parts = []
+    for r in para.runs:
+        if "<w:footnoteReference" in r._r.xml:
+            m = _FOOTNOTE_REF.search(r._r.xml)
+            if not m:
+                continue
+            fid = m.group(1)
+            note = footnotes.get(fid)
+            if not note:
+                continue
+            custom_mark = r.text.strip()
+            marker = _superscript(custom_mark) if custom_mark else _superscript(fid)
+            parts.append(marker)
+            if notes_out is not None:
+                note_body = note
+                if custom_mark and note.startswith(custom_mark):
+                    note_body = note[len(custom_mark):].lstrip()
+                notes_out.append((marker, note_body))
+        else:
+            parts.append(r.text)
+    return "".join(parts)
+
+
 def _cell_text(cell, footnotes=None, notes_out=None) -> str:
     """Join a table cell's paragraphs, marking 'List Paragraph' items with a
     leading bullet so the generator can render them as a bulleted list inside the
     cell (the source keeps these as real list items; flattening loses them).
-    A footnote reference on the paragraph gets a superscript marker appended
-    inline, with the actual note text collected into `notes_out` to render as
-    a small note block after the table — never as an extra row inside it."""
+    A footnote reference on the paragraph gets a superscript marker inline
+    (see _para_footnotes), with the actual note text collected into
+    `notes_out` to render as a small note block after the table — never as
+    an extra row inside it."""
     out = []
     for p in cell.paragraphs:
-        t = _clean(p.text)
+        raw = _para_footnotes(p, footnotes, notes_out) if footnotes and "<w:footnoteReference" in p._p.xml else p.text
+        t = _clean(raw)
         if not t:
             continue
-        if footnotes:
-            for fid in _FOOTNOTE_REF.findall(p._p.xml):
-                note = footnotes.get(fid)
-                if note:
-                    t += _superscript(fid)
-                    if notes_out is not None:
-                        notes_out.append((_superscript(fid), note))
         style = (p.style.name if p.style else "").lower()
         out.append("• " + t if "list" in style else t)
     return "\n".join(out)
 
 
 def _glossary_table(item) -> bool:
-    """A table where every row's first cell is entirely bold and no other
-    cell is (a "Term: definition" glossary) has no real header row — each
-    row, including the first, is an equal data entry. Without this check
-    the generator's default TableBlock(header=True) would band the first
-    definition as a column header, which is wrong when the source never
-    had one."""
+    """A table where every row is an equal "term: definition" entry has no
+    real header row — the generator's default TableBlock(header=True) would
+    otherwise band the first definition as a column header, which is wrong
+    when the source never had one. Two independent signals, either one
+    sufficient: the first column is entirely bold throughout and nowhere
+    else is (the template's usual way of marking the term column); or, for a
+    source that never bolds the term at all (request 536307dd's Appendix A),
+    every row's own shape still reads as term-then-definition — a short,
+    not-sentence-like first cell next to a real (non-blank) second cell —
+    with no row standing out as a distinct header/title."""
     def cell_bold(c):
         runs = [r for p in c.paragraphs for r in p.runs if r.text.strip()]
         return bool(runs) and all(r.bold for r in runs)
     rows = item.rows
     if len(rows) < 2:
         return False
-    for row in rows:
-        cells = row.cells
-        if not cell_bold(cells[0]) or any(cell_bold(c) for c in cells[1:]):
-            return False
-    return True
+    if all(cell_bold(row.cells[0]) for row in rows) and not any(
+            cell_bold(c) for row in rows for c in row.cells[1:]):
+        return True
+
+    def term_shaped(c):
+        t = c.text.strip()
+        return bool(t) and len(t) <= 40 and not t.rstrip().endswith((".", ":", ";"))
+
+    return all(term_shaped(row.cells[0]) and row.cells[-1].text.strip() for row in rows)
 
 
 _LEAD_CLAUSE_NUM = re.compile(r'^\d+(\.\d+)*\.?\s+')
@@ -262,7 +307,8 @@ def _body_from_runs(item, text, style=""):
     paragraph mixes styles; otherwise collapse to a single bold/italic flag
     for the whole paragraph."""
     rlist = [(r.text, bool(r.bold), bool(r.italic))
-             for r in item.runs if r.text and (r.text.strip() or r.text == " ")]
+             for r in item.runs if r.text and (r.text.strip() or r.text == " ")
+             and "<w:footnoteReference" not in r._r.xml]
     allb = bool(rlist) and all(b for _, b, _ in rlist)
     alli = bool(rlist) and all(i for _, _, i in rlist)
     mixed_bold = any(b for _, b, _ in rlist) and not allb
@@ -343,7 +389,10 @@ def parse_docx(path: str, title: Optional[str] = None,
                 continue
             blocks.append(ImageBlock(data=data, width=iw, height=ih))
 
-        text = _clean(item.text)
+        para_notes = []
+        raw_text = (_para_footnotes(item, footnotes, para_notes)
+                    if footnotes and "<w:footnoteReference" in item._p.xml else item.text)
+        text = _clean(raw_text)
         if not text:
             continue
         style = item.style.name if item.style else "Normal"
@@ -365,6 +414,15 @@ def parse_docx(path: str, title: Optional[str] = None,
             blocks.append(Bullet(text=text))
         else:
             blocks.append(_body_from_runs(item, text, style))
+        # A footnote reference on a regular paragraph (not a table cell —
+        # see the TableBlock branch above) renders as a small note right
+        # after the block that carries it.
+        seen_markers = set()
+        for marker, note in para_notes:
+            if marker in seen_markers:
+                continue
+            seen_markers.add(marker)
+            blocks.append(Body(text=f"{marker} {note}"))
 
     if title is None:
         title = doc_title or "Policy"
