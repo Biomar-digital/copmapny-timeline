@@ -695,5 +695,24 @@
     "text": "Please make bold",
     "included_in": [],
     "created_at": "2026-10-13T12:09:44.754Z"
+  },
+  {
+    "id": "cb813a01-9dd7-437e-a363-07693062e830",
+    "file": "files/Disclosure_Committee_Charter__Policy_2026-05_non-approval.pdf",
+    "page": 4,
+    "quote": "in Sched",
+    "rects": [
+      {
+        "x": 0.6293215515690925,
+        "y": 0.7009169771374366,
+        "w": 0.08642199318018316,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-05",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Please make bold",
+    "included_in": [],
+    "created_at": "2026-10-13T12:10:15.164Z"
   }
 ]
