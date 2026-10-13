@@ -36,5 +36,24 @@
     "text": "Amend format to align with the attached document",
     "included_in": [],
     "created_at": "2026-10-13T12:33:33.653Z"
+  },
+  {
+    "id": "5e92c80c-1cbd-49db-b91d-b3259ae59ef1",
+    "file": "files/Takeover_Response_Manual__Policy_2026-10_non-approval.pdf",
+    "page": 2,
+    "quote": "(each of the situations described in (a) and (b) above is referred to as a “Takeover Scen",
+    "rects": [
+      {
+        "x": 0.07139662849254341,
+        "y": 0.6968201377527874,
+        "w": 0.7831019199266979,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-10",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Please move to align the with text in the above list",
+    "included_in": [],
+    "created_at": "2026-10-13T12:34:20.371Z"
   }
 ]
