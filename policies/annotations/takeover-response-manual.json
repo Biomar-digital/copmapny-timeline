@@ -92,5 +92,24 @@
     "text": "Please move inwards to align with the list as in the attached document",
     "included_in": [],
     "created_at": "2026-10-13T12:35:02.754Z"
+  },
+  {
+    "id": "596d1c61-6f79-40e3-9db4-91c2adb899a6",
+    "file": "files/Takeover_Response_Manual__Policy_2026-10_non-approval.pdf",
+    "page": 3,
+    "quote": "Stakeholders",
+    "rects": [
+      {
+        "x": 0.13089381890299626,
+        "y": 0.21651383714376057,
+        "w": 0.12063578280244405,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-10",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Amend format to align with the attached document",
+    "included_in": [],
+    "created_at": "2026-10-13T12:35:31.585Z"
   }
 ]
