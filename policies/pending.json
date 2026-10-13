@@ -536,5 +536,15 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791894662505
+  },
+  {
+    "id": "d830617a-7f39-497a-8821-369b888d2a85",
+    "policy": "takeover-response-manual",
+    "request_id": "0e21d68e-0840-4cc9-a416-ed1c49ffa702",
+    "title": "Change: takeover-response-manual",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1791895400936
   }
 ]
