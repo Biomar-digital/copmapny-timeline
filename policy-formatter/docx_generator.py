@@ -51,6 +51,8 @@ _LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
 _ADOPTED = re.compile(r"^As adopted\b", re.I)
 _SCHEDULE = re.compile(r"^(schedule|attachment|appendix|annex)\s+[a-z0-9]", re.I)
 _BARE_NUM = re.compile(r"^\d+\.$")
+# See the matching comment in generator.py.
+_PAREN_CONT = re.compile(r"^\(each\b", re.I)
 
 
 def _is_footnote(text):
@@ -58,7 +60,8 @@ def _is_footnote(text):
 
 
 def _is_schedule_heading(blk):
-    if not isinstance(blk, M.Heading) or blk.level != 1:
+    # See the matching comment in generator.py.
+    if not isinstance(blk, M.Heading) or blk.level not in (1, 2):
         return False
     t = blk.text.strip()
     m = _NUM.match(t)
@@ -177,6 +180,9 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
         p.paragraph_format.tab_stops.add_tab_stop(Pt(text_indent), WD_TAB_ALIGNMENT.LEFT)
     elif indent_mode == "uniform":
         p.paragraph_format.left_indent = Pt(indent)
+        p.paragraph_format.first_line_indent = Pt(0)
+    elif indent_mode == "uniform_deep":
+        p.paragraph_format.left_indent = Pt(indent * 2)
         p.paragraph_format.first_line_indent = Pt(0)
     if blk.runs:                              # mixed-style runs (bold label, italic word, ...)
         runs = list(blk.runs)
@@ -313,7 +319,10 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
                 nxt = blocks[idx + 1] if idx + 1 < len(blocks) else None
                 if not isinstance(nxt, M.Bullet):
                     p.paragraph_format.space_after = Pt((p.paragraph_format.space_after or Pt(0)).pt + 6)
-            prev_subhead = False
+            # A plain prose paragraph right after a lettered list is that
+            # list's own closing/continuation text, not fresh flush prose —
+            # see the matching comment in generator.py (request 0e21d68e).
+            prev_subhead = is_lettered and hanging_indent
             nested_num_indent = False
         elif isinstance(blk, M.TableBlock):
             _table(doc, blk)
@@ -363,7 +372,8 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
                 if not _BARE_NUM.match(m.group(1)):
                     nested_num_indent = stripped.endswith(":")
             elif prev_subhead:
-                _body(doc, blk, size, indent_mode="uniform", indent=indent)
+                deep = bool(_PAREN_CONT.match(blk.text.strip()))
+                _body(doc, blk, size, indent_mode="uniform_deep" if deep else "uniform", indent=indent)
                 # leave prev_subhead as-is: a sub-heading's content can span
                 # several paragraphs, all needing the same indent.
             else:

@@ -19,10 +19,19 @@
    "present": ["Jens Bjerg Sørensen", "Rikke Schiøtt Petersen"]},
   {"id": "section-headings-numbered", "label": "Top-level section headings carry the original's literal numbers, including the Appendix A sub-sections' own restarted 1-4 sequence (style-inherited Word numbering, invisible to the extractor, restored as literal text)",
    "present": ["1\tIntroduction", "7\tCommunication", "4\tPublic offers in Denmark"]},
-  {"id": "table-roman-lettered-lists", "label": "The two numbered lists inside the 'Specific liability in Takeover Scenarios' table cell (i.-iv., then a restarted i.-ii.) and the lettered a.-f. list inside the 'Offer document' table cell are present — a distinct blind spot from the body-text one: model.py's table-cell renderer only ever adds a bullet for 'List Paragraph'-styled cells and has no numbered/lettered handling at all, so these numId-only markers (direct numId, no literal marker) were silently dropped",
+  {"id": "table-roman-lettered-lists", "label": "The two numbered lists inside the 'Specific liability in Takeover Scenarios' table cell (i.-iv., then a restarted i.-ii.) and the lettered a.-f. list inside the 'Offer document' table cell are present, and now hang-indent properly (wrapped lines align under the text, not under the marker — new CELL_NUM style, request 0e21d68e, \"amend table to align with the attached document\")",
    "present": ["i.\tThe Board of Directors and the Executive Management have a fundamental",
                "iv.\tThe Board of Directors and the Executive Management may be held liable",
                "i.\tpossible conflicting interests between the Company",
                "ii.\tpossible conflicting interests between different groups",
-               "a.\tThe identity of the offeror(s)", "f.\tDetails of related party arrangements"]}
+               "a.\tThe identity of the offeror(s)", "f.\tDetails of related party arrangements"]},
+  {"id": "sub-heads-small", "label": "1.1 Purpose/1.2 Scope/1.3 Stakeholders/1.4 Introduction to the legal framework render small, at clause-indent level, not as oversized H1 headings — the source mis-tagged all four as 'Heading 1' alongside true top-level headings like '1 Introduction'; retagged to Normal so they match the already-correctly-sized '2.1 Board of Directors'-style sub-headings elsewhere in the same document (request 0e21d68e)",
+   "present": ["1.1\tPurpose", "1.3\tStakeholders", "1.4\tIntroduction to the legal framework"]},
+  {"id": "paren-cont-deep-indent", "label": "\"(each of the situations described in (a) and (b) above is referred to as a 'Takeover Scenario').\" nests at the lettered list's own deeper indent (it continues/closes out that list), not the shallow lead-in indent (request 0e21d68e, \"move to align with text in the above list\")",
+   "present": ["each of the situations described in (a) and (b) above is referred to as"]},
+  {"id": "coc-lead-in-indent", "label": "\"For the purposes of this Manual, 'Change of Control' means...\" moves inwards to the standard clause indent, not flush left (request 0e21d68e, \"move inwards to align with the list\")",
+   "present": ["For the purposes of this Manual"]},
+  {"id": "appendix-a-own-page", "label": "Appendix A starts on its own page, not sharing the page with section 7's closing content and the approval sentence (request 0e21d68e, \"move appendix to separate page\") — _is_schedule_heading previously only forced a page break for level-1 headings, but this document's Appendix headings are source-styled Heading 2",
+   "page": 7,
+   "absent": ["Appendix A – Introduction to the legal framework"]}
 ]

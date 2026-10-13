@@ -71,6 +71,7 @@ BODY_CENTER = ParagraphStyle("BodyCenter", parent=BODY, alignment=TA_CENTER)
 _ADOPTED = re.compile(r"^As adopted\b", re.I)
 BODY_HANG, BODY_HANG_LEFT = BODY, BODY_LEFT   # overridden per-policy by _set_clause_indent
 BODY_INDENT, BODY_INDENT_LEFT = BODY, BODY_LEFT   # overridden per-policy by _set_clause_indent
+BODY_INDENT_DEEP, BODY_INDENT_DEEP_LEFT = BODY, BODY_LEFT   # overridden per-policy by _set_clause_indent
 # Document title repeated as a lead heading on the first content page (some
 # originals, e.g. the Code of Conduct, open the body with the title in large bold).
 LEAD_TITLE = ParagraphStyle("LeadTitle", fontName=B.F_BOLD, fontSize=19, leading=22,
@@ -97,6 +98,14 @@ CELL_SEC = ParagraphStyle("CellSec", parent=CELL, fontName=B.F_DEMI,
 CELL_C = ParagraphStyle("CellC", parent=CELL, alignment=TA_CENTER)     # short marks (√, —)
 CELL_BULLET = ParagraphStyle("CellBullet", parent=CELL, leftIndent=10,
                              firstLineIndent=-8, spaceBefore=1.5)        # in-cell bullet
+# A lettered/roman-numeral list item retyped as literal text inside a table
+# cell ("i.\tThe Board of Directors...", "a.\tThe identity of..." — table
+# cells have no bulletText mechanism, so these are plain text markers) needs
+# the same hang-indent as a real list: wrapped lines align under the text,
+# not under the marker. Wider than CELL_BULLET since "iii."/"iv." are wider
+# than "•" (request 0e21d68e, Takeover Response Manual's liability table).
+CELL_NUM = ParagraphStyle("CellNum", parent=CELL, leftIndent=16,
+                          firstLineIndent=-16, spaceBefore=1.5)
 CELL_GAP = ParagraphStyle("CellGap", parent=CELL, spaceBefore=3.5)      # paragraph gap in a cell
 
 
@@ -113,6 +122,11 @@ _LONG = re.compile(r"\S{28,}")
 # marker) — avoids the redundant "• a." double marking.
 _LETTERED = re.compile(r"^\(?[a-z][.)]\s")
 _LETTERED_SPLIT = re.compile(r"^(\(?[a-z][.)])\s+(.*)$", re.S)
+# A paragraph that closes out a lettered list ("(each of the situations
+# described in (a) and (b) above is referred to as ...)") rather than
+# starting fresh prose — nests at the list's own deeper indent instead of
+# the shallow lead-in indent. See BODY_INDENT_DEEP.
+_PAREN_CONT = re.compile(r"^\(each\b", re.I)
 # A "Schedule N" / "Attachment A" / "Appendix"/"Annex" section (an annex-style
 # add-on at the end of the document) always starts its own page, regardless of
 # how much room is left on the current one — e.g. the Disclosure Committee
@@ -123,7 +137,11 @@ _SCHEDULE = re.compile(r"^(schedule|attachment|appendix|annex)\s+[a-z0-9]", re.I
 
 
 def _is_schedule_heading(b):
-    if not isinstance(b, Heading) or b.level != 1:
+    # Level 2 too: Takeover Response Manual's own "Appendix A – Introduction
+    # to the legal framework" is source-styled Heading 2 (request 0e21d68e,
+    # "move appendix to separate page") — a Schedule/Appendix/Attachment/
+    # Annex section always starts its own page regardless of heading level.
+    if not isinstance(b, Heading) or b.level not in (1, 2):
         return False
     t = b.text.strip()
     m = _NUM.match(t)
@@ -299,6 +317,11 @@ def _header_rows(rows, ncols, hdr):
              [Paragraph(escape(x), CELL_H) if x else "" for x in h1]], style)
 
 
+# A retyped lettered/roman-numeral list marker inside a table cell ("i.",
+# "ii.", "iii.", "a.", ...) — see CELL_NUM. Requires a space/tab after the
+# period (already collapsed to a space by model.py's _clean) so it doesn't
+# false-match an abbreviation like "e.g." (no space between the two periods).
+_CELL_MARKER = re.compile(r"^((?:[ivxlcdm]+|[a-z])\.)\s+(.*)$", re.I | re.S)
 _REC = re.compile(r"(The [Cc]ommittee recommends)")
 def _bold_rec(markup):
     """Render 'The Committee recommends' in Demi (bold) inside recommendation cells
@@ -317,8 +340,12 @@ def _cell_flowables(c):
     out = []
     for i, line in enumerate([ln.strip() for ln in c.split("\n") if ln.strip()]):
         rec = _bold_rec if i == 0 else (lambda m: m)
+        m = _CELL_MARKER.match(line)
         if line.startswith("• "):
             out.append(Paragraph("•&nbsp;&nbsp;" + rec(_fmt(line[2:], number=False, widow=False)), CELL_BULLET))
+        elif m:
+            out.append(Paragraph(f"{m.group(1)}&nbsp;&nbsp;" + rec(_fmt(m.group(2), number=False, widow=False)),
+                                 CELL_NUM))
         else:
             out.append(Paragraph(rec(_fmt(line, number=(i == 0), widow=False)),
                                   CELL if i == 0 else CELL_GAP))
@@ -827,7 +854,9 @@ def _story(policy):
                     else:
                         flow.append(Paragraph(_fmt(b.text), style))
                 elif prev_subhead:
-                    style = BODY_INDENT if justify else BODY_INDENT_LEFT
+                    deep = bool(_PAREN_CONT.match(b.text.strip()))
+                    style = ((BODY_INDENT_DEEP if deep else BODY_INDENT) if justify
+                             else (BODY_INDENT_DEEP_LEFT if deep else BODY_INDENT_LEFT))
                     flow.append(Paragraph(_fmt(b.text), style))
                 else:
                     style = BODY if justify else BODY_LEFT
@@ -850,13 +879,21 @@ def _story(policy):
                 # else: leave prev_subhead as-is — a sub-heading's content can
                 # span several paragraphs, all of which need the same indent.
         elif isinstance(b, Bullet):
-            prev_subhead = False
+            # A plain prose paragraph right after a lettered (a)/(b) list is
+            # that list's own closing/continuation text (e.g. "(each of the
+            # situations described in (a) and (b) above is referred to as a
+            # 'Takeover Scenario').") rather than fresh flush prose — it needs
+            # the same indent treatment as a numbered sub-heading's content
+            # (request 0e21d68e). A plain "•" bullet isn't followed by this
+            # pattern in practice, so it still resets flush.
+            is_lettered = bool(_LETTERED.match(b.text.strip()))
+            prev_subhead = is_lettered and bool(getattr(policy, "hanging_indent", False))
             nested_num_indent = False
-            if _LETTERED.match(b.text.strip()) and getattr(policy, "hanging_indent", False):
+            if is_lettered and getattr(policy, "hanging_indent", False):
                 lm = _LETTERED_SPLIT.match(b.text.strip())
                 flow.append(Paragraph(_fmt(lm.group(2), number=False), BULLET_HANG,
                                       bulletText=lm.group(1)))     # letter is the marker
-            elif _LETTERED.match(b.text.strip()):
+            elif is_lettered:
                 flow.append(Paragraph(_fmt(b.text), BULLET_HANG))     # letter is the marker (no hang)
             elif getattr(policy, "hanging_indent", False):
                 flow.append(Paragraph(_fmt(b.text), BULLET_PLAIN_HANG, bulletText="•"))
@@ -1200,11 +1237,12 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     with the fixed-position wrapped continuation lines below. bulletText draws
     the marker at a fixed `bulletIndent` independent of the paragraph text,
     which then starts at `leftIndent` on EVERY line, first or wrapped alike."""
-    global BODY_HANG, BODY_HANG_LEFT, BODY_HANG_DEEP, BODY_HANG_DEEP_LEFT, BULLET_HANG, BULLET_PLAIN_HANG, BODY_INDENT, BODY_INDENT_LEFT, H1_HANG, H2_HANG
+    global BODY_HANG, BODY_HANG_LEFT, BODY_HANG_DEEP, BODY_HANG_DEEP_LEFT, BULLET_HANG, BULLET_PLAIN_HANG, BODY_INDENT, BODY_INDENT_LEFT, BODY_INDENT_DEEP, BODY_INDENT_DEEP_LEFT, H1_HANG, H2_HANG
     if not enabled:
         BODY_HANG, BODY_HANG_LEFT, BULLET_HANG, BULLET_PLAIN_HANG = BODY, BODY_LEFT, BULLET, BULLET
         BODY_HANG_DEEP, BODY_HANG_DEEP_LEFT = BODY, BODY_LEFT
         BODY_INDENT, BODY_INDENT_LEFT = BODY, BODY_LEFT
+        BODY_INDENT_DEEP, BODY_INDENT_DEEP_LEFT = BODY, BODY_LEFT
         H1_HANG, H2_HANG = H1, H2
         return
     # The clause number is drawn in the same weight as the body text that
@@ -1250,6 +1288,15 @@ def _set_clause_indent(enabled, indent=CLAUSE_INDENT):
     # its one-and-only line flush at the margin instead of under the clause text.
     BODY_INDENT = ParagraphStyle("BodyIndent", parent=BODY, leftIndent=indent, firstLineIndent=0)
     BODY_INDENT_LEFT = ParagraphStyle("BodyIndentLeft", parent=BODY_LEFT, leftIndent=indent, firstLineIndent=0)
+    # Uniform indent at the DEEPER (lettered-item) column — for a paragraph
+    # that continues/closes out a lettered (a)/(b) list rather than starting
+    # fresh prose, e.g. Takeover Response Manual's "(each of the situations
+    # described in (a) and (b) above is referred to as a 'Takeover
+    # Scenario').", which reads as part of the list rather than a new
+    # sentence (request 0e21d68e, "move to align with text in the above
+    # list").
+    BODY_INDENT_DEEP = ParagraphStyle("BodyIndentDeep", parent=BODY, leftIndent=indent * 2, firstLineIndent=0)
+    BODY_INDENT_DEEP_LEFT = ParagraphStyle("BodyIndentDeepLeft", parent=BODY_LEFT, leftIndent=indent * 2, firstLineIndent=0)
     # A numbered section heading ("1 Name and objects") tab-aligns its title
     # to the same column as the clause text below it — per Marianne's
     # reference layout, where "Name and objects" and "The Company's name..."

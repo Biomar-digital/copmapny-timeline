@@ -1,15 +1,15 @@
 {
   "request_id": "f10154e4-cc1d-47ab-9eca-2a661e6141f6",
   "policy": "takeover-response-manual",
-  "generated_at": "2026-10-08 07:58 UTC",
+  "generated_at": "2026-10-13 13:46 UTC",
   "overall": "attention",
-  "summary": "16 passed, 1 to review",
+  "summary": "20 passed, 1 to review",
   "checks": [
     {
       "id": "outputs",
       "label": "Rendered PDF exists and is non-empty",
       "status": "pass",
-      "detail": "11 pages"
+      "detail": "12 pages"
     },
     {
       "id": "word",
@@ -103,7 +103,31 @@
     },
     {
       "id": "assert:table-roman-lettered-lists",
-      "label": "The two numbered lists inside the 'Specific liability in Takeover Scenarios' table cell (i.-iv., then a restarted i.-ii.) and the lettered a.-f. list inside the 'Offer document' table cell are present — a distinct blind spot from the body-text one: model.py's table-cell renderer only ever adds a bullet for 'List Paragraph'-styled cells and has no numbered/lettered handling at all, so these numId-only markers (direct numId, no literal marker) were silently dropped",
+      "label": "The two numbered lists inside the 'Specific liability in Takeover Scenarios' table cell (i.-iv., then a restarted i.-ii.) and the lettered a.-f. list inside the 'Offer document' table cell are present, and now hang-indent properly (wrapped lines align under the text, not under the marker — new CELL_NUM style, request 0e21d68e, \"amend table to align with the attached document\")",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:sub-heads-small",
+      "label": "1.1 Purpose/1.2 Scope/1.3 Stakeholders/1.4 Introduction to the legal framework render small, at clause-indent level, not as oversized H1 headings — the source mis-tagged all four as 'Heading 1' alongside true top-level headings like '1 Introduction'; retagged to Normal so they match the already-correctly-sized '2.1 Board of Directors'-style sub-headings elsewhere in the same document (request 0e21d68e)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:paren-cont-deep-indent",
+      "label": "\"(each of the situations described in (a) and (b) above is referred to as a 'Takeover Scenario').\" nests at the lettered list's own deeper indent (it continues/closes out that list), not the shallow lead-in indent (request 0e21d68e, \"move to align with text in the above list\")",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:coc-lead-in-indent",
+      "label": "\"For the purposes of this Manual, 'Change of Control' means...\" moves inwards to the standard clause indent, not flush left (request 0e21d68e, \"move inwards to align with the list\")",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:appendix-a-own-page",
+      "label": "Appendix A starts on its own page, not sharing the page with section 7's closing content and the approval sentence (request 0e21d68e, \"move appendix to separate page\") — _is_schedule_heading previously only forced a page break for level-1 headings, but this document's Appendix headings are source-styled Heading 2",
       "status": "pass",
       "detail": ""
     }
