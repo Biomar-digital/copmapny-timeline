@@ -35,5 +35,24 @@
     "text": "Please move inwards to align with the text in the below clause.",
     "included_in": [],
     "created_at": "2026-10-13T12:21:56.315Z"
+  },
+  {
+    "id": "116cc364-d88f-4690-be15-9c2afd2f2373",
+    "file": "files/Management_Instructions__Policy_2026-10_non-approval.pdf",
+    "page": 4,
+    "quote": "r",
+    "rects": [
+      {
+        "x": 0.47512394488489434,
+        "y": 0.6347076533908907,
+        "w": 0.006796917532713733,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-10",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Please remove full stop",
+    "included_in": [],
+    "created_at": "2026-10-13T12:22:53.881Z"
   }
 ]
