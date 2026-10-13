@@ -181,25 +181,36 @@ def _fmt(text, number=True, widow=True, lstrip=True, rstrip=True):
     return escape(t)
 
 
-def _body_markup(b, strip_number=False):
-    """Markup for a Body block, wrapping any run-in bold/italic segment in the
-    brand's Demi/Italic face. Uses explicit <font name="Brand-Demi"/"Brand-
-    Italic"> tags rather than <b>/<i> — ReportLab's <b>/<i> only resolve to a
-    styled face via a registered font family (registerFontFamily), which this
-    pipeline never sets up; every other styled spot in this file (clause
-    numbers, table headers) already uses <font name=...> for the same reason.
-    A run that is both bold and italic renders bold — there is no bundled
-    bold-italic face to combine the two.
+def _body_markup(b, strip_number=False, skip_len=None):
+    """Markup for a Body/Bullet block, wrapping any run-in bold/italic segment
+    in the brand's Demi/Italic face. Uses explicit <font name="Brand-Demi"/
+    "Brand-Italic"> tags rather than <b>/<i> — ReportLab's <b>/<i> only
+    resolve to a styled face via a registered font family
+    (registerFontFamily), which this pipeline never sets up; every other
+    styled spot in this file (clause numbers, table headers) already uses
+    <font name=...> for the same reason. A run that is both bold and italic
+    renders bold — there is no bundled bold-italic face to combine the two.
 
     strip_number=True drops a leading clause number ("1.4 ...") from the
     first run instead of bolding it in place — used when the caller (a
     hanging_indent policy) draws that number itself via bulletText, so a
     numbered clause that happens to mix runs (e.g. an inline bold term right
     after the number) still hang-indents like every other numbered clause
-    instead of falling back to the plain inline-bold-number layout."""
+    instead of falling back to the plain inline-bold-number layout.
+
+    skip_len=N strips exactly N leading characters instead (a lettered
+    marker — "(e)\t" — rather than a decimal clause number; the caller
+    already knows the marker's length from its own regex match, e.g.
+    _LETTERED_SPLIT, so there is no separate pattern to match here)."""
     runs = getattr(b, "runs", None)
     if not runs:
+        if skip_len is not None:
+            # No mixed-style runs to preserve — just drop the marker the
+            # caller already extracted into bulletText, same as the old
+            # `_fmt(lm.group(2), number=False)` call this replaced.
+            return _fmt(b.text.strip()[skip_len:], number=False)
         return _fmt(b.text, number=not strip_number)
+    skip = None
     if strip_number:
         # The clause number + following whitespace can land entirely inside
         # run 0 ("1.4 text..." all one run) or, when Word happens to split a
@@ -212,18 +223,20 @@ def _body_markup(b, strip_number=False):
         # twice, once as the bulletText and once in the body — when it
         # doesn't fit inside that single run.
         m = _NUM.match(b.text.strip())
-        if m:
-            skip = len(m.group(1)) + len(m.group(2))
-            new_runs = []
-            for t, bd, it in runs:
-                if skip <= 0:
-                    new_runs.append((t, bd, it))
-                elif len(t) <= skip:
-                    skip -= len(t)
-                else:
-                    new_runs.append((t[skip:], bd, it))
-                    skip = 0
-            runs = new_runs
+        skip = (len(m.group(1)) + len(m.group(2))) if m else None
+    elif skip_len is not None:
+        skip = skip_len
+    if skip:
+        new_runs = []
+        for t, bd, it in runs:
+            if skip <= 0:
+                new_runs.append((t, bd, it))
+            elif len(t) <= skip:
+                skip -= len(t)
+            else:
+                new_runs.append((t[skip:], bd, it))
+                skip = 0
+        runs = new_runs
     n = len(runs)
     out = []
     for i, (t, bd, it) in enumerate(runs):
@@ -891,12 +904,18 @@ def _story(policy):
             nested_num_indent = False
             if is_lettered and getattr(policy, "hanging_indent", False):
                 lm = _LETTERED_SPLIT.match(b.text.strip())
-                flow.append(Paragraph(_fmt(lm.group(2), number=False), BULLET_HANG,
+                # The marker's own length (not just lm.group(1)) — b.text may
+                # carry a tab/space between marker and text that .strip()'s
+                # group(2) already excludes, so the skip count must come from
+                # the gap between the two matched groups' lengths, not the
+                # marker text alone (request 5c77202f's inline-bold fix).
+                skip_len = len(b.text.strip()) - len(lm.group(2))
+                flow.append(Paragraph(_body_markup(b, skip_len=skip_len), BULLET_HANG,
                                       bulletText=lm.group(1)))     # letter is the marker
             elif is_lettered:
-                flow.append(Paragraph(_fmt(b.text), BULLET_HANG))     # letter is the marker (no hang)
+                flow.append(Paragraph(_body_markup(b), BULLET_HANG))     # letter is the marker (no hang)
             elif getattr(policy, "hanging_indent", False):
-                flow.append(Paragraph(_fmt(b.text), BULLET_PLAIN_HANG, bulletText="•"))
+                flow.append(Paragraph(_body_markup(b), BULLET_PLAIN_HANG, bulletText="•"))
                 # Extra breathing room once the list ends (request 3d497671,
                 # "more spacing ... at the end of a list") — scoped to
                 # hanging_indent policies only, matching the deeper-indent
@@ -907,7 +926,7 @@ def _story(policy):
                 if not isinstance(nxt, Bullet):
                     flow.append(Spacer(1, 6))
             else:
-                flow.append(Paragraph(_fmt(b.text), BULLET, bulletText="•"))
+                flow.append(Paragraph(_body_markup(b), BULLET, bulletText="•"))
         elif isinstance(b, TableBlock):
             prev_subhead = False
             nested_num_indent = False

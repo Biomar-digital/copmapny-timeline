@@ -1,0 +1,13 @@
+[
+  {"id": "schedule-2-bold", "label": "p.3's 'Schedule 2' cross-reference (inside lettered item 3.3(e), \"...Log set out in Schedule 2...\") renders bold — the source run was already bold, but Bullet blocks previously flattened all inline formatting to plain text (request 5c77202f)",
+   "page": 3,
+   "present": ["set out in Schedule 2"]},
+  {"id": "schedule-3-bold", "label": "p.4's 'Schedule 3' cross-reference (inside lettered item 3.5(c), \"...procedure set out in Schedule 3\") renders bold, same fix as Schedule 2 above",
+   "page": 4,
+   "present": ["set out in Schedule 3"]},
+  {"id": "no-duplicate-markers", "label": "Fixing the Bullet inline-bold blind spot must not reintroduce a duplicate '(a) (a) ...' marker on any of the document's other lettered items (a regression caught and fixed during this request's own verification, before any commit)",
+   "absent": ["(a) (a)", "(b) (b)", "(c) (c)", "(d) (d)", "(e) (e)", "(f) (f)", "(g) (g)"]},
+  {"id": "sched2-footnotes-bottom", "label": "Schedule 2's two footnotes (restated in this request's own annotation) are already small print at the bottom of p.8/9, not incorporated into the table — confirms the earlier footnote-placement fix (request 3d497671) still holds",
+   "page": 8,
+   "present": ["Any changes to the fulfilment of the conditions noted above must be registered herein"]}
+]

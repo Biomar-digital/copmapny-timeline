@@ -220,13 +220,30 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     return p
 
 
-def _bullet(doc, text, size=11, hang=False, plain_hang=False, indent=CLAUSE_INDENT):
+def _bullet(doc, text, size=11, hang=False, plain_hang=False, indent=CLAUSE_INDENT, runs=None):
     # A lettered item ("a. ...") already carries its own marker in the text,
     # so it must NOT also get Word's automatic "List Bullet" glyph — same
     # double-marker bug the PDF generator guards against. Use a plain
     # paragraph with a manual hanging indent instead. Nests one level deeper
     # than the numbered clauses: marker at `indent` (same column as "1.1"),
     # text at 2x that — see generator.py's BULLET_HANG for the reasoning.
+    #
+    # runs, when given, is the mixed-style (text, bold, italic) list from the
+    # source Bullet block — preserves an inline bold cross-reference (e.g.
+    # "set out in **Schedule 2**") that plain `text` would otherwise flatten
+    # (request 5c77202f).
+    def _runs_after(skip, rlist):
+        out = []
+        for t, b, i in rlist:
+            if skip <= 0:
+                out.append((t, b, i))
+            elif len(t) <= skip:
+                skip -= len(t)
+            else:
+                out.append((t[skip:], b, i))
+                skip = 0
+        return out
+
     m = _LETTERED_SPLIT.match(text.strip()) if hang else None
     if m:
         text_indent = indent * 2
@@ -235,7 +252,13 @@ def _bullet(doc, text, size=11, hang=False, plain_hang=False, indent=CLAUSE_INDE
         p.paragraph_format.first_line_indent = Pt(-(text_indent - indent))
         p.paragraph_format.tab_stops.add_tab_stop(Pt(text_indent), WD_TAB_ALIGNMENT.LEFT)
         p.paragraph_format.space_after = Pt(4)
-        _run(p, f"{m.group(1)}\t{m.group(2)}", size=size)
+        if runs:
+            _run(p, f"{m.group(1)}\t", size=size)
+            skip = len(text.strip()) - len(m.group(2))
+            for t, b, i in _runs_after(skip, runs):
+                _run(p, t, bold=b, italic=i, size=size)
+        else:
+            _run(p, f"{m.group(1)}\t{m.group(2)}", size=size)
         return p
     if plain_hang:
         # A plain "•" bullet in a hanging_indent policy: same deeper indent as
@@ -249,11 +272,20 @@ def _bullet(doc, text, size=11, hang=False, plain_hang=False, indent=CLAUSE_INDE
         p.paragraph_format.first_line_indent = Pt(-(text_indent - indent))
         p.paragraph_format.tab_stops.add_tab_stop(Pt(text_indent), WD_TAB_ALIGNMENT.LEFT)
         p.paragraph_format.space_after = Pt(8)
-        _run(p, f"•\t{text}", size=size)
+        if runs:
+            _run(p, "•\t", size=size)
+            for t, b, i in runs:
+                _run(p, t, bold=b, italic=i, size=size)
+        else:
+            _run(p, f"•\t{text}", size=size)
         return p
     p = doc.add_paragraph(style="List Bullet")
     p.paragraph_format.space_after = Pt(4)
-    _run(p, text, size=size)
+    if runs:
+        for t, b, i in runs:
+            _run(p, t, bold=b, italic=i, size=size)
+    else:
+        _run(p, text, size=size)
     return p
 
 
@@ -311,7 +343,7 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
             is_lettered = bool(_LETTERED.match(blk.text.strip()))
             plain_hang = hanging_indent and not is_lettered
             p = _bullet(doc, blk.text, size, hang=hanging_indent and is_lettered,
-                        plain_hang=plain_hang, indent=indent)
+                        plain_hang=plain_hang, indent=indent, runs=getattr(blk, "runs", None))
             # Extra breathing room once the list ends — see the matching
             # comment in generator.py (request 3d497671). Scoped to
             # hanging_indent plain bullets only, like the deeper indent above.

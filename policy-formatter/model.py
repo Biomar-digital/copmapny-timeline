@@ -43,6 +43,7 @@ class Body:
 @dataclass
 class Bullet:
     text: str
+    runs: list = None        # optional [(text, bold, italic)] for mixed-style runs
 
 @dataclass
 class TableBlock:
@@ -301,14 +302,34 @@ def _classify(text: str, style: str):
     return "body", 0
 
 
+def _run_list(item):
+    return [(r.text, bool(r.bold), bool(r.italic))
+            for r in item.runs if r.text and (r.text.strip() or r.text == " ")
+            and "<w:footnoteReference" not in r._r.xml]
+
+
+def _mixed_runs(item):
+    """Return the paragraph's per-run (text, bold, italic) list when it mixes
+    styles (e.g. an inline bold cross-reference — "set out in **Schedule
+    2**" — amid otherwise plain text), else None. Shared by Body and Bullet
+    construction so a lettered/bulleted clause's inline bold isn't silently
+    flattened the way a plain `.text` string would (request 5c77202f — a
+    lettered sub-item's "Schedule 2"/"Schedule 3" cross-reference wasn't
+    rendering bold even though the source run was)."""
+    rlist = _run_list(item)
+    allb = bool(rlist) and all(b for _, b, _ in rlist)
+    alli = bool(rlist) and all(i for _, _, i in rlist)
+    mixed_bold = any(b for _, b, _ in rlist) and not allb
+    mixed_italic = any(i for _, _, i in rlist) and not alli
+    return rlist if (mixed_bold or mixed_italic) else None
+
+
 def _body_from_runs(item, text, style=""):
     """Build a Body, keeping per-run (bold, italic) — a run-in bold label, a
     word or two in italic within an otherwise plain sentence, etc. — when the
     paragraph mixes styles; otherwise collapse to a single bold/italic flag
     for the whole paragraph."""
-    rlist = [(r.text, bool(r.bold), bool(r.italic))
-             for r in item.runs if r.text and (r.text.strip() or r.text == " ")
-             and "<w:footnoteReference" not in r._r.xml]
+    rlist = _run_list(item)
     allb = bool(rlist) and all(b for _, b, _ in rlist)
     alli = bool(rlist) and all(i for _, _, i in rlist)
     mixed_bold = any(b for _, b, _ in rlist) and not allb
@@ -411,7 +432,7 @@ def parse_docx(path: str, title: Optional[str] = None,
         if kind == "heading":
             blocks.append(Heading(level=level, text=text))
         elif kind == "bullet":
-            blocks.append(Bullet(text=text))
+            blocks.append(Bullet(text=text, runs=_mixed_runs(item)))
         else:
             blocks.append(_body_from_runs(item, text, style))
         # A footnote reference on a regular paragraph (not a table cell —

@@ -1,0 +1,69 @@
+{
+  "request_id": "5c77202f-ec99-4d4d-a76e-0d03fa669282",
+  "policy": "disclosure-committee-charter",
+  "generated_at": "2026-10-13 14:29 UTC",
+  "overall": "attention",
+  "summary": "9 passed, 1 to review",
+  "checks": [
+    {
+      "id": "outputs",
+      "label": "Rendered PDF exists and is non-empty",
+      "status": "pass",
+      "detail": "10 pages"
+    },
+    {
+      "id": "word",
+      "label": "Editable Word (.docx) produced",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "variants",
+      "label": "Variants match request (Signed + Unsigned)",
+      "status": "pass",
+      "detail": "produced: Signed + Unsigned"
+    },
+    {
+      "id": "metadata",
+      "label": "Approver / owner / approval date present",
+      "status": "attention",
+      "detail": "missing: owner"
+    },
+    {
+      "id": "coverage",
+      "label": "All source content appears in the PDF",
+      "status": "pass",
+      "detail": "63/63 passages found"
+    },
+    {
+      "id": "ligatures",
+      "label": "No raw ligatures left",
+      "status": "pass",
+      "detail": "clean"
+    },
+    {
+      "id": "assert:schedule-2-bold",
+      "label": "p.3's 'Schedule 2' cross-reference (inside lettered item 3.3(e), \"...Log set out in Schedule 2...\") renders bold — the source run was already bold, but Bullet blocks previously flattened all inline formatting to plain text (request 5c77202f)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:schedule-3-bold",
+      "label": "p.4's 'Schedule 3' cross-reference (inside lettered item 3.5(c), \"...procedure set out in Schedule 3\") renders bold, same fix as Schedule 2 above",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:no-duplicate-markers",
+      "label": "Fixing the Bullet inline-bold blind spot must not reintroduce a duplicate '(a) (a) ...' marker on any of the document's other lettered items (a regression caught and fixed during this request's own verification, before any commit)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:sched2-footnotes-bottom",
+      "label": "Schedule 2's two footnotes (restated in this request's own annotation) are already small print at the bottom of p.8/9, not incorporated into the table — confirms the earlier footnote-placement fix (request 3d497671) still holds",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}
