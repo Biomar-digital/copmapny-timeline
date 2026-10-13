@@ -55,5 +55,42 @@
     "text": "Please move to align the with text in the above list",
     "included_in": [],
     "created_at": "2026-10-13T12:34:20.371Z"
+  },
+  {
+    "id": "0f574dc4-be1d-40d5-b0bb-0a0f7e92d49e",
+    "file": "files/Takeover_Response_Manual__Policy_2026-10_non-approval.pdf",
+    "page": 2,
+    "quote": "For the purposes of this Manual, “Change of Control” means a direct or indirect transfer of a\nshareholding in the Company to an acquirer (acting alone or in concert with others) whereby the\nacquirer obtains control of",
+    "rects": [
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7294161316487716,
+        "w": 0.9235366619840174,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7492954261125393,
+        "w": 0.9235472951624507,
+        "h": 0.014077729966042975
+      },
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7484155679896617,
+        "w": 0.9235472951624507,
+        "h": 0.014957588088920662
+      },
+      {
+        "x": 0.07139662849254341,
+        "y": 0.7674150043305517,
+        "w": 0.24000777437246018,
+        "h": 0.014957588088920662
+      }
+    ],
+    "edition": "Version 1__2026-10",
+    "author": "Marianne Niviaq Thomsen",
+    "text": "Please move inwards to align with the list as in the attached document",
+    "included_in": [],
+    "created_at": "2026-10-13T12:35:02.754Z"
   }
 ]
