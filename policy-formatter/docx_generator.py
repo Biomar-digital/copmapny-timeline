@@ -356,11 +356,12 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
             p = _bullet(doc, blk.text, size, hang=hanging_indent and is_lettered,
                         plain_hang=plain_hang, indent=indent, runs=getattr(blk, "runs", None))
             # Extra breathing room once the list ends — see the matching
-            # comment in generator.py (request 3d497671). Scoped to
-            # hanging_indent plain bullets only, like the deeper indent above.
+            # comment in generator.py (request 3d497671; request e4305282
+            # for the heading exception). Scoped to hanging_indent plain
+            # bullets only, like the deeper indent above.
             if plain_hang:
                 nxt = blocks[idx + 1] if idx + 1 < len(blocks) else None
-                if not isinstance(nxt, M.Bullet):
+                if not isinstance(nxt, (M.Bullet, M.Heading)):
                     p.paragraph_format.space_after = Pt((p.paragraph_format.space_after or Pt(0)).pt + 6)
             # A plain prose paragraph right after a lettered list is that
             # list's own closing/continuation text, not fresh flush prose —

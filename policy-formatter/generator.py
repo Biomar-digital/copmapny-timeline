@@ -960,10 +960,15 @@ def _story(policy):
                 # "more spacing ... at the end of a list") — scoped to
                 # hanging_indent policies only, matching the deeper-indent
                 # treatment above; other policies' bullet spacing is
-                # untouched. The next block is a fresh paragraph/heading/
-                # table, not another item of this same list.
+                # untouched. The next block is a fresh paragraph/table, not
+                # another item of this same list — but not a heading either:
+                # a Heading already carries its own spaceBefore, so adding
+                # this on top left a visibly bigger gap before a heading than
+                # before any other heading in the same document (request
+                # e4305282, "extra space between section 5.2 and the heading
+                # for section 6").
                 nxt = blocks[i + 1] if i + 1 < len(blocks) else None
-                if not isinstance(nxt, Bullet):
+                if not isinstance(nxt, (Bullet, Heading)):
                     flow.append(Spacer(1, 6))
             else:
                 flow.append(Paragraph(_body_markup(b), BULLET, bulletText="•"))

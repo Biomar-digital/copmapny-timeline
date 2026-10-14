@@ -513,7 +513,7 @@
     "policy": "investor-relations-policy",
     "request_id": "e4305282-92d2-4a04-9620-c16a65d426b3",
     "title": "Change: investor-relations-policy",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791893997515

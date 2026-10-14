@@ -1,0 +1,5 @@
+[
+  {"id": "no-extra-space-before-6", "label": "p.4's '6. Strong IR governance and compliance' heading no longer has extra vertical space above it compared to the other headings — the end-of-bullet-list spacer (meant for a list followed by more flush prose) was firing even when the next block is itself a Heading, which already carries its own spacing (request e4305282)",
+   "page": 4,
+   "present": ["Strong IR governance and compliance", "Adoption and publication"]}
+]
