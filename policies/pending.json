@@ -526,7 +526,8 @@
     "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1791894230644
+    "created_at": 1791894230644,
+    "notified": true
   },
   {
     "id": "ef36c69b-871a-447b-a050-3774e2964dbf",
