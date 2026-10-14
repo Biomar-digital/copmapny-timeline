@@ -523,7 +523,7 @@
     "policy": "management-instructions",
     "request_id": "a11bc6a5-f880-4bc6-b34e-1e845fa8800d",
     "title": "Change: management-instructions",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791894230644

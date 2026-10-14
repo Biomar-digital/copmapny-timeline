@@ -866,6 +866,20 @@ def _story(policy):
                         flow.append(Paragraph(_fmt(m.group(3), number=False), style, bulletText=m.group(1)))
                     else:
                         flow.append(Paragraph(_fmt(b.text), style))
+                elif nested_num_indent:
+                    # Plain prose immediately after a nested bare-numbered
+                    # list ("1." ... "7.", as opposed to a lettered Bullet
+                    # list, already handled by prev_subhead above) is that
+                    # list's own lead-in/closing continuation and needs the
+                    # list's own deep indent, not a flush fallback — the
+                    # list's own last item ends with terminal punctuation, so
+                    # it correctly isn't itself treated as a short sub-heading
+                    # (prev_subhead stays False), but nested_num_indent still
+                    # carries the "we're nested under 4.3" state forward
+                    # (request a11bc6a5, "move inwards to align with the text
+                    # in the below clause").
+                    style = (BODY_INDENT_DEEP if justify else BODY_INDENT_DEEP_LEFT)
+                    flow.append(Paragraph(_fmt(b.text), style))
                 elif prev_subhead:
                     deep = bool(_PAREN_CONT.match(b.text.strip()))
                     style = ((BODY_INDENT_DEEP if deep else BODY_INDENT) if justify

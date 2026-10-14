@@ -1,0 +1,11 @@
+[
+  {"id": "doubt-clause-deep-indent", "label": "p.3's 'In case of doubt, ...' paragraph (closing continuation of 4.3's bare-numbered list 1.-7.) moves inwards to align with the list's own text column instead of sitting flush at the margin — the list's own last item (\"7. ...decision.\") ends in terminal punctuation so it isn't itself treated as a short sub-heading, but the nested-list state must still carry forward to this un-numbered continuation paragraph (request a11bc6a5)",
+   "page": 3,
+   "present": ["In case of doubt, the matters in question"]},
+  {"id": "no-duplicate-markers", "label": "The new nested_num_indent-continuation branch must not reintroduce a duplicate marker on any numbered/lettered item elsewhere in the document",
+   "absent": ["1. 1.", "(a) (a)", "(b) (b)", "(c) (c)", "(f) (f)"]},
+  {"id": "item-f-no-fullstop", "label": "p.4's item 5.1(f) \"...(e.g. material compliance matters)\" has its stray trailing full stop removed — every other item in the same (a)-(f) list has no terminal punctuation",
+   "page": 4,
+   "present": ["(e.g. material compliance matters)"],
+   "absent": ["(e.g. material compliance matters)."]}
+]

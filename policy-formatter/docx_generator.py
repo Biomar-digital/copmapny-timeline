@@ -403,6 +403,18 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
                 # sets it fresh for whatever bare items follow.
                 if not _BARE_NUM.match(m.group(1)):
                     nested_num_indent = stripped.endswith(":")
+            elif nested_num_indent:
+                # Plain prose immediately after a nested bare-numbered list
+                # ("1." ... "7.") is that list's own lead-in/closing
+                # continuation and needs the list's own deep indent — the
+                # list's last item ends with terminal punctuation so it isn't
+                # itself treated as a short sub-heading (prev_subhead stays
+                # False), but nested_num_indent still carries the "nested
+                # under its parent clause" state forward (request a11bc6a5,
+                # "move inwards to align with the text in the below clause").
+                _body(doc, blk, size, indent_mode="uniform_deep", indent=indent)
+                # leave nested_num_indent as-is, same reasoning as prev_subhead
+                # below: the continuation can span several paragraphs.
             elif prev_subhead:
                 deep = bool(_PAREN_CONT.match(blk.text.strip()))
                 _body(doc, blk, size, indent_mode="uniform_deep" if deep else "uniform", indent=indent)
