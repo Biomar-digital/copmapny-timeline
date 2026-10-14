@@ -1,0 +1,14 @@
+[
+  {"id": "toc-present", "label": "A table of contents listing all 17 top-level sections with real page numbers (matching this document's own pagination, not copied from the reference's different pagination) is inserted right after the cover, before '1 Introduction' begins",
+   "page": 2,
+   "present": ["Contents", "1 Introduction", "17 Review and amendment of the Rules of Procedure"]},
+  {"id": "toc-pagenum-accurate", "label": "'1 Introduction' is listed with page 3, matching where it actually starts",
+   "page": 3,
+   "present": ["1", "Introduction"]},
+  {"id": "sub-heading-3.1-demoted", "label": "'3.1 Meetings, venue and electronic means of communication' renders at the smaller sub-heading size (Heading 2 equivalent), not the same size as top-level heading '3 Meetings of the Board of Directors' — the source mis-tags both identically as 'Heading 1', so the classifier now demotes any dotted-number ('N.M') short heading one level (request a2f179f7)",
+   "present": ["Meetings, venue and electronic means of communication"]},
+  {"id": "doubt-clause-indent", "label": "p.6 (rendered) 'The responsibilities of the Board of Directors include the following:' moves inwards to align with clause 4.1/4.2's own text column instead of sitting flush left",
+   "present": ["The responsibilities of the Board of Directors include the following:"]},
+  {"id": "no-duplicate-markers", "label": "None of the heading-level or indent changes reintroduce a duplicate clause/lettered marker anywhere in the document",
+   "absent": ["(a) (a)", "(b) (b)", "4.2 4.2", "1 1\tIntroduction"]}
+]

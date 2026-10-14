@@ -84,6 +84,7 @@ class Policy:
     version_date: str = ""    # date shown on the version line (defaults to approval date)
     has_signed: bool = False  # this unsigned render has a signed sibling (-> drop the card)
     category: str = "Policy"  # "Policy" | "Guideline" | "Position Statement" — Guideline swaps the cover colour
+    toc: bool = False         # insert an auto-paginated table of contents after the cover (request a2f179f7)
 
 
 def _para_images(item):
@@ -290,6 +291,9 @@ def _heading_like(text: str) -> bool:
     return len(shape_text.split()) <= 15 and not text.rstrip().endswith((".", ":", ";"))
 
 
+_DOTTED_NUM = re.compile(r'^\d+\.\d+(\.\d+)*\.?\s')
+
+
 def _classify(text: str, style: str):
     """Return ('heading', level) | ('bullet', 0) | ('body', 0)."""
     s = (style or "").lower()
@@ -298,7 +302,20 @@ def _classify(text: str, style: str):
     if "heading 2" in s or s == "subtitle":
         return ("heading", 2) if _heading_like(text) else ("body", 0)
     if "heading 1" in s or s in ("heading", "title"):
-        return ("heading", 1) if _heading_like(text) else ("body", 0)
+        if not _heading_like(text):
+            return "body", 0
+        # A "Heading 1"-styled paragraph whose own clause number has more
+        # than one component ("3.1 Meetings, venue...", "5.2. Principle
+        # 2...") is really a second-level sub-heading nested under a bare-
+        # numbered top-level heading ("3 Meetings of the Board of
+        # Directors") even though Word tagged both identically — demote it
+        # to level 2 so it renders smaller, matching its true place in the
+        # hierarchy (request a2f179f7). Also corrects a pre-existing
+        # instance of the same mis-tagging in Travel Policy Implementation
+        # Guidelines, where sibling heading "5.1." was already (correctly)
+        # Heading 2 while "5.2./5.3./5.4." were still Heading 1 — spotted
+        # via the library-wide diff-safety check while verifying this fix.
+        return ("heading", 2) if _DOTTED_NUM.match(text.strip()) else ("heading", 1)
     return "body", 0
 
 

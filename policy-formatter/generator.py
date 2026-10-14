@@ -13,6 +13,7 @@ from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame,
                                 Paragraph, Spacer, Table, TableStyle,
                                 NextPageTemplate, PageBreak, KeepTogether, Flowable)
 from reportlab.platypus.flowables import HRFlowable, BalancedColumns
+from reportlab.platypus.tableofcontents import TableOfContents
 from xml.sax.saxutils import escape
 import re
 
@@ -98,6 +99,12 @@ CELL_SEC = ParagraphStyle("CellSec", parent=CELL, fontName=B.F_DEMI,
 CELL_C = ParagraphStyle("CellC", parent=CELL, alignment=TA_CENTER)     # short marks (√, —)
 CELL_BULLET = ParagraphStyle("CellBullet", parent=CELL, leftIndent=10,
                              firstLineIndent=-8, spaceBefore=1.5)        # in-cell bullet
+# Table of contents (request a2f179f7) — top-level ("1 Introduction") headings
+# only, matching the reference document's own manually-typed TOC, but with
+# real page numbers from this rendering rather than copied from the original
+# (whose pagination differs from ours).
+TOC_ENTRY = ParagraphStyle("TOCEntry", fontName=B.F_REGULAR, fontSize=11, leading=16,
+                           textColor=B.BIOMAR_BLUE, spaceAfter=6)
 # A lettered/roman-numeral list item retyped as literal text inside a table
 # cell ("i.\tThe Board of Directors...", "a.\tThe identity of..." — table
 # cells have no bulletText mechanism, so these are plain text markers) needs
@@ -788,6 +795,11 @@ def _story(policy):
                 flow.append(Paragraph(escape(m.group(3)), hstyle, bulletText=m.group(1)))
             else:
                 flow.append(Paragraph(escape(b.text), style))
+            if getattr(policy, "toc", False) and b.level == 1:
+                # Top-level heading only (matches the reference TOC, which
+                # never lists "3.1"-style sub-headings) — picked up by
+                # _PolicyDocTemplate.afterFlowable below.
+                flow[-1]._toc_title = escape(b.text)
             # An un-numbered paragraph right after a top-level heading ("3
             # Remuneration of the members of the Board of Directors" / "The
             # remuneration offered to...") is that section's lead-in text, not
@@ -884,6 +896,20 @@ def _story(policy):
                     deep = bool(_PAREN_CONT.match(b.text.strip()))
                     style = ((BODY_INDENT_DEEP if deep else BODY_INDENT) if justify
                              else (BODY_INDENT_DEEP_LEFT if deep else BODY_INDENT_LEFT))
+                    flow.append(Paragraph(_fmt(b.text), style))
+                elif getattr(policy, "hanging_indent", False) and b.text.strip().endswith(":"):
+                    # An un-numbered lead-in sentence that itself ends with a
+                    # colon (introducing the numbered sub-clauses that
+                    # follow, e.g. "The responsibilities of the Board of
+                    # Directors include the following:" before 4.2/4.3/4.4)
+                    # is logically still the tail of the clause above it and
+                    # needs that clause's own indent, not a flush fallback
+                    # (request a2f179f7, "move inwards to align with the
+                    # text in the below clause"). A full-library scan of
+                    # every hanging_indent source found exactly one such
+                    # paragraph, so this is safe to apply unconditionally
+                    # rather than needing to track state forward/backward.
+                    style = BODY_INDENT if justify else BODY_INDENT_LEFT
                     flow.append(Paragraph(_fmt(b.text), style))
                 else:
                     style = BODY if justify else BODY_LEFT
@@ -1372,12 +1398,36 @@ def _required_clause_indent(policy, base=CLAUSE_INDENT):
     return max(base, widest + MIN_NUMBER_GAP)
 
 
+class _PolicyDocTemplate(BaseDocTemplate):
+    """Only differs from BaseDocTemplate when policy.toc is set: registers a
+    TOCEntry (and a clickable bookmark) for every top-level-heading Paragraph
+    the story tags with `_toc_title` (see _story()'s Heading branch) — the
+    standard reportlab TOC pattern, requiring multiBuild() instead of build()
+    so the table's page numbers have a first pass to settle against."""
+    def afterFlowable(self, flowable):
+        title = getattr(flowable, "_toc_title", None)
+        if title is None:
+            return
+        key = f"toc-{id(flowable)}"
+        self.canv.bookmarkPage(key)
+        self.canv.addOutlineEntry(flowable.getPlainText(), key, level=0)
+        self.notify("TOCEntry", (0, title, self.page, key))
+
+
+def _toc_flowable():
+    toc = TableOfContents()
+    toc.levelStyles = [TOC_ENTRY]
+    toc.dotsMinLevel = 0
+    return toc
+
+
 def build_pdf(policy, out_path):
     _set_body_size(getattr(policy, "body_size", 11) or 11)
     _set_heading_size(getattr(policy, "head_scale", 1.0) or 1.0)
     hanging = getattr(policy, "hanging_indent", False)
     _set_clause_indent(hanging, indent=_required_clause_indent(policy) if hanging else CLAUSE_INDENT)
-    doc = BaseDocTemplate(
+    has_toc = getattr(policy, "toc", False)
+    doc = _PolicyDocTemplate(
         out_path, pagesize=(B.PAGE_W, B.PAGE_H),
         leftMargin=B.MARGIN_L, rightMargin=B.MARGIN_R,
         topMargin=B.MARGIN_TOP, bottomMargin=B.MARGIN_BOTTOM,
@@ -1386,8 +1436,10 @@ def build_pdf(policy, out_path):
 
     # The first content page starts high (H1 at the template's 119 pt) only
     # when it begins with a short heading; if it begins with full-width body
-    # text, start below the logo so text never runs under it.
-    first_top = (B.MARGIN_TOP if (policy.blocks and isinstance(policy.blocks[0], Heading))
+    # text, start below the logo so text never runs under it. A TOC page
+    # always opens with the short "Contents" heading, so it always qualifies
+    # regardless of what the body's own first block is.
+    first_top = (B.MARGIN_TOP if (has_toc or (policy.blocks and isinstance(policy.blocks[0], Heading)))
                  else B.MARGIN_TOP_CONT)
 
     doc.addPageTemplates([
@@ -1401,13 +1453,19 @@ def build_pdf(policy, out_path):
         PageTemplate(id="back", frames=[_frame(B.MARGIN_TOP)], onPage=_draw_back_cover),
     ])
 
-    # cover | content (first page starts high so the H1 matches the template,
-    # later pages start below the logo) | back cover. The board signatures page
-    # has been removed from all documents (board composition changed); the
-    # "with approval information" variant keeps only the approver/owner/approval
-    # card on the back cover, driven by policy.signatures.
-    story = ([NextPageTemplate("content_first"), PageBreak(),
-              NextPageTemplate("content")] + _story(policy))
+    # cover | [table of contents, when policy.toc] | content (first page
+    # starts high so the H1 matches the template, later pages start below the
+    # logo) | back cover. The board signatures page has been removed from all
+    # documents (board composition changed); the "with approval information"
+    # variant keeps only the approver/owner/approval card on the back cover,
+    # driven by policy.signatures.
+    toc_pages = ([Paragraph("Contents", H1), Spacer(1, 14), _toc_flowable(), PageBreak()]
+                 if has_toc else [])
+    story = ([NextPageTemplate("content_first"), PageBreak()] + toc_pages +
+             [NextPageTemplate("content")] + _story(policy))
     story += [NextPageTemplate("back"), PageBreak(), Spacer(1, 0.1)]
-    doc.build(story)
+    if has_toc:
+        doc.multiBuild(story)
+    else:
+        doc.build(story)
     return out_path

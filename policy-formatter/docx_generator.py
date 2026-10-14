@@ -126,7 +126,7 @@ def _run(p, text, *, bold=False, italic=False, size=11, color=NAVY, font=FONT):
     return r
 
 
-def _heading(doc, text, level, hang=False, indent=CLAUSE_INDENT):
+def _heading(doc, text, level, hang=False, indent=CLAUSE_INDENT, toc=False):
     # A hanging_indent policy tab-aligns the heading title to the same column
     # as its clause text below — see the matching comment in generator.py's
     # _story(). Other policies keep the number embedded with a plain space.
@@ -134,6 +134,17 @@ def _heading(doc, text, level, hang=False, indent=CLAUSE_INDENT):
     p.paragraph_format.space_before = Pt(13 if level == 1 else 6)
     p.paragraph_format.space_after = Pt(8 if level == 1 else 4)
     p.paragraph_format.keep_with_next = True
+    if toc and level == 1:
+        # Headings here are direct-formatted paragraphs, not Word's built-in
+        # "Heading 1" style, so a native TOC field (which scans paragraph
+        # outline level, usually set via that style) would otherwise find
+        # nothing to list — set the outline level directly, with no visual
+        # effect of its own, so Update Field in Word actually populates the
+        # table of contents inserted in build_docx (request a2f179f7).
+        pPr = p._p.get_or_add_pPr()
+        outlineLvl = OxmlElement("w:outlineLvl")
+        outlineLvl.set(qn("w:val"), "0")
+        pPr.append(outlineLvl)
     size = 14 if level == 1 else 12
     m = _NUM.match(text.strip()) if hang else None
     if m:
@@ -316,7 +327,7 @@ def _table(doc, blk):
                  color=WHITE if header else NAVY)
 
 
-def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_INDENT):
+def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_INDENT, toc=False):
     # Mirrors generator.py's _story(): tracks whether the previous block was a
     # short numbered sub-heading with no clause number of its own ("3.2
     # Incentive pay"), so the paragraph(s) right after it — its actual content
@@ -329,7 +340,7 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
         if isinstance(blk, M.Heading):
             if _is_schedule_heading(blk):
                 in_schedule = True
-            _heading(doc, blk.text, blk.level, hang=hanging_indent, indent=indent)
+            _heading(doc, blk.text, blk.level, hang=hanging_indent, indent=indent, toc=toc)
             # An un-numbered paragraph right after a top-level heading is that
             # section's lead-in text and needs the same indent as the rest of
             # the hanging-indent layout — see the matching comment in
@@ -420,6 +431,13 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
                 _body(doc, blk, size, indent_mode="uniform_deep" if deep else "uniform", indent=indent)
                 # leave prev_subhead as-is: a sub-heading's content can span
                 # several paragraphs, all needing the same indent.
+            elif blk.text.strip().endswith(":"):
+                # An un-numbered lead-in sentence ending in a colon
+                # (introducing the numbered sub-clauses that follow) is
+                # logically still the tail of the clause above it and needs
+                # that clause's own indent, not a flush fallback (request
+                # a2f179f7) — see the matching comment in generator.py.
+                _body(doc, blk, size, indent_mode="uniform", indent=indent)
             else:
                 _body(doc, blk, size)
                 prev_subhead = False
@@ -574,6 +592,35 @@ def _version_card(doc, policy):
     _run(rp, policy.approver or "Executive Committee", size=9)
 
 
+def _insert_toc_field(doc):
+    """A native Word TOC field (top-level headings only, matching the PDF's
+    auto-paginated table of contents — request a2f179f7). Unlike the PDF,
+    Word computes its own pagination only once the field is updated, so this
+    inserts the field rather than hand-computed page numbers, which would
+    have no reliable meaning in an editable Word document anyway. Word shows
+    a "Right-click > Update Field" placeholder until the reader does so (or
+    opens with update-fields-on-open enabled)."""
+    title_p = doc.add_paragraph()
+    title_p.paragraph_format.space_after = Pt(8)
+    _run(title_p, "Contents", bold=True, size=14)
+    paragraph = doc.add_paragraph()
+    run = paragraph.add_run()
+    fld_begin = OxmlElement("w:fldChar")
+    fld_begin.set(qn("w:fldCharType"), "begin")
+    instr = OxmlElement("w:instrText")
+    instr.set(qn("xml:space"), "preserve")
+    instr.text = 'TOC \\o "1-1" \\h \\z \\u'
+    fld_separate = OxmlElement("w:fldChar")
+    fld_separate.set(qn("w:fldCharType"), "separate")
+    placeholder = OxmlElement("w:t")
+    placeholder.text = "Right-click and choose “Update Field” to generate the table of contents."
+    fld_end = OxmlElement("w:fldChar")
+    fld_end.set(qn("w:fldCharType"), "end")
+    for el in (fld_begin, instr, fld_separate, placeholder, fld_end):
+        run._r.append(el)
+    doc.add_page_break()
+
+
 def build_docx(policy, out_path, pdf_path=None):
     doc = Document()
     # Base style
@@ -599,12 +646,16 @@ def build_docx(policy, out_path, pdf_path=None):
     _normal_margins(body_sec)
     _content_furniture(body_sec, policy)
 
+    has_toc = getattr(policy, "toc", False)
+    if has_toc:
+        _insert_toc_field(doc)
     if policy.lead_title:
         _heading(doc, policy.title, 1)
     hanging = getattr(policy, "hanging_indent", False)
     _render_blocks(doc, policy.blocks, size=policy.body_size or 11,
                     hanging_indent=hanging,
-                    indent=_required_indent(policy) if hanging else CLAUSE_INDENT)
+                    indent=_required_indent(policy) if hanging else CLAUSE_INDENT,
+                    toc=has_toc)
     _version_card(doc, policy)
     doc.save(out_path)
     return out_path

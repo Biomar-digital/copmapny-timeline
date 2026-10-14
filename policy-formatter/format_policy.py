@@ -54,6 +54,9 @@ def main(argv=None):
                     help="Date shown on the version line (defaults to approval date)")
     ap.add_argument("--has-signed", dest="has_signed", action="store_true",
                     help="This unsigned render has a signed sibling, so omit the back card")
+    ap.add_argument("--toc", dest="toc", action="store_true",
+                    help="Insert an auto-paginated table of contents (top-level headings only) "
+                         "right after the cover")
     ap.add_argument("--date", help="Date tag in the file name (default: current YYYY-MM)")
     ap.add_argument("--docx", dest="docx_out",
                     help="Also write an editable BioMar-branded Word copy to this path")
@@ -70,7 +73,7 @@ def main(argv=None):
                         lead_title=args.lead_title, body_size=args.body_size,
                         head_scale=args.head_scale, hanging_indent=args.hanging_indent,
                         footer_note=args.footer_note, version_date=args.version_date,
-                        has_signed=args.has_signed, category=args.category)
+                        has_signed=args.has_signed, category=args.category, toc=args.toc)
 
     # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
     import datetime
