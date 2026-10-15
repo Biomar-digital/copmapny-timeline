@@ -165,6 +165,26 @@ def main(argv=None):
     except Exception as e:
         check(results, "coverage", "Source coverage", "info", f"skipped ({e})")
 
+    # 4b — translations: same clauses, in the same order, as the original
+    try:
+        reg_all = json.load(open(REGISTRY, encoding="utf-8"))
+        me = next((x for x in reg_all["policies"] if x["id"] == args.policy), None)
+        root = next((x for x in reg_all["policies"] if x["id"] == (me or {}).get("translation_of")), None)
+        if me and root:
+            sys.path.insert(0, os.path.join(REPO, "policy-formatter", "tools"))
+            import translate_source as TS
+            def first_source(pol):
+                ed_ = pol["editions"][-1]
+                docs_ = ed_.get("documents") or [{"source": ed_.get("source")}]
+                return os.path.join(SOURCES, docs_[0]["source"])
+            errs, warns = TS.compare(first_source(root), first_source(me),
+                                     strict=(me.get("translation_method") == "auto"))
+            check(results, "translation", f"Translation matches the {root.get('language', 'English')} original clause by clause",
+                  "fail" if errs else ("attention" if warns else "pass"),
+                  "; ".join((errs + warns)[:4]) + (f" (+{len(errs) + len(warns) - 4} more)" if len(errs) + len(warns) > 4 else ""))
+    except Exception as e:
+        check(results, "translation", "Translation parity", "info", f"skipped ({e})")
+
     # 5 — ligatures
     if full:
         ligs = sum(full.count(c) for c in ("ﬁ", "ﬂ", "ﬀ", "ﬃ", "ﬄ"))

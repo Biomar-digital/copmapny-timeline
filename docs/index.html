@@ -32,6 +32,10 @@
     <div id="typetabs" class="typetabs"></div>
     <div class="toolbar">
       <input id="search" type="search" placeholder="Search policies…" autocomplete="off" />
+      <label class="fdrop langsel" id="langWrap" hidden title="Show every policy in this language where a translation exists">
+        <span class="fdrop-label">Language</span>
+        <select id="langSel" class="fselect"></select>
+      </label>
       <span class="count" id="count"></span>
       <a id="requestsLink" class="btn reqbtn" href="requests.html" hidden>📋 Requests <span class="qbadge newreq" id="reqCount" hidden>0</span></a>
       <button type="button" id="queueBtn" class="btn reqbtn" hidden>Review queue <span class="qbadge" id="queueCount">0</span></button>
@@ -135,12 +139,23 @@
           <label class="rq-checkline"><input id="reqWantUnsigned" type="checkbox" /> <b>Unsigned</b> <span class="rq-hint">— without approval information</span></label>
           <span class="rq-hint">Select one or both.</span>
         </div>
+        <div class="rq-field" id="reqLangField">
+          <label>Translate into *</label>
+          <select id="reqLang" class="fselect"></select>
+          <input id="reqLangOther" type="text" placeholder="Language name, e.g. Finnish" hidden />
+          <span class="rq-hint" id="reqLangHint"></span>
+        </div>
+        <div class="rq-field rq-check" id="reqMethodField">
+          <label>How should it be translated?</label>
+          <label class="rq-checkline"><input type="radio" name="reqMethod" value="auto" checked /> <b>Translate it automatically</b> <span class="rq-hint">— Claude translates it into the BioMar template. It is marked as auto-translated; English stays the official version.</span></label>
+          <label class="rq-checkline"><input type="radio" name="reqMethod" value="attached" /> <b>I'll attach a translated Word file</b> <span class="rq-hint">— it is restyled into the template and checked against the English clause by clause.</span></label>
+        </div>
         <div class="rq-field">
           <label id="reqDetailsLabel">Details *</label>
           <textarea id="reqDetails" rows="4" placeholder="Describe the change or the new policy you need…"></textarea>
         </div>
         <div class="rq-field">
-          <label>Attach a document <span class="rq-hint">(.docx or .pdf, optional)</span></label>
+          <label id="reqFileLabel">Attach a document <span class="rq-hint">(.docx or .pdf, optional)</span></label>
           <input id="reqFile" type="file" accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
         </div>
         <div class="rq-actions">

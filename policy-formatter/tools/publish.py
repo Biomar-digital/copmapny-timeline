@@ -27,6 +27,9 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 PF = os.path.normpath(os.path.join(HERE, ".."))          # policy-formatter/
 REPO = os.path.normpath(os.path.join(PF, ".."))          # repo root
+sys.path.insert(0, PF)
+import i18n  # noqa: E402  (fixed template strings per language)
+
 SOURCES = os.path.join(REPO, "policies", "sources")
 REGISTRY = os.path.join(REPO, "policies", "registry.json")
 FILES = os.path.join(REPO, "docs", "files")
@@ -122,11 +125,13 @@ def main():
                              "--approver", p.get("approver", "Executive Committee")]
                 # Version line always carries a date: the approval date if there
                 # is one, otherwise the edition's own month/year.
+                lang = doc.get("language") or p.get("language") or "English"
                 try:
-                    vd = datetime.datetime.strptime(date, "%Y-%m").strftime("%B %Y")
+                    datetime.datetime.strptime(date, "%Y-%m")
+                    vd = i18n.month_year(lang, date)
                 except ValueError:
                     vd = date
-                meta_args += ["--version-date", vd]
+                meta_args += ["--version-date", vd, "--language", lang]
                 # Covers carry no year by default (removed across all documents);
                 # a policy can opt back in with "cover_year": true.
                 if not p.get("cover_year"):
@@ -184,14 +189,21 @@ def main():
                 "generated_at": today,
                 "documents": docs_out,
             })
+            if ed.get("translated_from"):       # edition key of the original this was translated from
+                eds_out[-1]["translated_from"] = ed["translated_from"]
 
-        out_policies.append({
+        out_policies_entry = {
             "id": p["id"], "title": p["title"],
             "category": p.get("category", "Policy"),
             "language": p.get("language", "English"),
             "owner": p.get("owner", ""), "approver": p.get("approver", ""),
             "editions": eds_out,
-        })
+        }
+        # Translation link: this policy is the `language` version of another one.
+        for k in ("translation_of", "translation_method", "variant"):
+            if p.get(k):
+                out_policies_entry[k] = p[k]
+        out_policies.append(out_policies_entry)
         nd = sum(len(e["documents"]) for e in eds_out)
         print(f"  published {p['title']}  ({len(eds_out)} edition(s), {nd} document(s))")
 

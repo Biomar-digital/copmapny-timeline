@@ -568,7 +568,8 @@ async function handleRequests(request, env, user) {
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
   let form; try { form = await request.formData(); } catch { return json({ error: "Invalid form data." }, 400); }
 
-  const kind = form.get("kind") === "new" ? "new" : "change";
+  const kindIn = String(form.get("kind") || "");
+  const kind = kindIn === "new" ? "new" : kindIn === "translation" ? "translation" : "change";
   const author = String(form.get("author") || user.name || "").trim().slice(0, MAX_AUTHOR);
   const email = String(form.get("email") || user.email || "").trim().slice(0, 200);
   const title = String(form.get("title") || "").trim().slice(0, 300);
@@ -582,8 +583,25 @@ async function handleRequests(request, env, user) {
   const versions = kind === "new" ? String(form.get("versions") || "Signed").slice(0, 40) : "";
   const category = kind === "new" && form.get("category") === "Guideline" ? "Guideline" : "Policy";
   const details = String(form.get("details") || "").trim().slice(0, MAX_TEXT);
+  // Translation requests: which language, and whether Claude translates it
+  // ("auto") or the requester attaches their own translated Word file
+  // ("attached"). The translated policy will be published as
+  // "<policy>--<language>", which is also the id its pending entry is tracked
+  // under while the work is open.
+  const targetLanguage = kind === "translation"
+    ? String(form.get("target_language") || "").replace(/[^\p{L}\s-]/gu, "").trim().slice(0, 40) : "";
+  const method = kind === "translation" && form.get("method") === "attached" ? "attached" : "auto";
+  const translationId = kind === "translation" && targetLanguage && policy
+    ? `${policy}--${targetLanguage.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 24)}` : "";
   if (!author) return json({ error: "Your name is required." }, 400);
-  if (!details) return json({ error: "Please describe your request." }, 400);
+  if (kind === "translation") {
+    if (!policy) return json({ error: "Which policy should be translated?" }, 400);
+    if (!targetLanguage || !safePolicyId(translationId)) return json({ error: "Choose the language to translate into." }, 400);
+    const f = form.get("file");
+    if (method === "attached" && !(f && typeof f === "object" && f.size > 0 && /\.docx$/i.test(f.name || ""))) {
+      return json({ error: "Attach the translated Word (.docx) file, or choose automatic translation." }, 400);
+    }
+  } else if (!details) return json({ error: "Please describe your request." }, 400);
   if (kind === "new" && !title) return json({ error: "A title for the new policy is required." }, 400);
 
   const id = crypto.randomUUID();
@@ -601,19 +619,23 @@ async function handleRequests(request, env, user) {
     if (!r.ok) return json({ error: `Could not store the uploaded file (${r.status}).` }, 502);
   }
 
-  const record = { id, kind, status: "open", title: kind === "new" ? title : (policy || title), policy, edition, variant, versions, category: kind === "new" ? category : undefined, author, email, details, upload: uploadPath, created_at: new Date().toISOString() };
-  const heading = kind === "new" ? "New policy request" : "Policy change request";
-  const issueTitle = kind === "new" ? `New ${category.toLowerCase()}: ${title}` : `Change: ${policy || title}`;
+  const record = { id, kind, status: "open", title: kind === "new" ? title : (policy || title), policy, edition, variant, versions, category: kind === "new" ? category : undefined,
+    target_language: kind === "translation" ? targetLanguage : undefined, method: kind === "translation" ? method : undefined, translation_id: translationId || undefined,
+    author, email, details, upload: uploadPath, created_at: new Date().toISOString() };
+  const heading = kind === "new" ? "New policy request" : kind === "translation" ? "Translation request" : "Policy change request";
+  const issueTitle = kind === "new" ? `New ${category.toLowerCase()}: ${title}`
+    : kind === "translation" ? `Translate: ${policy} → ${targetLanguage}` : `Change: ${policy || title}`;
   const issueBody =
     `**${heading}**\n\n- **Requested by:** ${author}${email ? ` (${email})` : ""}\n` +
     (kind === "new" ? `- **Type:** ${category}\n` : "") +
     (kind === "new" ? `- **Proposed title:** ${title}\n` : `- **Policy:** ${policy || "—"}\n`) +
     (kind === "new" ? `- **Versions:** ${versions}\n` : "") +
+    (kind === "translation" ? `- **Translate into:** ${targetLanguage}\n- **Method:** ${method === "attached" ? "requester attached a translated Word file (restyle + verify against the English)" : "automatic (Claude translates the Word source)"}\n- **Publish as policy id:** \`${translationId}\`\n` : "") +
     (edition ? `- **Edition:** ${edition}\n` : "") +
     (variant ? `- **Variant:** ${variant}${variant === "Both" ? " (apply to signed and unsigned)" : ""}\n` : "") +
     (uploadPath ? `- **Attached document:** \`${uploadPath}\`\n` : "") +
     `- **Request record:** \`${REQUESTS_DIR}/${id}/request.json\`\n\n---\n\n${details}\n`;
-  const issue = await ghCreateIssue(env, issueTitle, issueBody, ["policy-request", kind === "new" ? "new-policy" : "change-request"]);
+  const issue = await ghCreateIssue(env, issueTitle, issueBody, ["policy-request", kind === "new" ? "new-policy" : kind === "translation" ? "translation" : "change-request"]);
   if (issue.ok) record.issue = issue.number; else warnings.push("issue:" + issue.status);
 
   const rec = await ghCreateFile(env, `${REQUESTS_DIR}/${id}/request.json`, b64encode(JSON.stringify(record, null, 2) + "\n"), `Request ${id}: ${issueTitle}`);
@@ -625,6 +647,8 @@ async function handleRequests(request, env, user) {
       kind === "new" ? ["Type", escapeHtml(category)] : null,
       kind === "new" ? ["Proposed title", escapeHtml(title)] : ["Policy", escapeHtml(policy || "—")],
       kind === "new" ? ["Versions", escapeHtml(versions)] : null,
+      kind === "translation" ? ["Translate into", escapeHtml(targetLanguage)] : null,
+      kind === "translation" ? ["Method", method === "attached" ? "Translated Word file attached" : "Automatic"] : null,
       edition ? ["Edition", escapeHtml(edition)] : null,
       variant ? ["Variant", escapeHtml(variant) + (variant === "Both" ? " (signed + unsigned)" : "")] : null,
       uploadPath ? ["Attached", escapeHtml(uploadPath.split("/").pop())] : null,
@@ -633,7 +657,13 @@ async function handleRequests(request, env, user) {
     ]));
   if (!mail.ok && !mail.skipped) warnings.push("email:" + mail.status);
 
-  await recordEvent(env, kind === "new" ? "request_new" : "request_change", `${author}: ${issueTitle}`, policy || "", author);
+  await recordEvent(env, kind === "new" ? "request_new" : kind === "translation" ? "request_translation" : "request_change", `${author}: ${issueTitle}`, policy || "", author);
+  if (kind === "translation") {
+    await appendItem(env, PENDING_FILE,
+      { id: crypto.randomUUID(), policy: translationId, request_id: id, title: issueTitle, status: "change_pending",
+        author, email, created_at: Date.now() },
+      `Track pending translation ${translationId}`).catch(() => {});
+  }
   if (kind === "change" && policy) {
     await appendItem(env, PENDING_FILE,
       { id: crypto.randomUUID(), policy, request_id: id, title: issueTitle, status: "change_pending",

@@ -22,6 +22,7 @@ from docx.oxml.ns import qn, nsdecls
 
 import model as M
 import brand as B
+import i18n
 
 NAVY = RGBColor(0x1C, 0x40, 0x76)
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
@@ -574,26 +575,26 @@ def _version_card(doc, policy):
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
     left, right = t.rows[0].cells
     _set_cell_bg(left, "1C4076"); _set_cell_bg(right, "1C4076")
-    _run(left.paragraphs[0], "Version history", bold=True, size=10, color=WHITE)
-    _run(right.paragraphs[0], "Owner and approver", bold=True, size=10, color=WHITE)
+    _run(left.paragraphs[0], i18n.t(policy, "version_history"), bold=True, size=10, color=WHITE)
+    _run(right.paragraphs[0], i18n.t(policy, "owner_approver"), bold=True, size=10, color=WHITE)
     body = t.add_row().cells
     vdate = policy.approval_date or getattr(policy, "version_date", "") or "—"
     lp = body[0].paragraphs[0]
-    _run(lp, f"{policy.version} ", bold=True, size=9)
+    _run(lp, f"{i18n.localise_version(policy.language, policy.version)} ", bold=True, size=9)
     _run(lp, vdate, size=9)
     if policy.approval_date:
         ap = body[0].add_paragraph()
-        _run(ap, "Approval date: ", bold=True, size=9)
+        _run(ap, i18n.t(policy, "approval_date") + " ", bold=True, size=9)
         _run(ap, policy.approval_date, size=9)
     op = body[1].paragraphs[0]
-    _run(op, "Owner: ", bold=True, size=9)
+    _run(op, i18n.t(policy, "owner") + " ", bold=True, size=9)
     _run(op, policy.owner or "—", size=9)
     rp = body[1].add_paragraph()
-    _run(rp, "Approver: ", bold=True, size=9)
+    _run(rp, i18n.t(policy, "approver") + " ", bold=True, size=9)
     _run(rp, policy.approver or "Executive Committee", size=9)
 
 
-def _insert_toc_field(doc):
+def _insert_toc_field(doc, policy):
     """A native Word TOC field (top-level headings only, matching the PDF's
     auto-paginated table of contents — request a2f179f7). Unlike the PDF,
     Word computes its own pagination only once the field is updated, so this
@@ -603,7 +604,7 @@ def _insert_toc_field(doc):
     opens with update-fields-on-open enabled)."""
     title_p = doc.add_paragraph()
     title_p.paragraph_format.space_after = Pt(8)
-    _run(title_p, "Contents", bold=True, size=14)
+    _run(title_p, i18n.t(policy, "contents"), bold=True, size=14)
     paragraph = doc.add_paragraph()
     run = paragraph.add_run()
     fld_begin = OxmlElement("w:fldChar")
@@ -614,7 +615,7 @@ def _insert_toc_field(doc):
     fld_separate = OxmlElement("w:fldChar")
     fld_separate.set(qn("w:fldCharType"), "separate")
     placeholder = OxmlElement("w:t")
-    placeholder.text = "Right-click and choose “Update Field” to generate the table of contents."
+    placeholder.text = i18n.t(policy, "update_field")
     fld_end = OxmlElement("w:fldChar")
     fld_end.set(qn("w:fldCharType"), "end")
     for el in (fld_begin, instr, fld_separate, placeholder, fld_end):
@@ -649,7 +650,7 @@ def build_docx(policy, out_path, pdf_path=None):
 
     has_toc = getattr(policy, "toc", False)
     if has_toc:
-        _insert_toc_field(doc)
+        _insert_toc_field(doc, policy)
     if policy.lead_title:
         _heading(doc, policy.title, 1)
     hanging = getattr(policy, "hanging_indent", False)

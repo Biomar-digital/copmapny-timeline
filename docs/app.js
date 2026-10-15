@@ -158,6 +158,7 @@ function moreMenu(p) {
     <button type="button" class="btn ghost pop-toggle kebab" aria-label="More actions" title="More actions">⋯</button>
     <div class="pop-list" hidden>
       <button type="button" data-more="edit">Request change or edit</button>
+      <button type="button" data-more="translate">Request a translation</button>
       <button type="button" data-more="history">Version history</button>
       <button type="button" data-more="notify">This policy should be uploaded or updated on the website</button>
     </div></div>`;
@@ -197,7 +198,21 @@ function recentBadge(ed) {
   return diff >= 0 && diff <= 1 ? '<span class="tag recent">Recently updated</span>' : "";
 }
 
-function card(p) {
+function langPills(root, p) {
+  const vs = variantsOf(root);
+  if (vs.length < 2) return "";
+  return `<div class="langpills" role="group" aria-label="Language">` + vs.map(v =>
+    `<button type="button" class="langpill${v.id === p.id ? " active" : ""}" data-vid="${esc(v.id)}">${esc(langOf(v))}${v.variant ? ` <span class="lp-sub">· ${esc(v.variant)}</span>` : ""}</button>`).join("") + `</div>`;
+}
+
+function missingNote(p) {
+  if (!LANG_PREF || langOf(p) === LANG_PREF) return "";
+  return `<div class="lang-missing"><span>Not available in ${esc(LANG_PREF)} yet — showing ${esc(langOf(p))}.</span>
+    <button type="button">Request a ${esc(LANG_PREF)} translation</button></div>`;
+}
+
+function card(root) {
+  const p = pickVariant(root);
   const ed = latest(p);
   const el = document.createElement("article");
   el.className = "card";
@@ -211,6 +226,9 @@ function card(p) {
       <h2 class="title"><button type="button" class="title-link view" title="Preview document">${esc(p.title)}</button>${statusBadge(p.id)}${recentBadge(ed)}</h2>
       <div class="tags">
         <span class="tag lang">${esc(p.language || "English")}</span>
+        ${p.translation_of && p.translation_method === "auto" ? '<span class="tag auto" title="Machine translation of the English original, not separately reviewed by a translator. The English version is the official one.">Auto-translated</span>' : ""}
+        ${translationStale(p, root) ? '<span class="tag stale" title="The English original has been updated since this translation was made.">Translation out of date</span>' : ""}
+        ${pendingTranslations(root).map(t => `<span class="tag" title="A translation has been requested">${esc(t.lang)} translation ${t.st === "pending_review" ? "ready for review" : "requested"}</span>`).join("")}
         <span class="tag">${displayVersion()}</span>
         <span class="tag">${prettyDate(ed.date)}</span>
         ${p.category && p.category !== "Policy" ? `<span class="tag cat">${esc(p.category)}</span>` : ""}
@@ -221,6 +239,8 @@ function card(p) {
         <br><b>Last updated:</b> ${prettyDate(ed.date)} &nbsp;·&nbsp;
         <b>Editions:</b> ${n}
       </div>
+      ${langPills(root, p)}
+      ${missingNote(p)}
       ${stepperHtml(p)}
     </div>
     <div class="actions">
@@ -231,6 +251,11 @@ function card(p) {
       </div>
     </div>`;
   el.querySelectorAll(".view").forEach(b => b.addEventListener("click", () => openPreview(p)));
+  el.querySelectorAll(".langpill").forEach(b => b.addEventListener("click", () => {
+    VARIANT_PICK.set(root.id, b.dataset.vid); render();
+  }));
+  const miss = el.querySelector(".lang-missing button");
+  if (miss) miss.addEventListener("click", () => openRequest("translation", root, LANG_PREF));
   // Dropdown toggles (Download, ⋯ More): open this one, close any others.
   el.querySelectorAll(".pop-toggle").forEach(t => t.addEventListener("click", e => {
     e.stopPropagation();
@@ -242,6 +267,7 @@ function card(p) {
   const more = el.querySelector(".more");
   if (more) {
     more.querySelector('[data-more="edit"]').addEventListener("click", () => { closePops(); openEditChooser(p); });
+    more.querySelector('[data-more="translate"]').addEventListener("click", () => { closePops(); openRequest("translation", root); });
     more.querySelector('[data-more="history"]').addEventListener("click", () => { closePops(); openHistory(p); });
     more.querySelector('[data-more="notify"]').addEventListener("click", () => { closePops(); notifyWebsiteUpdate(p); });
   }
@@ -530,31 +556,58 @@ function setReqType(type) {
   if (inp) inp.placeholder = type === "Guideline" ? "e.g. Brand Voice Guidelines" : "e.g. Travel & Expenses Policy";
 }
 
-function openRequest(mode, policy) {
+function openRequest(mode, policy, lang) {
   const dlg = document.getElementById("request");
   const isNew = mode === "new";
+  const isTr = mode === "translation";
   document.getElementById("reqTitle").textContent =
-    isNew ? "Request a new policy or guideline" : "Request a change";
+    isNew ? "Request a new policy or guideline" : isTr ? "Request a translation" : "Request a change";
   document.getElementById("reqSub").textContent = isNew
     ? "Describe what you need and optionally attach a draft."
     : `Policy: ${policy ? policy.title : "—"}`;
+  document.getElementById("reqLangField").style.display = isTr ? "" : "none";
+  document.getElementById("reqMethodField").style.display = isTr ? "" : "none";
+  if (isTr) setupTranslationForm(policy, lang);
   document.getElementById("reqTypeField").style.display = isNew ? "" : "none";
   document.getElementById("reqTitleField").style.display = isNew ? "" : "none";
   document.getElementById("reqVariantsField").style.display = isNew ? "" : "none";
   setReqType("Policy");
   const ws = document.getElementById("reqWantSigned"); if (ws) ws.checked = true;
   const wu = document.getElementById("reqWantUnsigned"); if (wu) wu.checked = false;
+  document.getElementById("reqDetails").placeholder = isTr
+    ? "Terminology to keep, the audience, a deadline…"
+    : "Describe the change or the new policy you need…";
+  document.getElementById("reqFileLabel").innerHTML = isTr
+    ? 'Translated Word file <span class="rq-hint">(.docx — only if you chose “I\'ll attach”)</span>'
+    : 'Attach a document <span class="rq-hint">(.docx or .pdf, optional)</span>';
   document.getElementById("reqDetailsLabel").textContent =
-    isNew ? "What should this cover? *" : "What change do you need? *";
+    isNew ? "What should this cover? *" : isTr ? "Anything we should know? (optional)" : "What change do you need? *";
   document.getElementById("reqDocTitle").value = "";
   document.getElementById("reqDetails").value = "";
   document.getElementById("reqFile").value = "";
   document.getElementById("reqStatus").textContent = "";
   dlg.dataset.mode = mode;
+  dlg.dataset.edition = isTr && policy ? edKey(latest(policy)) : "";
   dlg.dataset.policy = isNew ? "" : (policy ? policy.id : "");
   dlg.dataset.title = isNew ? "" : (policy ? policy.title : "");
   if (typeof dlg.showModal === "function") dlg.showModal();
   else dlg.setAttribute("open", "");
+}
+
+function setupTranslationForm(root, preferred) {
+  const sel = document.getElementById("reqLang"), other = document.getElementById("reqLangOther");
+  const have = new Set(variantsOf(root).map(langOf));
+  sel.innerHTML = TRANSLATION_LANGUAGES.map(l =>
+    `<option value="${esc(l)}"${have.has(l) ? " disabled" : ""}>${esc(l)}${have.has(l) ? " (already available)" : ""}</option>`).join("") +
+    `<option value="__other">Another language…</option>`;
+  const first = [...sel.options].find(o => !o.disabled && o.value === preferred) ||
+    [...sel.options].find(o => !o.disabled);
+  sel.value = first ? first.value : "__other";
+  other.value = ""; other.hidden = sel.value !== "__other";
+  sel.onchange = () => { other.hidden = sel.value !== "__other"; };
+  document.getElementById("reqLangHint").textContent =
+    `Translated from the ${langOf(root)} original. Latin-script languages only for now (Greek, Cyrillic, Vietnamese and Asian scripts need a font added first).`;
+  document.querySelector('input[name="reqMethod"][value="auto"]').checked = true;
 }
 
 async function submitRequest() {
@@ -564,12 +617,26 @@ async function submitRequest() {
   const details = document.getElementById("reqDetails").value.trim();
   const docTitle = document.getElementById("reqDocTitle").value.trim();
   const fileEl = document.getElementById("reqFile");
-  if (!details) { status.textContent = "Please describe your request."; return; }
+  if (!details && mode !== "translation") { status.textContent = "Please describe your request."; return; }
   if (mode === "new" && !docTitle) { status.textContent = "Enter a title."; return; }
+  let targetLang = "", method = "";
+  if (mode === "translation") {
+    const sel = document.getElementById("reqLang");
+    targetLang = sel.value === "__other" ? document.getElementById("reqLangOther").value.trim() : sel.value;
+    method = document.querySelector('input[name="reqMethod"]:checked')?.value || "auto";
+    if (!targetLang) { status.textContent = "Choose the language to translate into."; return; }
+    if (method === "attached" && !(fileEl.files && fileEl.files[0])) {
+      status.textContent = "Attach the translated Word file, or choose automatic translation."; return;
+    }
+  }
 
   const fd = new FormData();
-  fd.set("kind", mode === "new" ? "new" : "change");
-  fd.set("details", details);
+  fd.set("kind", mode === "new" ? "new" : mode === "translation" ? "translation" : "change");
+  fd.set("details", details || `Translate into ${targetLang}.`);
+  if (mode === "translation") {
+    fd.set("target_language", targetLang); fd.set("method", method);
+    fd.set("edition", dlg.dataset.edition || "");
+  }
   if (mode === "new") {
     fd.set("title", docTitle);
     const wantSigned = document.getElementById("reqWantSigned").checked;
@@ -908,7 +975,8 @@ async function openCompare(policyId, key, opts = {}) {
   draw();
 }
 
-let POLICIES = [];
+let POLICIES = [];        // every policy, translations included (lookups by id)
+let ROOTS = [];           // one per policy family; translations hang off root.translations
 let SEARCH = "";
 let OWNER_FILTER = "";    // "" = all
 let APPROVER_FILTER = ""; // "" = all
@@ -924,8 +992,8 @@ function policyType(p) { return p.category === "Guideline" ? "Guideline" : "Poli
 function renderTypeTabs() {
   const el = document.getElementById("typetabs");
   if (!el) return;
-  const nPolicy = POLICIES.filter(p => policyType(p) === "Policy").length;
-  const nGuideline = POLICIES.filter(p => policyType(p) === "Guideline").length;
+  const nPolicy = ROOTS.filter(p => policyType(p) === "Policy").length;
+  const nGuideline = ROOTS.filter(p => policyType(p) === "Guideline").length;
   const tab = (val, label, n) =>
     `<button type="button" class="typetab${TYPE_FILTER === val ? " active" : ""}" data-val="${esc(val)}">${esc(label)} <span class="typetab-count">${n}</span></button>`;
   el.innerHTML = tab("Policy", "Policies", nPolicy) + tab("Guideline", "Guidelines", nGuideline);
@@ -937,6 +1005,78 @@ function renderTypeTabs() {
 
 // A policy with no open change request is "approved" (up to date).
 function policyStatus(p) { return PENDING.get(p.id) || "approved"; }
+
+// ---- translations / language selector -------------------------------------
+// A translation is its own policy (own editions, approval, comments) linked to
+// the original with `translation_of`. The catalogue shows one card per family
+// and lets the visitor switch the language on it, or set a preferred language
+// for the whole page.
+const TRANSLATION_LANGUAGES = ["Spanish", "Danish", "Norwegian", "Swedish", "French", "German",
+  "Portuguese", "Italian", "Dutch", "Polish", "Turkish"];
+const VARIANT_PICK = new Map();   // root id -> variant id chosen with the pills on that card
+let LANG_PREF = "";
+try { LANG_PREF = localStorage.getItem("lang") || ""; } catch {}
+
+function buildRoots() {
+  const byId = new Map(POLICIES.map(p => [p.id, p]));
+  POLICIES.forEach(p => { p.translations = []; });
+  ROOTS = [];
+  POLICIES.forEach(p => {
+    const root = p.translation_of && byId.get(p.translation_of);
+    if (root && root !== p) root.translations.push(p); else ROOTS.push(p);
+  });
+}
+const langOf = p => p.language || "English";
+function variantsOf(root) { return [root, ...(root.translations || [])]; }
+function pickVariant(root) {
+  const vs = variantsOf(root);
+  const chosen = VARIANT_PICK.get(root.id);
+  if (chosen) { const v = vs.find(x => x.id === chosen); if (v) return v; }
+  if (LANG_PREF) { const v = vs.find(x => langOf(x) === LANG_PREF); if (v) return v; }
+  return root;
+}
+function groupStatus(root) {
+  const sts = variantsOf(root).map(v => PENDING.get(v.id));
+  return sts.includes("change_pending") ? "change_pending"
+    : sts.includes("pending_review") ? "pending_review" : "approved";
+}
+// The English edition this translation was made from is no longer the latest.
+function translationStale(v, root) {
+  const from = v.translation_of && latest(v).translated_from;
+  return !!(from && root && edKey(latest(root)) !== from);
+}
+function availableLanguages() {
+  const set = new Set(POLICIES.map(langOf));
+  return ["English", ...[...set].filter(l => l !== "English").sort()];
+}
+// Translation requests are tracked under "<root id>--<language>" while open.
+function pendingTranslations(root) {
+  const out = [];
+  PENDING.forEach((st, id) => {
+    if (id.startsWith(root.id + "--") && !variantsOf(root).some(v => v.id === id)) {
+      const l = id.slice(root.id.length + 2);
+      out.push({ lang: l.charAt(0).toUpperCase() + l.slice(1), st });
+    }
+  });
+  return out;
+}
+
+function renderLangSelector() {
+  const wrap = document.getElementById("langWrap"), sel = document.getElementById("langSel");
+  if (!wrap || !sel) return;
+  const langs = availableLanguages();
+  wrap.hidden = langs.length < 2;
+  const cur = LANG_PREF || "English";
+  const n = l => ROOTS.filter(r => variantsOf(r).some(v => langOf(v) === l)).length;
+  sel.innerHTML = langs.map(l =>
+    `<option value="${esc(l)}"${l === cur ? " selected" : ""}>${esc(l)} (${n(l)} of ${ROOTS.length})</option>`).join("");
+  sel.onchange = () => {
+    LANG_PREF = sel.value === "English" ? "" : sel.value;
+    try { localStorage.setItem("lang", LANG_PREF); } catch {}
+    VARIANT_PICK.clear();
+    render();
+  };
+}
 
 let QUEUE = []; // admin-only: full pending entries (requester, title, status, dates)
 
@@ -1039,15 +1179,16 @@ async function pendingAction(policy, action) {
 function render() {
   const list = document.getElementById("list");
   const f = SEARCH.trim().toLowerCase();
-  let shown = POLICIES.filter(p => {
-    if (policyType(p) !== TYPE_FILTER) return false;
-    if (OWNER_FILTER && (p.owner || "") !== OWNER_FILTER) return false;
-    if (APPROVER_FILTER && (p.approver || "") !== APPROVER_FILTER) return false;
-    if (STATUS_FILTER && policyStatus(p) !== STATUS_FILTER) return false;
+  let shown = ROOTS.filter(r => {
+    if (policyType(r) !== TYPE_FILTER) return false;
+    if (OWNER_FILTER && (r.owner || "") !== OWNER_FILTER) return false;
+    if (APPROVER_FILTER && (r.approver || "") !== APPROVER_FILTER) return false;
+    if (STATUS_FILTER && groupStatus(r) !== STATUS_FILTER) return false;
     if (!f) return true;
-    return p.title.toLowerCase().includes(f) || (p.owner || "").toLowerCase().includes(f) ||
+    // a family matches if the original or any translation does
+    return variantsOf(r).some(p => p.title.toLowerCase().includes(f) || (p.owner || "").toLowerCase().includes(f) ||
       (p.approver || "").toLowerCase().includes(f) || (p.language || "").toLowerCase().includes(f) ||
-      (p.group || "").toLowerCase().includes(f);
+      (p.group || "").toLowerCase().includes(f));
   });
   // Cluster family members together (under a section header), keep the rest alphabetical.
   shown = shown.slice().sort((a, b) => {
@@ -1068,7 +1209,7 @@ function render() {
     }
     list.appendChild(card(p));
   });
-  const inTabTotal = POLICIES.filter(p => policyType(p) === TYPE_FILTER).length;
+  const inTabTotal = ROOTS.filter(p => policyType(p) === TYPE_FILTER).length;
   document.getElementById("empty").hidden = shown.length > 0;
   document.getElementById("empty").textContent = TYPE_FILTER === "Guideline"
     ? "No guidelines match your search." : "No policies match your search.";
@@ -1079,13 +1220,13 @@ function render() {
 function renderStatusFilter() {
   const el = document.getElementById("statusfilter");
   if (!el) return;
-  const inTab = POLICIES.filter(p => policyType(p) === TYPE_FILTER);
+  const inTab = ROOTS.filter(p => policyType(p) === TYPE_FILTER);
   const defs = [
     ["change_pending", "Change pending"],
     ["pending_review", "Pending for review"],
     ["approved", "Up to date"],
   ];
-  const count = (s) => inTab.filter(p => policyStatus(p) === s).length;
+  const count = (s) => inTab.filter(p => groupStatus(p) === s).length;
   const isActive = (val) => val === "__all" ? STATUS_FILTER === null : STATUS_FILTER === val;
   const btn = (val, label, n) =>
     `<button type="button" class="sfilter sf-${esc(val)}${isActive(val) ? " active" : ""}" data-val="${esc(val)}">${esc(label)} <span class="sf-count">${n}</span></button>`;
@@ -1102,7 +1243,7 @@ function renderStatusFilter() {
 
 function renderChips() {
   const el = document.getElementById("chips");
-  const inTab = POLICIES.filter(p => policyType(p) === TYPE_FILTER);
+  const inTab = ROOTS.filter(p => policyType(p) === TYPE_FILTER);
   const uniq = (k) => [...new Set(inTab.map(p => p[k]).filter(Boolean))].sort();
   const opts = (vals, sel) => `<option value="">All</option>` +
     vals.map(v => `<option value="${esc(v)}"${v === sel ? " selected" : ""}>${esc(v)}</option>`).join("");
@@ -1134,7 +1275,7 @@ async function loadOpenRequestCount() {
 const EVENT_LABEL = {
   account_request: "Account request", account_approved: "Account approved",
   account_rejected: "Account rejected", comment: "New comment", annotation: "New annotation",
-  request_new: "New policy request", request_change: "Change request",
+  request_new: "New policy request", request_change: "Change request", request_translation: "Translation request",
 };
 
 async function setupAccount() {
@@ -1290,8 +1431,10 @@ async function init() {
       await (await fetch("library.json", { cache: "no-store" })).json();
     POLICIES = (data.policies || []).slice()
       .sort((a, b) => a.title.localeCompare(b.title));
+    buildRoots();
     document.getElementById("meta").textContent =
-      `${POLICIES.length} policies · Last update: ${data.updated || ""}`;
+      `${ROOTS.length} policies · ${availableLanguages().length} language${availableLanguages().length === 1 ? "" : "s"} · Last update: ${data.updated || ""}`;
+    renderLangSelector();
     renderTypeTabs();
     renderChips();
     renderStatusFilter();

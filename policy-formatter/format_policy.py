@@ -54,6 +54,9 @@ def main(argv=None):
                     help="Date shown on the version line (defaults to approval date)")
     ap.add_argument("--has-signed", dest="has_signed", action="store_true",
                     help="This unsigned render has a signed sibling, so omit the back card")
+    ap.add_argument("--language", default="English",
+                    help="Language the document is written in (English, Spanish, Danish, ...): "
+                         "localises the template's own labels — see i18n.py")
     ap.add_argument("--toc", dest="toc", action="store_true",
                     help="Insert an auto-paginated table of contents (top-level headings only) "
                          "right after the cover")
@@ -73,7 +76,8 @@ def main(argv=None):
                         lead_title=args.lead_title, body_size=args.body_size,
                         head_scale=args.head_scale, hanging_indent=args.hanging_indent,
                         footer_note=args.footer_note, version_date=args.version_date,
-                        has_signed=args.has_signed, category=args.category, toc=args.toc)
+                        has_signed=args.has_signed, category=args.category, toc=args.toc,
+                        language=args.language)
 
     # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
     import datetime

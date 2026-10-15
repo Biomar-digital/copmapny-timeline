@@ -30,7 +30,8 @@
   → `docs/files/*.pdf` + `docs/library.json`.
 - Per-policy switches in `registry.json`: `pdf` (serve the original verbatim),
   `cover_year` (default OFF — covers carry no year; opt in with `true`),
-  `lead_title`, `body_size`, `footer_note`, `version_date`, and on a document
+  `lead_title`, `body_size`, `footer_note`, `version_date`, `toc` (auto-paginated
+  table of contents after the cover; Word gets a native TOC field), and on a document
   `board_approval: true` (renders BOTH an approval and a non-approval variant).
 - Design-heavy pieces (position statements, Responsible Sourcing) are served as
   the original PDF via `tools/use_original.py`.
@@ -188,6 +189,56 @@ maps to `board_approval: true/false` on the new registry document.
    purpose (a dropped signature block, an added list marker, a period added
    for a label you turned into a run-in bold); a ratio noticeably below ~0.98
    with unexplained hunks means something got lost.
+
+## Translations (`request.json` `"kind": "translation"`)
+
+The same policy can exist in several languages. A translation is **its own
+policy** in `registry.json` (own editions, approval, comments, history) linked
+to the original — the site groups them on one card with a language selector.
+
+Registry fields on the translation: `translation_of: "<original policy id>"`,
+`language: "Spanish"`, `translation_method: "auto"|"attached"` (auto → shown
+with an "Auto-translated — English is the official version" tag), optional
+`variant: "Digital"` (when one language has several variants), and on its
+edition `translated_from: "<original's edition key>"` (`Version 1__2026-10`,
+the same key the History modal uses) — when the original gets a newer edition
+the card shows "Translation out of date". Policy `title` is the *translated*
+title. Id convention for requested translations: `<original id>--<language>`
+(lower-case language name, e.g. `travel-policy--spanish`); the Worker already
+created a `pending.json` entry under that id, so just flip its status.
+`toc: true`, `hanging_indent`, `cover_year` etc. should mirror the original.
+
+Request carries `target_language`, `method` and `translation_id`. Two paths:
+
+- **method `auto`** (Claude translates; there is no model in the Worker/CI, so
+  this happens in a session like any other request):
+  1. `python policy-formatter/tools/translate_source.py extract policies/sources/<Orig>.docx -o /tmp/seg.json --language Spanish`
+     (after the English changed, add `--reuse <old English docx from git> <old translated docx>`
+     so only new/edited paragraphs are blank).
+  2. Fill each segment's `"translation"`. Keep `<b>`/`<i>` tags and `[[fn:N]]`/`[[keep:N]]`
+     placeholders exactly; clause markers (`prefix`) are never translated; keep defined
+     terms consistent (see the JSON's `glossary`, fill it first); keep numbers, dates and
+     legal references intact; use the formal register of that language's legal drafting.
+     Big documents: translate in chunks to several JSON files (`{id: text}` maps are fine).
+  3. `... apply policies/sources/<Orig>.docx /tmp/seg.json [more.json] -o policies/sources/<Orig>__<lang>.docx`
+  4. `... verify policies/sources/<Orig>.docx policies/sources/<Orig>__<lang>.docx` must report 0 errors.
+- **method `attached`** (requester uploaded a translated Word file): treat like a
+  new-policy restyle (inspect, patch to the template, drop signature blocks…), then
+  `verify --outline <Orig>.docx <translated>.docx` — it lists clause markers present in the
+  original but missing in the translation.
+
+Then add the registry entry, `python policy-formatter/tools/publish.py`, render the PDF to
+PNG and read it (diacritics, card labels, long words overflowing), run `self_review.py
+--policy <translation id> --request <id> --versions "…"` (it also runs the clause-by-clause
+parity check against the original and fails on a missing/reordered clause), write a
+`checklist.json`, set the pending entry to `pending_review`.
+
+Template strings (contents heading, back-cover card labels, month names) are localised
+from `policy-formatter/i18n.py`; the registry `language` selects them (missing → English
+labels). Only Latin-script languages are supported — the bundled fonts have no Greek,
+Cyrillic, Vietnamese or CJK glyphs, so those need a font added in `brand.py` first.
+Position statements served as original PDFs are linked the same way (`translation_of`) but
+skip all of the above.
 
 ## Review workflow
 

@@ -18,6 +18,7 @@ from xml.sax.saxutils import escape
 import re
 
 import brand as B
+import i18n
 from model import Heading, Body, Bullet, TableBlock, ImageBlock, Columns
 from reportlab.platypus import Image as RLImage
 from io import BytesIO
@@ -1134,8 +1135,8 @@ def _draw_version_card(c, policy):
     head_y = cy + ch - 24
     c.setFillColor(B.BIOMAR_BLUE)
     c.setFont(B.F_DEMI, 10)
-    c.drawCentredString(193, head_y, "Version history")
-    c.drawCentredString(364, head_y, "Owner and approver")
+    c.drawCentredString(193, head_y, i18n.t(policy, "version_history"))
+    c.drawCentredString(364, head_y, i18n.t(policy, "owner_approver"))
     c.setStrokeColor(B.LIGHT_RULE)
     c.setLineWidth(0.5)
     c.line(cx + 14, head_y - 10, right - 14, head_y - 10)   # under headers
@@ -1144,17 +1145,21 @@ def _draw_version_card(c, policy):
     # Version line carries its date; the "Approval date" row is shown whenever
     # the policy has an approval date (both signed and unsigned variants).
     vdate = policy.approval_date or getattr(policy, "version_date", "") or "—"
-    rows_l = [(policy.version, vdate)]
+    rows_l = [(i18n.localise_version(policy.language, policy.version), vdate)]
     if policy.approval_date:
-        rows_l.append(("Approval date:", policy.approval_date))
-    rows_r = [("Owner:", policy.owner or "—"),
-              ("Approver:", policy.approver or "Executive Committee")]
+        rows_l.append((i18n.t(policy, "approval_date"), policy.approval_date))
+    rows_r = [(i18n.t(policy, "owner"), policy.owner or "—"),
+              (i18n.t(policy, "approver"), policy.approver or "Executive Committee")]
     ry = head_y - 27
     for k in range(max(len(rows_l), len(rows_r))):
         c.setFillColor(B.BIOMAR_BLUE)
         c.setFont(B.F_LIGHT, 8)
         if k < len(rows_l):
             la, va = rows_l[k]
+            lsize = 8.0
+            while lsize > 6 and c.stringWidth(la, B.F_LIGHT, lsize) > L_LABEL_R - (cx + 14):
+                lsize -= 0.5
+            c.setFont(B.F_LIGHT, lsize)
             c.drawRightString(L_LABEL_R, ry, la)
             # Shrink the version-date value if it would overflow into the
             # column divider (e.g. a long month name with no approval date
@@ -1167,6 +1172,10 @@ def _draw_version_card(c, policy):
             c.setFont(B.F_LIGHT, 8)
         if k < len(rows_r):
             lb, vb = rows_r[k]
+            lsize = 8.0
+            while lsize > 6 and c.stringWidth(lb, B.F_LIGHT, lsize) > R_VALUE - R_LABEL - 4:
+                lsize -= 0.5
+            c.setFont(B.F_LIGHT, lsize)
             c.drawString(R_LABEL, ry, lb)
             # Shrink the owner/approver value if it would overflow the card.
             size, avail = 8.0, right - R_VALUE - 8
@@ -1464,7 +1473,7 @@ def build_pdf(policy, out_path):
     # documents (board composition changed); the "with approval information"
     # variant keeps only the approver/owner/approval card on the back cover,
     # driven by policy.signatures.
-    toc_pages = ([Paragraph("Contents", H1), Spacer(1, 14), _toc_flowable(), PageBreak()]
+    toc_pages = ([Paragraph(escape(i18n.t(policy, "contents")), H1), Spacer(1, 14), _toc_flowable(), PageBreak()]
                  if has_toc else [])
     story = ([NextPageTemplate("content_first"), PageBreak()] + toc_pages +
              [NextPageTemplate("content")] + _story(policy))

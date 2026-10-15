@@ -85,6 +85,7 @@ class Policy:
     has_signed: bool = False  # this unsigned render has a signed sibling (-> drop the card)
     category: str = "Policy"  # "Policy" | "Guideline" | "Position Statement" — Guideline swaps the cover colour
     toc: bool = False         # insert an auto-paginated table of contents after the cover (request a2f179f7)
+    language: str = "English" # language the document is written in (drives the template's own fixed strings — see i18n.py)
 
 
 def _para_images(item):
