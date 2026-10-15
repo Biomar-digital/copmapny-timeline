@@ -226,7 +226,7 @@ function card(root) {
       <h2 class="title"><button type="button" class="title-link view" title="Preview document">${esc(p.title)}</button>${statusBadge(p.id)}${recentBadge(ed)}</h2>
       <div class="tags">
         <span class="tag lang">${esc(p.language || "English")}</span>
-        ${p.translation_of && p.translation_method === "auto" ? '<span class="tag auto" title="Machine translation of the English original, not separately reviewed by a translator. The English version is the official one.">Auto-translated</span>' : ""}
+        ${p.translation_of && p.translation_method === "auto" ? '<span class="tag auto" title="AI translation of the English original, not separately reviewed by a translator. The English version is the official one.">AI translation</span>' : ""}
         ${translationStale(p, root) ? '<span class="tag stale" title="The English original has been updated since this translation was made.">Translation out of date</span>' : ""}
         ${pendingTranslations(root).map(t => `<span class="tag" title="A translation has been requested">${esc(t.lang)} translation ${t.st === "pending_review" ? "ready for review" : "requested"}</span>`).join("")}
         <span class="tag">${displayVersion()}</span>
@@ -626,7 +626,7 @@ async function submitRequest() {
     method = document.querySelector('input[name="reqMethod"]:checked')?.value || "auto";
     if (!targetLang) { status.textContent = "Choose the language to translate into."; return; }
     if (method === "attached" && !(fileEl.files && fileEl.files[0])) {
-      status.textContent = "Attach the translated Word file, or choose automatic translation."; return;
+      status.textContent = "Attach the translated Word file, or choose AI translation."; return;
     }
   }
 

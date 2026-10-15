@@ -198,7 +198,7 @@ to the original — the site groups them on one card with a language selector.
 
 Registry fields on the translation: `translation_of: "<original policy id>"`,
 `language: "Spanish"`, `translation_method: "auto"|"attached"` (auto → shown
-with an "Auto-translated — English is the official version" tag), optional
+with an "AI translation — English is the official version" tag), optional
 `variant: "Digital"` (when one language has several variants), and on its
 edition `translated_from: "<original's edition key>"` (`Version 1__2026-10`,
 the same key the History modal uses) — when the original gets a newer edition

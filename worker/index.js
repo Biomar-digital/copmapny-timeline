@@ -583,7 +583,7 @@ async function handleRequests(request, env, user) {
   const versions = kind === "new" ? String(form.get("versions") || "Signed").slice(0, 40) : "";
   const category = kind === "new" && form.get("category") === "Guideline" ? "Guideline" : "Policy";
   const details = String(form.get("details") || "").trim().slice(0, MAX_TEXT);
-  // Translation requests: which language, and whether Claude translates it
+  // Translation requests: which language, and whether AI translates it
   // ("auto") or the requester attaches their own translated Word file
   // ("attached"). The translated policy will be published as
   // "<policy>--<language>", which is also the id its pending entry is tracked
@@ -599,7 +599,7 @@ async function handleRequests(request, env, user) {
     if (!targetLanguage || !safePolicyId(translationId)) return json({ error: "Choose the language to translate into." }, 400);
     const f = form.get("file");
     if (method === "attached" && !(f && typeof f === "object" && f.size > 0 && /\.docx$/i.test(f.name || ""))) {
-      return json({ error: "Attach the translated Word (.docx) file, or choose automatic translation." }, 400);
+      return json({ error: "Attach the translated Word (.docx) file, or choose AI translation." }, 400);
     }
   } else if (!details) return json({ error: "Please describe your request." }, 400);
   if (kind === "new" && !title) return json({ error: "A title for the new policy is required." }, 400);
@@ -630,7 +630,7 @@ async function handleRequests(request, env, user) {
     (kind === "new" ? `- **Type:** ${category}\n` : "") +
     (kind === "new" ? `- **Proposed title:** ${title}\n` : `- **Policy:** ${policy || "—"}\n`) +
     (kind === "new" ? `- **Versions:** ${versions}\n` : "") +
-    (kind === "translation" ? `- **Translate into:** ${targetLanguage}\n- **Method:** ${method === "attached" ? "requester attached a translated Word file (restyle + verify against the English)" : "automatic (Claude translates the Word source)"}\n- **Publish as policy id:** \`${translationId}\`\n` : "") +
+    (kind === "translation" ? `- **Translate into:** ${targetLanguage}\n- **Method:** ${method === "attached" ? "requester attached a translated Word file (restyle + verify against the English)" : "AI translation (translate the Word source)"}\n- **Publish as policy id:** \`${translationId}\`\n` : "") +
     (edition ? `- **Edition:** ${edition}\n` : "") +
     (variant ? `- **Variant:** ${variant}${variant === "Both" ? " (apply to signed and unsigned)" : ""}\n` : "") +
     (uploadPath ? `- **Attached document:** \`${uploadPath}\`\n` : "") +
@@ -648,7 +648,7 @@ async function handleRequests(request, env, user) {
       kind === "new" ? ["Proposed title", escapeHtml(title)] : ["Policy", escapeHtml(policy || "—")],
       kind === "new" ? ["Versions", escapeHtml(versions)] : null,
       kind === "translation" ? ["Translate into", escapeHtml(targetLanguage)] : null,
-      kind === "translation" ? ["Method", method === "attached" ? "Translated Word file attached" : "Automatic"] : null,
+      kind === "translation" ? ["Method", method === "attached" ? "Translated Word file attached" : "AI translation"] : null,
       edition ? ["Edition", escapeHtml(edition)] : null,
       variant ? ["Variant", escapeHtml(variant) + (variant === "Both" ? " (signed + unsigned)" : "")] : null,
       uploadPath ? ["Attached", escapeHtml(uploadPath.split("/").pop())] : null,

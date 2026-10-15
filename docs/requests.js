@@ -109,7 +109,7 @@ function requestCard(r) {
   const sr = selfReview(r.self_review);
   return `<article class="req-card${r.kind === "new" ? " req-new" : ""}" data-status="${esc(r.current_status)}">
     ${r.kind === "new" ? '<div class="req-newbanner">✦ New policy requested</div>' : ""}
-    ${r.kind === "translation" ? `<div class="req-newbanner">🌐 Translation into ${esc(r.target_language || "?")} — ${r.method === "attached" ? "translated Word file attached" : "automatic"}${r.translation_id ? ` · publish as <code>${esc(r.translation_id)}</code>` : ""}</div>` : ""}
+    ${r.kind === "translation" ? `<div class="req-newbanner">🌐 Translation into ${esc(r.target_language || "?")} — ${r.method === "attached" ? "translated Word file attached" : "AI translation"}${r.translation_id ? ` · publish as <code>${esc(r.translation_id)}</code>` : ""}</div>` : ""}
     <div class="req-head">
       <div>
         <span class="req-title">${esc(title)}</span>
