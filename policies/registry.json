@@ -931,7 +931,8 @@
           "notes": "Initial publication, restyled to the current BioMar template.",
           "requested_by": "Marianne Niviaq Thomsen"
         }
-      ]
+      ],
+      "subhead_gap": 12
     },
     {
       "id": "dividend-and-share-buyback-policy",

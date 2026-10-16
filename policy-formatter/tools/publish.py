@@ -148,6 +148,8 @@ def main():
                     meta_args += ["--category", p["category"]]
                 if p.get("footer_note"):
                     meta_args += ["--footer-note", p["footer_note"]]
+                if p.get("subhead_gap"):
+                    meta_args += ["--subhead-gap", str(p["subhead_gap"])]
                 if p.get("toc"):
                     meta_args += ["--toc"]
                 if ed.get("approval_date"):

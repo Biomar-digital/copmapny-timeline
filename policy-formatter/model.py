@@ -84,6 +84,7 @@ class Policy:
     version_date: str = ""    # date shown on the version line (defaults to approval date)
     has_signed: bool = False  # this unsigned render has a signed sibling (-> drop the card)
     category: str = "Policy"  # "Policy" | "Guideline" | "Position Statement" — Guideline swaps the cover colour
+    subhead_gap: float = 0    # extra points above a short numbered sub-heading that directly follows a list or table (request 1ce50c34)
     toc: bool = False         # insert an auto-paginated table of contents after the cover (request a2f179f7)
     language: str = "English" # language the document is written in (drives the template's own fixed strings — see i18n.py)
 

@@ -875,6 +875,14 @@ def _story(policy):
                             and getattr(policy, "hanging_indent", False))
                     style = ((BODY_HANG_DEEP if deep else BODY_HANG) if justify
                              else (BODY_HANG_DEEP_LEFT if deep else BODY_HANG_LEFT))
+                    # Opt-in (registry `subhead_gap`): a short numbered sub-heading
+                    # that directly follows a list or an answer box gets extra
+                    # room above it (request 1ce50c34). spaceBefore, not a
+                    # Spacer, so it is dropped at the top of a page.
+                    gap = getattr(policy, "subhead_gap", 0)
+                    if (gap and i > 0 and isinstance(blocks[i - 1], (Bullet, TableBlock))
+                            and not b.text.strip().endswith((".", ";"))):
+                        style = ParagraphStyle(style.name + "Gap", parent=style, spaceBefore=gap)
                     if getattr(policy, "hanging_indent", False):
                         flow.append(Paragraph(_fmt(m.group(3), number=False), style, bulletText=m.group(1)))
                     else:

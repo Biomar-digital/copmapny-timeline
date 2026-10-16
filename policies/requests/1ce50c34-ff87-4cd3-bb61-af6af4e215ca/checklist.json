@@ -1,0 +1,10 @@
+[
+  {"id": "space-before-3.2-3.6", "label": "Extra 12pt space above the short sub-headings 3.2-3.6 that follow a lettered list (explicit w:spacing before=240 in the amended Word; registry subhead_gap=12)",
+   "present": ["Provide recommendations on immediate disclosure", "Process for delay of disclosure of Inside Information", "Process in relation to financial results and outlook"]},
+  {"id": "space-before-sched3-items", "label": "Same extra space above Schedule 3's items 2-5, which follow the answer boxes",
+   "present": ["The identity of the person making the notification", "Date and time of the decision to delay disclosure"]},
+  {"id": "sched1-bullets", "label": "Schedule 1's four bullets (already bulleted in the amended Word) are unchanged",
+   "present": ["Non-public;", "Precise;"]},
+  {"id": "no-duplicate-markers", "label": "No duplicated clause markers",
+   "absent": ["(a) (a)", "(b) (b)", "3.2 3.2"]}
+]

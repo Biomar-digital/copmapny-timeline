@@ -328,7 +328,7 @@ def _table(doc, blk):
                  color=WHITE if header else NAVY)
 
 
-def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_INDENT, toc=False):
+def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_INDENT, toc=False, subhead_gap=0):
     # Mirrors generator.py's _story(): tracks whether the previous block was a
     # short numbered sub-heading with no clause number of its own ("3.2
     # Incentive pay"), so the paragraph(s) right after it — its actual content
@@ -407,7 +407,11 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
             if is_numbered:
                 m = _NUM.match(blk.text.strip())
                 deep = bool(_BARE_NUM.match(m.group(1))) and nested_num_indent
-                _body(doc, blk, size, indent_mode="hang_deep" if deep else "hang", indent=indent)
+                para = _body(doc, blk, size, indent_mode="hang_deep" if deep else "hang", indent=indent)
+                gap = subhead_gap
+                if (gap and idx > 0 and isinstance(blocks[idx - 1], (M.Bullet, M.TableBlock))
+                        and not blk.text.strip().endswith((".", ";"))):
+                    para.paragraph_format.space_before = Pt(gap)   # request 1ce50c34
                 stripped = blk.text.strip()
                 prev_subhead = (len(stripped.split()) <= 8
                                 and not stripped.rstrip().endswith((".", ":", ";")))
@@ -657,7 +661,7 @@ def build_docx(policy, out_path, pdf_path=None):
     _render_blocks(doc, policy.blocks, size=policy.body_size or 11,
                     hanging_indent=hanging,
                     indent=_required_indent(policy) if hanging else CLAUSE_INDENT,
-                    toc=has_toc)
+                    toc=has_toc, subhead_gap=getattr(policy, "subhead_gap", 0))
     _version_card(doc, policy)
     doc.save(out_path)
     return out_path
