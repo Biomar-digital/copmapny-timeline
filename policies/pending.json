@@ -550,5 +550,15 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791895400936
+  },
+  {
+    "id": "9799fc33-0d33-4cd8-8d77-6f2fa8d9cd36",
+    "policy": "disclosure-committee-charter",
+    "request_id": "1ce50c34-ff87-4cd3-bb61-af6af4e215ca",
+    "title": "Change: disclosure-committee-charter",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1792155685250
   }
 ]
