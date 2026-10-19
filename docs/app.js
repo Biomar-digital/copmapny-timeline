@@ -205,12 +205,6 @@ function langPills(root, p) {
     `<button type="button" class="langpill${v.id === p.id ? " active" : ""}" data-vid="${esc(v.id)}">${esc(langOf(v))}${v.variant ? ` <span class="lp-sub">· ${esc(v.variant)}</span>` : ""}</button>`).join("") + `</div>`;
 }
 
-function missingNote(p) {
-  if (!LANG_PREF || langOf(p) === LANG_PREF) return "";
-  return `<div class="lang-missing"><span>Not available in ${esc(LANG_PREF)} yet — showing ${esc(langOf(p))}.</span>
-    <button type="button">Request a ${esc(LANG_PREF)} translation</button></div>`;
-}
-
 function card(root) {
   const p = pickVariant(root);
   const ed = latest(p);
@@ -240,7 +234,6 @@ function card(root) {
         <b>Editions:</b> ${n}
       </div>
       ${langPills(root, p)}
-      ${missingNote(p)}
       ${stepperHtml(p)}
     </div>
     <div class="actions">
@@ -254,8 +247,6 @@ function card(root) {
   el.querySelectorAll(".langpill").forEach(b => b.addEventListener("click", () => {
     VARIANT_PICK.set(root.id, b.dataset.vid); render();
   }));
-  const miss = el.querySelector(".lang-missing button");
-  if (miss) miss.addEventListener("click", () => openRequest("translation", root, LANG_PREF));
   // Dropdown toggles (Download, ⋯ More): open this one, close any others.
   el.querySelectorAll(".pop-toggle").forEach(t => t.addEventListener("click", e => {
     e.stopPropagation();
@@ -992,8 +983,8 @@ function policyType(p) { return p.category === "Guideline" ? "Guideline" : "Poli
 function renderTypeTabs() {
   const el = document.getElementById("typetabs");
   if (!el) return;
-  const nPolicy = ROOTS.filter(p => policyType(p) === "Policy").length;
-  const nGuideline = ROOTS.filter(p => policyType(p) === "Guideline").length;
+  const nPolicy = visibleRoots().filter(p => policyType(p) === "Policy").length;
+  const nGuideline = visibleRoots().filter(p => policyType(p) === "Guideline").length;
   const tab = (val, label, n) =>
     `<button type="button" class="typetab${TYPE_FILTER === val ? " active" : ""}" data-val="${esc(val)}">${esc(label)} <span class="typetab-count">${n}</span></button>`;
   el.innerHTML = tab("Policy", "Policies", nPolicy) + tab("Guideline", "Guidelines", nGuideline);
@@ -1045,6 +1036,10 @@ function translationStale(v, root) {
   const from = v.translation_of && latest(v).translated_from;
   return !!(from && root && edKey(latest(root)) !== from);
 }
+// With a language chosen, only families that exist in it are listed.
+function visibleRoots() {
+  return LANG_PREF ? ROOTS.filter(r => variantsOf(r).some(v => langOf(v) === LANG_PREF)) : ROOTS;
+}
 function availableLanguages() {
   const set = new Set(POLICIES.map(langOf));
   return ["English", ...[...set].filter(l => l !== "English").sort()];
@@ -1069,12 +1064,12 @@ function renderLangSelector() {
   const cur = LANG_PREF || "English";
   const n = l => ROOTS.filter(r => variantsOf(r).some(v => langOf(v) === l)).length;
   sel.innerHTML = langs.map(l =>
-    `<option value="${esc(l)}"${l === cur ? " selected" : ""}>${esc(l)} (${n(l)} of ${ROOTS.length})</option>`).join("");
+    `<option value="${esc(l)}"${l === cur ? " selected" : ""}>${esc(l)} (${n(l)})</option>`).join("");
   sel.onchange = () => {
     LANG_PREF = sel.value === "English" ? "" : sel.value;
     try { localStorage.setItem("lang", LANG_PREF); } catch {}
     VARIANT_PICK.clear();
-    render();
+    renderTypeTabs(); renderChips(); renderStatusFilter(); render();
   };
 }
 
@@ -1179,7 +1174,7 @@ async function pendingAction(policy, action) {
 function render() {
   const list = document.getElementById("list");
   const f = SEARCH.trim().toLowerCase();
-  let shown = ROOTS.filter(r => {
+  let shown = visibleRoots().filter(r => {
     if (policyType(r) !== TYPE_FILTER) return false;
     if (OWNER_FILTER && (r.owner || "") !== OWNER_FILTER) return false;
     if (APPROVER_FILTER && (r.approver || "") !== APPROVER_FILTER) return false;
@@ -1209,7 +1204,7 @@ function render() {
     }
     list.appendChild(card(p));
   });
-  const inTabTotal = ROOTS.filter(p => policyType(p) === TYPE_FILTER).length;
+  const inTabTotal = visibleRoots().filter(p => policyType(p) === TYPE_FILTER).length;
   document.getElementById("empty").hidden = shown.length > 0;
   document.getElementById("empty").textContent = TYPE_FILTER === "Guideline"
     ? "No guidelines match your search." : "No policies match your search.";
@@ -1220,7 +1215,7 @@ function render() {
 function renderStatusFilter() {
   const el = document.getElementById("statusfilter");
   if (!el) return;
-  const inTab = ROOTS.filter(p => policyType(p) === TYPE_FILTER);
+  const inTab = visibleRoots().filter(p => policyType(p) === TYPE_FILTER);
   const defs = [
     ["change_pending", "Change pending"],
     ["pending_review", "Pending for review"],
@@ -1243,7 +1238,7 @@ function renderStatusFilter() {
 
 function renderChips() {
   const el = document.getElementById("chips");
-  const inTab = ROOTS.filter(p => policyType(p) === TYPE_FILTER);
+  const inTab = visibleRoots().filter(p => policyType(p) === TYPE_FILTER);
   const uniq = (k) => [...new Set(inTab.map(p => p[k]).filter(Boolean))].sort();
   const opts = (vals, sel) => `<option value="">All</option>` +
     vals.map(v => `<option value="${esc(v)}"${v === sel ? " selected" : ""}>${esc(v)}</option>`).join("");

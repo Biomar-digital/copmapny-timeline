@@ -728,13 +728,5 @@ main { max-width: 900px; margin: 0 auto; padding: 22px; }
 .langpill .lp-sub { font-weight: 400; opacity: .8; }
 .tag.auto { background: #fff4e0; color: #7a4a00; border: 1px solid #f1d199; }
 .tag.stale { background: #fde8e8; color: #8a1f1f; border: 1px solid #f1b5b5; }
-.lang-missing {
-  margin-top: 9px; font-size: 12.5px; color: #6b4a00; background: #fff8e6; border: 1px solid #f1d199;
-  border-radius: 8px; padding: 6px 10px; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center;
-}
-.lang-missing button {
-  border: 0; background: none; padding: 0; color: var(--ocean); font: inherit; font-weight: 600;
-  text-decoration: underline; cursor: pointer;
-}
 #reqLangOther { margin-top: 6px; }
 #reqLangHint { display: block; margin-top: 6px; font-size: 11.5px; line-height: 1.4; color: #6b87a4; }
