@@ -1,0 +1,10 @@
+[
+  {"id": "text-from-attached-word", "label": "The Spanish text is the attached Word file's, paragraph for paragraph (verified identical, same order) — headings, 5 bullets of 'applies to', 'Principio 1-4', process and policy list",
+   "present": ["Política SpeakUp", "¿Qué se puede denunciar?", "Principio 4: Gestión profesional, independiente y justa de las denuncias", "Proceso y plazos", "Gobernanza, revisión y políticas relacionadas", "Otras políticas y procedimientos de cumplimiento normativo pertinentes"]},
+  {"id": "numbers-preserved", "label": "Every number matches the English (7 days acknowledgement, 30 days to start, 60 days feedback/completion)",
+   "present": ["7 días", "30 días", "60 días"]},
+  {"id": "card-localised", "label": "Back-cover card uses the Spanish labels from i18n.py and the translator's own owner/approver/approval date",
+   "present": ["Historial de versiones", "Propietario y aprobador", "Dirección Ejecutiva", "08-05-2026"]},
+  {"id": "translator-header-dropped", "label": "The translator's own cover block, title table, version table and 'Historial de versiones y responsables' footer heading are not duplicated in the body (the template draws the cover and back card)",
+   "absent": ["Responsable y aprobación", "Powered by Partnership. / Driven"]}
+]

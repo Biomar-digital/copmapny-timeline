@@ -568,8 +568,8 @@
     "id": "2218e2cb-a669-4ba3-86ba-83237d8356b6",
     "policy": "whistleblower-policy--spanish",
     "request_id": "76457ecc-f998-415e-be13-4c23da7664ff",
-    "title": "Translate: whistleblower-policy → Spanish",
-    "status": "change_pending",
+    "title": "Translate: whistleblower-policy \u2192 Spanish",
+    "status": "pending_review",
     "author": "Administrator",
     "email": "marketing@biomar.com",
     "created_at": 1792416654128
