@@ -492,7 +492,7 @@
     "policy": "internal-rules-disclosure-obligations",
     "request_id": "6ee28068-023a-4e4d-aea9-effe922e343a",
     "title": "Change: internal-rules-disclosure-obligations",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791537866082
@@ -546,7 +546,7 @@
     "policy": "takeover-response-manual",
     "request_id": "0e21d68e-0840-4cc9-a416-ed1c49ffa702",
     "title": "Change: takeover-response-manual",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791895400936

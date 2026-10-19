@@ -1,7 +1,7 @@
 {
   "request_id": "6ee28068-023a-4e4d-aea9-effe922e343a",
   "policy": "internal-rules-disclosure-obligations",
-  "generated_at": "2026-10-09 10:16 UTC",
+  "generated_at": "2026-10-19 07:19 UTC",
   "overall": "attention",
   "summary": "18 passed, 1 to review",
   "checks": [

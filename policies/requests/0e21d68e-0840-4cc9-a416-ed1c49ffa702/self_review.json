@@ -1,7 +1,7 @@
 {
   "request_id": "0e21d68e-0840-4cc9-a416-ed1c49ffa702",
   "policy": "takeover-response-manual",
-  "generated_at": "2026-10-13 13:46 UTC",
+  "generated_at": "2026-10-19 07:19 UTC",
   "overall": "attention",
   "summary": "20 passed, 1 to review",
   "checks": [
