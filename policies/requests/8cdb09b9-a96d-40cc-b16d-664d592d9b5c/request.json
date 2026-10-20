@@ -1,0 +1,16 @@
+{
+  "id": "8cdb09b9-a96d-40cc-b16d-664d592d9b5c",
+  "kind": "change",
+  "status": "open",
+  "title": "internal-rules-handling-inside-information",
+  "policy": "internal-rules-handling-inside-information",
+  "edition": "Version 1__2026-10",
+  "variant": "Unsigned",
+  "versions": "",
+  "author": "Magnhild Saeboe",
+  "email": "magsae@biomar.com",
+  "details": "Footnote to be placed in buttom of page.\r\n\r\nAll Schedules and Appendixes to start on a new separate page.",
+  "upload": null,
+  "created_at": "2026-10-20T12:42:24.245Z",
+  "issue": 76
+}
