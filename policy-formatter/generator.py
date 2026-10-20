@@ -14,6 +14,7 @@ from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame,
                                 NextPageTemplate, PageBreak, KeepTogether, Flowable)
 from reportlab.platypus.flowables import HRFlowable, BalancedColumns
 from reportlab.platypus.tableofcontents import TableOfContents
+from reportlab.platypus.doctemplate import IndexingFlowable
 from xml.sax.saxutils import escape
 import re
 
@@ -163,6 +164,15 @@ def _breakable(t):
     return _LONG.sub(lambda m: re.sub(r"([/?&])", "\\1​", m.group(0)), t)
 
 
+# The bundled fonts have the Latin-1 superscripts (¹ ² ³) but not ⁰ ⁴-⁹; draw
+# those as markup so a footnote mark 4+ never renders as a blank box.
+_SUPER_MISSING = {"\u2070": "0", **{chr(0x2074 + k): str(4 + k) for k in range(6)}}
+
+
+def _supers(markup):
+    return "".join(f"<super>{_SUPER_MISSING[ch]}</super>" if ch in _SUPER_MISSING else ch for ch in markup)
+
+
 def _fmt(text, number=True, widow=True, lstrip=True, rstrip=True):
     """Format clause text: (1) keep the last two words together so a paragraph
     never ends with a single orphaned word; (2) render a leading clause number
@@ -185,8 +195,8 @@ def _fmt(text, number=True, widow=True, lstrip=True, rstrip=True):
     m = _NUM.match(t) if number else None
     if m:
         return (f'<font name="{B.F_DEMI}">{escape(m.group(1))}</font>'
-                f'{m.group(2)}{escape(m.group(3))}')
-    return escape(t)
+                f'{m.group(2)}{_supers(escape(m.group(3)))}')
+    return _supers(escape(t))
 
 
 def _body_markup(b, strip_number=False, skip_len=None):
@@ -517,7 +527,7 @@ def _signature_card_flowables(block):
     return [Spacer(1, 10), KeepTogether([box]), Spacer(1, 8)]
 
 
-def _table_flowables(block):
+def _table_flowables(block, reserve=0, lead=0):
     """Return the flowables for a table. Small tables are a single Table; large
     tables are paginated manually so the header repeats and a page never ends
     on a section band (which would orphan it from its rows)."""
@@ -560,19 +570,24 @@ def _table_flowables(block):
                          colw) if head_data else 0
     if hdr == 2:
         head_h += _row_height([c if c else "" for c in head_data[1]], colw)
-    page_h = B.PAGE_H - B.MARGIN_TOP_CONT - B.MARGIN_BOTTOM - head_h - 18
+    # `reserve`: room the footnotes under this table will take at the page foot
+    page_h = B.PAGE_H - B.MARGIN_TOP_CONT - B.MARGIN_BOTTOM - head_h - 18 - reserve
     heights = [_row_height(_body_cells(r, ncols)[0], colw) for r in body]
 
+    # `lead`: height of the heading this table directly follows. Without it the
+    # table always opens a fresh page, stranding the heading alone on the page
+    # before; with it the first chunk starts under the heading instead.
     chunks, i = [], 0
     while i < len(body):
+        cap = page_h - lead if not chunks else page_h
         cur, h = [], 0.0
-        while i < len(body) and (not cur or h + heights[i] <= page_h):
+        while i < len(body) and (not cur or h + heights[i] <= cap):
             cur.append(i); h += heights[i]; i += 1
         while len(cur) > 1 and _band(body[cur[-1]]):   # don't orphan trailing bands
             i = cur.pop()
         chunks.append(cur)
 
-    flow = [PageBreak()]
+    flow = [] if lead else [PageBreak()]
     for ci, ch in enumerate(chunks):
         flow.append(_assemble(head_data, head_style, [body[j] for j in ch],
                               colw, ncols, block.header, span_cols))
@@ -815,7 +830,7 @@ def _story(policy):
                 # Schedule 2 log table, request 3d497671) renders as a small
                 # note right after the table, never as an extra row inside
                 # it — same small-print treatment as a Columns-block footnote.
-                flow.append(Paragraph(_fmt(b.text), COL_FOOTNOTE))
+                flow.append(_FootnoteMark(b.text))
                 prev_subhead = False
                 nested_num_indent = False
                 continue
@@ -988,7 +1003,16 @@ def _story(policy):
                 flow.extend(_signature_card_flowables(b))
             else:
                 flow.append(Spacer(1, 4))
-                flow.extend(_table_flowables(b))
+                j = i + 1
+                while j < len(blocks) and isinstance(blocks[j], Body) and _is_footnote(blocks[j].text):
+                    j += 1
+                notes = [x.text for x in blocks[i + 1:j]]
+                fn_reserve = (sum(h for _, h in _footnote_paras(notes)) + _FN_GAP) if notes else 0
+                lead = 0
+                if i > 0 and isinstance(blocks[i - 1], Heading) and flow and not isinstance(flow[-1], PageBreak):
+                    hflow = flow[-2] if isinstance(flow[-1], Spacer) else flow[-1]
+                    lead = _flow_height(hflow, _CONTENT_W) + 6
+                flow.extend(_table_flowables(b, fn_reserve, lead))
                 flow.append(Spacer(1, 8))
         elif isinstance(b, ImageBlock):
             prev_subhead = False
@@ -1088,6 +1112,7 @@ def _draw_content_furniture(c, doc):
     # Footer (centred), with an optional small disclaimer line beneath it.
     c.setFont(B.F_REGULAR, 8)
     c.drawCentredString(B.PAGE_W / 2.0, 25, B.FOOTER)
+    _reserve_footnotes(c, doc)
     note = getattr(policy, "footer_note", "")
     if note:
         c.setFillColor(colors.Color(0.576, 0.584, 0.596))   # #939598 grey
@@ -1420,6 +1445,80 @@ def _required_clause_indent(policy, base=CLAUSE_INDENT):
     return max(base, widest + MIN_NUMBER_GAP)
 
 
+# ---- footnotes at the bottom of the page -----------------------------------
+# A footnote block in the model ("¹ text") is placed by the page it lands on:
+# a zero-height _FootnoteMark sits right after the paragraph/table that carries
+# the reference and records itself; the NEXT pass reserves that much room at the
+# bottom of the page (frame bottom padding) and draws the notes there. The pass
+# loop settles when the notes sit on the same pages two passes running.
+FOOTNOTE = ParagraphStyle("Footnote", fontName=B.F_REGULAR, fontSize=7.5, leading=9.5,
+                          textColor=B.BIOMAR_BLUE, alignment=TA_LEFT, spaceAfter=0)
+_FN_GAP, _FN_TEXT_W = 9, B.PAGE_W - B.MARGIN_L - B.MARGIN_R
+
+
+class _FootnoteMark(Flowable):
+    def __init__(self, text):
+        Flowable.__init__(self)
+        self.text = text
+
+    def wrap(self, aw, ah):
+        return (0, 0)
+
+    def draw(self):
+        pass
+
+
+class _FootnoteStore(IndexingFlowable):
+    """Rotates the per-page footnote registry between passes and reports when
+    it has stopped changing (capped, so a note flip-flopping across a page
+    boundary can never loop forever)."""
+    def __init__(self, doc):
+        IndexingFlowable.__init__(self)
+        self.doc, self.passes = doc, 0
+
+    def wrap(self, aw, ah):
+        return (0, 0)
+
+    def draw(self):
+        pass
+
+    def beforeBuild(self):
+        self.passes += 1
+        self.doc._fn_prev, self.doc._fn_now = self.doc._fn_now, {}
+
+    def isSatisfied(self):
+        return self.passes >= 6 or self.doc._fn_now == self.doc._fn_prev
+
+
+def _footnote_paras(notes):
+    out = []
+    for t in notes:
+        p = Paragraph(_supers(escape(t)), FOOTNOTE)
+        out.append((p, p.wrap(_FN_TEXT_W, 10000)[1] + 2))
+    return out
+
+
+def _reserve_footnotes(c, doc):
+    """Called as each content page begins: shrink the frame by the height of the
+    notes expected on it and draw them on the bottom margin."""
+    notes = getattr(doc, "_fn_prev", {}).get(c.getPageNumber(), [])
+    paras = _footnote_paras(notes)
+    total = sum(h for _, h in paras)
+    reserve = total + _FN_GAP if paras else 0
+    for f in doc.pageTemplate.frames:
+        f.__dict__["_bottomPadding"] = reserve
+        f._geom()
+    if not paras:
+        return
+    y = B.MARGIN_BOTTOM + total
+    c.setStrokeColor(B.LIGHT_RULE)
+    c.setLineWidth(0.5)
+    c.line(B.MARGIN_L, y + 3, B.MARGIN_L + 110, y + 3)
+    for p, h in paras:
+        p.drawOn(c, B.MARGIN_L, y - h + 2)
+        y -= h
+
+
 class _PolicyDocTemplate(BaseDocTemplate):
     """Only differs from BaseDocTemplate when policy.toc is set: registers a
     TOCEntry (and a clickable bookmark) for every top-level-heading Paragraph
@@ -1427,6 +1526,9 @@ class _PolicyDocTemplate(BaseDocTemplate):
     standard reportlab TOC pattern, requiring multiBuild() instead of build()
     so the table's page numbers have a first pass to settle against."""
     def afterFlowable(self, flowable):
+        if isinstance(flowable, _FootnoteMark):
+            self._fn_now.setdefault(self.canv.getPageNumber(), []).append(flowable.text)
+            return
         title = getattr(flowable, "_toc_title", None)
         if title is None:
             return
@@ -1455,6 +1557,7 @@ def build_pdf(policy, out_path):
         topMargin=B.MARGIN_TOP, bottomMargin=B.MARGIN_BOTTOM,
         title=policy.title, author=B.COMPANY)
     doc._policy = policy
+    doc._fn_prev, doc._fn_now = {}, {}
 
     # The first content page starts high (H1 at the template's 119 pt) only
     # when it begins with a short heading; if it begins with full-width body
@@ -1486,7 +1589,10 @@ def build_pdf(policy, out_path):
     story = ([NextPageTemplate("content_first"), PageBreak()] + toc_pages +
              [NextPageTemplate("content")] + _story(policy))
     story += [NextPageTemplate("back"), PageBreak(), Spacer(1, 0.1)]
-    if has_toc:
+    has_fn = any(isinstance(x, _FootnoteMark) for x in story)
+    if has_fn:
+        story.insert(0, _FootnoteStore(doc))
+    if has_toc or has_fn:
         doc.multiBuild(story)
     else:
         doc.build(story)

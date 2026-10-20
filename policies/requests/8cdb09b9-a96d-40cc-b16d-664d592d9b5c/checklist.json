@@ -1,0 +1,43 @@
+[
+ {
+  "id": "fn-child-page-bottom",
+  "label": "Footnote on 'a dependent¹ child' is drawn at the foot of its own page (real page-bottom footnote with a rule above), not as a small paragraph after the text (request 8cdb09b9)",
+  "page": 11,
+  "present": [
+   "Understood as a child which the Reporting Person has a duty to support under national law"
+  ]
+ },
+ {
+  "id": "fn-pdmr-page-bottom",
+  "label": "The PDMR form's two footnotes (1 and 3) sit at the foot of the page the form ends on",
+  "present": [
+   "Section to be repeated for (i) each type of instrument",
+   "Weighted average price"
+  ]
+ },
+ {
+  "id": "fn-transactions-page-bottom",
+  "label": "Footnote 4 (Article 19(7) MAR) sits at the foot of Schedule 3.4's first page, with its superscript 4 drawn (the bundled font has no U+2074 glyph)",
+  "present": [
+   "4 The transactions are listed in Article 19(7) of the Market Abuse Regulation"
+  ]
+ },
+ {
+  "id": "schedules-new-page",
+  "label": "Every Schedule and Appendix heading starts a page (PDF; the Word export now page-breaks before them too)",
+  "present": [
+   "Schedule 3.2 – Notification form",
+   "Schedule 3.4 – List of transactions",
+   "Appendix B – Definition of Inside Information"
+  ]
+ },
+ {
+  "id": "no-stranded-heading",
+  "label": "Schedule 3.2's heading is no longer alone on a page: the PDMR form starts directly under it and runs on to the next page",
+  "page": 15,
+  "present": [
+   "Schedule 3.2",
+   "Name"
+  ]
+ }
+]

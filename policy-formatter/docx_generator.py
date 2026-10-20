@@ -155,6 +155,7 @@ def _heading(doc, text, level, hang=False, indent=CLAUSE_INDENT, toc=False):
         _run(p, f"{m.group(1)}\t{m.group(3)}", bold=True, size=size)
     else:
         _run(p, text, bold=True, size=size)
+    return p
 
 
 def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
@@ -341,7 +342,11 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
         if isinstance(blk, M.Heading):
             if _is_schedule_heading(blk):
                 in_schedule = True
-            _heading(doc, blk.text, blk.level, hang=hanging_indent, indent=indent, toc=toc)
+            hp = _heading(doc, blk.text, blk.level, hang=hanging_indent, indent=indent, toc=toc)
+            # Every Schedule / Appendix opens its own page, as in the PDF
+            # (request 8cdb09b9).
+            if idx > 0 and _is_schedule_heading(blk):
+                hp.paragraph_format.page_break_before = True
             # An un-numbered paragraph right after a top-level heading is that
             # section's lead-in text and needs the same indent as the rest of
             # the hanging-indent layout — see the matching comment in
