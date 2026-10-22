@@ -565,17 +565,6 @@
     "notified": true
   },
   {
-    "id": "2218e2cb-a669-4ba3-86ba-83237d8356b6",
-    "policy": "whistleblower-policy--spanish",
-    "request_id": "76457ecc-f998-415e-be13-4c23da7664ff",
-    "title": "Translate: whistleblower-policy → Spanish",
-    "status": "pending_review",
-    "author": "Administrator",
-    "email": "marketing@biomar.com",
-    "created_at": 1792416654128,
-    "notified": true
-  },
-  {
     "id": "23403c17-ebb3-45bf-946b-5a51f45f2a1d",
     "policy": "internal-rules-handling-inside-information",
     "request_id": "8cdb09b9-a96d-40cc-b16d-664d592d9b5c",
