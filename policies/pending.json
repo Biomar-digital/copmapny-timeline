@@ -574,5 +574,15 @@
     "email": "magsae@biomar.com",
     "created_at": 1792500146709,
     "notified": true
+  },
+  {
+    "id": "c6e7c412-6ad8-4d72-ada3-ab2a9f1a4975",
+    "policy": "internal-rules-disclosure-obligations",
+    "request_id": "699ea5cb-f7cd-4b18-9fc1-c86b9d9c7228",
+    "title": "Change: internal-rules-disclosure-obligations",
+    "status": "change_pending",
+    "author": "Marianne Niviaq Thomsen",
+    "email": "marni@biomar.com",
+    "created_at": 1794388334113
   }
 ]
