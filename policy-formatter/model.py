@@ -50,6 +50,36 @@ class TableBlock:
     rows: List[List[str]]
     header: bool = True
 
+
+# A roman-numeral sub-item ("(i) ...", "(ii) ...", "(iii) ...") — the third level
+# under a lettered "(a)" item (request ecb33d76, Rules of Procedure 4.2(a)).
+ROMAN_SPLIT = re.compile(r"^(\(?(?:i{1,3}|iv|vi{0,3}|ix|x)[.)])\s+(.*)$", re.S)
+_LETTER_SPLIT = re.compile(r"^\(?([a-z])[.)]\s")
+
+
+def is_roman_item(blocks, i):
+    """True when blocks[i] is a roman-numeral item nested under a lettered one.
+    Multi-letter markers ("ii", "iii", "iv", ...) are unambiguous; the single
+    letters i / v / x also read as alphabet letters, so they only count after
+    a lettered item that isn't their alphabet predecessor (h / u / w) or after
+    a roman item of the same run."""
+    b = blocks[i]
+    if not isinstance(b, Bullet):
+        return False
+    m = ROMAN_SPLIT.match(b.text.strip())
+    if not m:
+        return False
+    marker = m.group(1).strip("().")
+    if len(marker) > 1:
+        return True
+    prev = blocks[i - 1] if i > 0 else None
+    if not isinstance(prev, Bullet):
+        return False
+    if is_roman_item(blocks, i - 1):
+        return True
+    pm = _LETTER_SPLIT.match(prev.text.strip())
+    return bool(pm) and pm.group(1) not in ("h", "u", "w")
+
 @dataclass
 class ImageBlock:
     data: bytes             # raw image bytes (png/jpeg)

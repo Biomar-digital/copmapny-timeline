@@ -511,9 +511,10 @@
     "policy": "rules-of-procedure-board-of-directors",
     "request_id": "ecb33d76-344a-4242-b142-c197da7fa63d",
     "title": "Change: rules-of-procedure-board-of-directors",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1794406464362
+    "created_at": 1794406464362,
+    "updated_at": 1794406839194
   }
 ]

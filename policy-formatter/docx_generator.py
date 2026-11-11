@@ -233,7 +233,7 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     return p
 
 
-def _bullet(doc, text, size=11, hang=False, plain_hang=False, indent=CLAUSE_INDENT, runs=None):
+def _bullet(doc, text, size=11, hang=False, plain_hang=False, indent=CLAUSE_INDENT, runs=None, roman=False):
     # A lettered item ("a. ...") already carries its own marker in the text,
     # so it must NOT also get Word's automatic "List Bullet" glyph — same
     # double-marker bug the PDF generator guards against. Use a plain
@@ -257,12 +257,16 @@ def _bullet(doc, text, size=11, hang=False, plain_hang=False, indent=CLAUSE_INDE
                 skip = 0
         return out
 
-    m = _LETTERED_SPLIT.match(text.strip()) if hang else None
+    m = (M.ROMAN_SPLIT if roman else _LETTERED_SPLIT).match(text.strip()) if hang else None
     if m:
-        text_indent = indent * 2
+        # A roman "(i)"/"(ii)" sub-item sits one level below the lettered item:
+        # marker at the lettered item's text column, text one indent further in
+        # (request ecb33d76).
+        text_indent = indent * (3 if roman else 2)
+        marker_indent = text_indent - indent
         p = doc.add_paragraph()
         p.paragraph_format.left_indent = Pt(text_indent)
-        p.paragraph_format.first_line_indent = Pt(-(text_indent - indent))
+        p.paragraph_format.first_line_indent = Pt(-(text_indent - marker_indent))
         p.paragraph_format.tab_stops.add_tab_stop(Pt(text_indent), WD_TAB_ALIGNMENT.LEFT)
         p.paragraph_format.space_after = Pt(4)
         if runs:
@@ -357,10 +361,12 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
             prev_subhead = bool(hanging_indent) and not in_schedule
             nested_num_indent = False
         elif isinstance(blk, M.Bullet):
-            is_lettered = bool(_LETTERED.match(blk.text.strip()))
+            is_roman = hanging_indent and M.is_roman_item(blocks, idx)
+            is_lettered = bool(_LETTERED.match(blk.text.strip())) or is_roman
             plain_hang = hanging_indent and not is_lettered
             p = _bullet(doc, blk.text, size, hang=hanging_indent and is_lettered,
-                        plain_hang=plain_hang, indent=indent, runs=getattr(blk, "runs", None))
+                        plain_hang=plain_hang, indent=indent, runs=getattr(blk, "runs", None),
+                        roman=is_roman)
             # Extra breathing room once the list ends — see the matching
             # comment in generator.py (request 3d497671; request e4305282
             # for the heading exception). Scoped to hanging_indent plain

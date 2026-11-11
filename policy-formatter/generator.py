@@ -20,7 +20,7 @@ import re
 
 import brand as B
 import i18n
-from model import Heading, Body, Bullet, TableBlock, ImageBlock, Columns
+from model import Heading, Body, Bullet, TableBlock, ImageBlock, Columns, ROMAN_SPLIT, is_roman_item
 from reportlab.platypus import Image as RLImage
 from io import BytesIO
 
@@ -967,10 +967,23 @@ def _story(policy):
             # the same indent treatment as a numbered sub-heading's content
             # (request 0e21d68e). A plain "•" bullet isn't followed by this
             # pattern in practice, so it still resets flush.
-            is_lettered = bool(_LETTERED.match(b.text.strip()))
+            is_roman = bool(getattr(policy, "hanging_indent", False)) and is_roman_item(blocks, i)
+            is_lettered = bool(_LETTERED.match(b.text.strip())) or is_roman
             prev_subhead = is_lettered and bool(getattr(policy, "hanging_indent", False))
             nested_num_indent = False
-            if is_lettered and getattr(policy, "hanging_indent", False):
+            if is_roman:
+                # Third level — "(i)", "(ii)" under a lettered "(a)" item: marker
+                # at the lettered item's text column, text one indent further in
+                # (request ecb33d76).
+                lm = ROMAN_SPLIT.match(b.text.strip())
+                skip_len = len(b.text.strip()) - len(lm.group(2))
+                step = BULLET_HANG.leftIndent - BULLET_HANG.bulletIndent
+                style = ParagraphStyle("BulletHangRoman", parent=BULLET_HANG,
+                                       leftIndent=BULLET_HANG.leftIndent + step,
+                                       bulletIndent=BULLET_HANG.leftIndent)
+                flow.append(Paragraph(_body_markup(b, skip_len=skip_len), style,
+                                      bulletText=lm.group(1)))
+            elif is_lettered and getattr(policy, "hanging_indent", False):
                 lm = _LETTERED_SPLIT.match(b.text.strip())
                 # The marker's own length (not just lm.group(1)) — b.text may
                 # carry a tab/space between marker and text that .strip()'s

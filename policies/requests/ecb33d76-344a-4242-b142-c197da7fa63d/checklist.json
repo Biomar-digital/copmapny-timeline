@@ -1,0 +1,18 @@
+[
+ {
+  "id": "4-2a-sub-items",
+  "label": "Clause 4.2(a): the two key areas are now separate third-level sub-items (i) and (ii) under the (a) lead-in ('...the following key areas:'), not run into the (a) paragraph; each is one indent deeper than (a) with its own marker. Word copy matches (marker at (a)'s text column)",
+  "page": 7,
+  "present": [
+    "the following key areas:",
+    "Adoption, execution and follow-up on the overall objectives and strategic targets of the Company; and",
+    "In support of the Company’s statutory objectives and the long-term value creation"
+  ]
+ },
+ {
+  "id": "toc-unchanged",
+  "label": "The contents (turned on earlier for this document) still lists all 17 sections and its page numbers match the headings after the text moved",
+  "page": 2,
+  "present": ["Introduction", "Takeover scenario", "Review and amendment of the Rules of Procedure"]
+ }
+]
