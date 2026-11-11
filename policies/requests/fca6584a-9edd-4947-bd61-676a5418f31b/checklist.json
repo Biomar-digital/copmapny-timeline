@@ -1,0 +1,8 @@
+[
+ {
+  "id": "closing-para-present",
+  "label": "Clause 4.3's closing paragraph ('In case of doubt, ...') is present on page 3 and now sits at the clause-text indent (in line with 4.3/4.4), not at the list items' deeper indent; the Word copy matches (449580 twips, same as 4.4's text). The uploaded Word has no text changes against the published one",
+  "page": 3,
+  "present": ["In case of doubt, the matters in question are to be discussed with the Chair of the Board of Directors", "Any matter that by nature would be deemed significant and require a board decision."]
+ }
+]

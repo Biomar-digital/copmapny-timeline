@@ -580,19 +580,21 @@
     "policy": "internal-rules-disclosure-obligations",
     "request_id": "699ea5cb-f7cd-4b18-9fc1-c86b9d9c7228",
     "title": "Change: internal-rules-disclosure-obligations",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1794388334113
+    "created_at": 1794388334113,
+    "updated_at": 1794400749847
   },
   {
     "id": "a03bd5c3-037b-4e4e-b5d4-9009b93032ee",
     "policy": "management-instructions",
     "request_id": "fca6584a-9edd-4947-bd61-676a5418f31b",
     "title": "Change: management-instructions",
-    "status": "change_pending",
+    "status": "pending_review",
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
-    "created_at": 1794400098663
+    "created_at": 1794400098663,
+    "updated_at": 1794400749847
   }
 ]

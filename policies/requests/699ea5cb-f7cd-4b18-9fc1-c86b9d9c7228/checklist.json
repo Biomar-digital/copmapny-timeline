@@ -1,0 +1,21 @@
+[
+ {
+  "id": "toc-present",
+  "label": "A table of contents follows the cover, headed 'Contents' (request 699ea5cb: 'including but not limited to the table of contents')",
+  "page": 2,
+  "present": ["Contents", "Introduction", "Persons responsible for compliance with the disclosure obligations"]
+ },
+ {
+  "id": "toc-all-entries",
+  "label": "The contents lists every section (1-10), Schedule 8.1 with its items 1-17, and Appendices A and B, all on one page like the amended document",
+  "page": 2,
+  "present": ["The Company’s spokespersons", "Schedule 8.1", "Treasury shares", "Appendix A", "Appendix B"]
+ },
+ {
+  "id": "body-starts-after-toc",
+  "label": "The body starts on its own page after the contents (no stray contents lines spilling onto page 3)",
+  "page": 3,
+  "present": ["These Internal Rules have been prepared to ensure BioMar Group A/S"],
+  "absent": ["Appendix B"]
+ }
+]

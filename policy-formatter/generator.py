@@ -107,6 +107,8 @@ CELL_BULLET = ParagraphStyle("CellBullet", parent=CELL, leftIndent=10,
 # (whose pagination differs from ours).
 TOC_ENTRY = ParagraphStyle("TOCEntry", fontName=B.F_REGULAR, fontSize=11, leading=16,
                            textColor=B.BIOMAR_BLUE, spaceAfter=6)
+TOC_ENTRY_COMPACT = ParagraphStyle("TOCEntryCompact", parent=TOC_ENTRY, fontSize=10.5,
+                                   leading=14, spaceAfter=4)
 # A lettered/roman-numeral list item retyped as literal text inside a table
 # cell ("i.\tThe Board of Directors...", "a.\tThe identity of..." — table
 # cells have no bulletText mechanism, so these are plain text markers) needs
@@ -906,15 +908,17 @@ def _story(policy):
                     # Plain prose immediately after a nested bare-numbered
                     # list ("1." ... "7.", as opposed to a lettered Bullet
                     # list, already handled by prev_subhead above) is that
-                    # list's own lead-in/closing continuation and needs the
-                    # list's own deep indent, not a flush fallback — the
-                    # list's own last item ends with terminal punctuation, so
-                    # it correctly isn't itself treated as a short sub-heading
-                    # (prev_subhead stays False), but nested_num_indent still
-                    # carries the "we're nested under 4.3" state forward
-                    # (request a11bc6a5, "move inwards to align with the text
-                    # in the below clause").
-                    style = (BODY_INDENT_DEEP if justify else BODY_INDENT_DEEP_LEFT)
+                    # clause's own closing continuation: it sits at the
+                    # clause-text indent, in line with the text of the clause
+                    # below, not flush and not at the list items' deeper
+                    # indent. The list's own last item ends with terminal
+                    # punctuation, so it correctly isn't itself treated as a
+                    # short sub-heading (prev_subhead stays False), but
+                    # nested_num_indent still carries the "we're nested under
+                    # 4.3" state forward (request a11bc6a5, "move inwards to
+                    # align with the text in the below clause"; corrected in
+                    # request fca6584a).
+                    style = (BODY_INDENT if justify else BODY_INDENT_LEFT)
                     flow.append(Paragraph(_fmt(b.text), style))
                 elif prev_subhead:
                     deep = bool(_PAREN_CONT.match(b.text.strip()))
@@ -1538,9 +1542,12 @@ class _PolicyDocTemplate(BaseDocTemplate):
         self.notify("TOCEntry", (0, title, self.page, key))
 
 
-def _toc_flowable():
+def _toc_flowable(n_entries=0):
     toc = TableOfContents()
-    toc.levelStyles = [TOC_ENTRY]
+    # A long contents list (Internal Rules: 31 entries) is tightened so it stays
+    # on one page instead of spilling a couple of lines onto an otherwise empty
+    # second one (request 699ea5cb). Shorter lists keep the standard spacing.
+    toc.levelStyles = [TOC_ENTRY_COMPACT if n_entries > 26 else TOC_ENTRY]
     toc.dotsMinLevel = 0
     return toc
 
@@ -1584,7 +1591,9 @@ def build_pdf(policy, out_path):
     # documents (board composition changed); the "with approval information"
     # variant keeps only the approver/owner/approval card on the back cover,
     # driven by policy.signatures.
-    toc_pages = ([Paragraph(escape(i18n.t(policy, "contents")), H1), Spacer(1, 14), _toc_flowable(), PageBreak()]
+    toc_pages = ([Paragraph(escape(i18n.t(policy, "contents")), H1), Spacer(1, 14),
+                  _toc_flowable(sum(1 for b in policy.blocks if isinstance(b, Heading) and b.level == 1)),
+                  PageBreak()]
                  if has_toc else [])
     story = ([NextPageTemplate("content_first"), PageBreak()] + toc_pages +
              [NextPageTemplate("content")] + _story(policy))

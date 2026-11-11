@@ -1063,6 +1063,7 @@
       "approver": "Board of Directors",
       "category": "Policy",
       "hanging_indent": true,
+      "toc": true,
       "editions": [
         {
           "version": "Version 1",
