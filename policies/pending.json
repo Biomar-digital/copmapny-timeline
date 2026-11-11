@@ -118,17 +118,6 @@
     "notified": true
   },
   {
-    "id": "dcc-marianne-1",
-    "policy": "disclosure-committee-charter",
-    "request_id": "74354987-c73e-4e17-8698-71277d7d2f0c",
-    "title": "Disclosure Committee Charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1790672820000,
-    "notified": true
-  },
-  {
     "id": "nas-marianne-1",
     "policy": "non-audit-service-policy",
     "request_id": "e642b6be-c58e-42ee-b77a-4fe43442e338",
@@ -152,18 +141,6 @@
     "notified": true
   },
   {
-    "id": "4c4e9d59-05ae-4da4-b67f-f3efb4c7ee09",
-    "policy": "disclosure-committee-charter",
-    "request_id": "57ecfff2-48a0-4979-8289-e16cde9ff5a3",
-    "title": "Change: disclosure-committee-charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1790590499129,
-    "updated_at": 1790600749199,
-    "notified": true
-  },
-  {
     "id": "10a3c55a-0816-4ace-afd9-4ea3712afb73",
     "policy": "non-audit-service-policy",
     "request_id": "6221b053-71db-4225-8014-daaf9117ead2",
@@ -184,18 +161,6 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791357659693,
-    "updated_at": 1791358791052,
-    "notified": true
-  },
-  {
-    "id": "f845f594-6105-45cc-a3b0-8f2c6a10f87e",
-    "policy": "disclosure-committee-charter",
-    "request_id": "8f92e9fa-9583-4672-9002-0c1cccd208fc",
-    "title": "Change: disclosure-committee-charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1791358323228,
     "updated_at": 1791358791052,
     "notified": true
   },
@@ -368,18 +333,6 @@
     "notified": true
   },
   {
-    "id": "00519766-e46f-48de-9c31-88442fc2a1c6",
-    "policy": "disclosure-committee-charter",
-    "request_id": "713a9da8-3b3f-4f65-8441-a7e0b9f54cd9",
-    "title": "Change: disclosure-committee-charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1791370905479,
-    "updated_at": 1791371290460,
-    "notified": true
-  },
-  {
     "id": "bdf8a910-4b0c-48a8-8896-5455bafe14a3",
     "policy": "internal-rules-disclosure-obligations",
     "request_id": "e33c62d2-4fc6-4bbf-94db-e75afa733d41",
@@ -440,30 +393,6 @@
     "notified": true
   },
   {
-    "id": "dc410f22-a9fe-4278-a8d9-ae759dcb0da9",
-    "policy": "disclosure-committee-charter",
-    "request_id": "9b2cc81d-4575-4549-a272-e553d1f6ade4",
-    "title": "Change: disclosure-committee-charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1791378366282,
-    "updated_at": 1791378452557,
-    "notified": true
-  },
-  {
-    "id": "83318a86-2c48-434c-96bc-19e1725ab1e7",
-    "policy": "disclosure-committee-charter",
-    "request_id": "3d497671-98bf-45f3-9c36-c1574b7081cc",
-    "title": "Change: disclosure-committee-charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1791531874916,
-    "updated_at": 1791534760939,
-    "notified": true
-  },
-  {
     "id": "adb72b1e-0857-41c2-9133-6971ff99b244",
     "policy": "internal-rules-disclosure-obligations",
     "request_id": "8e11e275-8f7b-4713-bd83-48f7fcc54410",
@@ -496,17 +425,6 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791537866082,
-    "notified": true
-  },
-  {
-    "id": "8907e4be-8945-4629-a78e-5060152db74d",
-    "policy": "disclosure-committee-charter",
-    "request_id": "5c77202f-ec99-4d4d-a76e-0d03fa669282",
-    "title": "Change: disclosure-committee-charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1791893525359,
     "notified": true
   },
   {
@@ -551,17 +469,6 @@
     "author": "Marianne Niviaq Thomsen",
     "email": "marni@biomar.com",
     "created_at": 1791895400936,
-    "notified": true
-  },
-  {
-    "id": "9799fc33-0d33-4cd8-8d77-6f2fa8d9cd36",
-    "policy": "disclosure-committee-charter",
-    "request_id": "1ce50c34-ff87-4cd3-bb61-af6af4e215ca",
-    "title": "Change: disclosure-committee-charter",
-    "status": "pending_review",
-    "author": "Marianne Niviaq Thomsen",
-    "email": "marni@biomar.com",
-    "created_at": 1792155685250,
     "notified": true
   },
   {
