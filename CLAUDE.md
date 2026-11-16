@@ -259,8 +259,9 @@ and the Worker uses that to decide what an account may see, download and request
 - The 13 markets are listed in three places that must match — `MARKETS` in
   `worker/index.js`, in `policy-formatter/tools/publish.py` and `docs/markets.js`.
   publish.py fails the build on an unknown market name.
-- **New-policy requests carry `market`** (in `request.json`; a limited requester can
-  only pick one of their own). When you build the new policy, set `"market": "<that
+- **New-policy requests carry `market`** (in `request.json`). Everyone must choose it —
+  the form pre-selects nothing (unless only one market is possible) and the Worker
+  refuses a request without one; a limited requester can only pick one of their own. When you build the new policy, set `"market": "<that
   market>"` on its registry entry — that is how it ends up visible only to that
   market. Change and translation requests carry the target document's market for
   reference; no registry change is needed for them.

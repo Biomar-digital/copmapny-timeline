@@ -567,11 +567,12 @@ function openRequest(mode, policy, lang) {
     // A limited account files under one of its own markets; everyone else may pick any (Global by default).
     const opts = ME_MARKETS ? ME_MARKETS : [window.GLOBAL_MARKET, ...window.MARKETS];
     const sel = document.getElementById("reqMarket");
-    sel.innerHTML = opts.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("");
-    sel.value = opts[0];
+    // The requester has to choose — nothing is pre-selected, unless only one market is possible.
+    sel.innerHTML = (opts.length > 1 ? `<option value="" disabled selected>Select a market…</option>` : "") +
+      opts.map(m => `<option value="${esc(m)}"${opts.length === 1 ? " selected" : ""}>${esc(m)}</option>`).join("");
     document.getElementById("reqMarketHint").textContent = ME_MARKETS
-      ? "The new document is filed under this market, visible to people with access to it."
-      : "Global = group-wide. A market limits who can see the new document.";
+      ? "Which market is this document for? It is filed under it, visible to people with access to that market."
+      : "Which market is this document for? Global = group-wide; a market limits who can see it.";
   }
   document.getElementById("reqTitleField").style.display = isNew ? "" : "none";
   document.getElementById("reqVariantsField").style.display = isNew ? "" : "none";
@@ -623,6 +624,7 @@ async function submitRequest() {
   const fileEl = document.getElementById("reqFile");
   if (!details && mode !== "translation") { status.textContent = "Please describe your request."; return; }
   if (mode === "new" && !docTitle) { status.textContent = "Enter a title."; return; }
+  if (mode === "new" && !document.getElementById("reqMarket").value) { status.textContent = "Choose the market this document is for."; return; }
   let targetLang = "", method = "";
   if (mode === "translation") {
     const sel = document.getElementById("reqLang");
@@ -1022,6 +1024,10 @@ const TRANSLATION_LANGUAGES = ["Spanish", "Danish", "Norwegian", "Swedish", "Fre
 const VARIANT_PICK = new Map();   // root id -> variant id chosen with the pills on that card
 let LANG_PREF = "";
 try { LANG_PREF = localStorage.getItem("lang") || ""; } catch {}
+// Market filter: "" = every market this account can see.
+let MARKET_PREF = "";
+try { MARKET_PREF = localStorage.getItem("market") || ""; } catch {}
+const mktOf = p => p.market || "Global";
 
 function buildRoots() {
   const byId = new Map(POLICIES.map(p => [p.id, p]));
@@ -1053,7 +1059,14 @@ function translationStale(v, root) {
 }
 // With a language chosen, only families that exist in it are listed.
 function visibleRoots() {
-  return LANG_PREF ? ROOTS.filter(r => variantsOf(r).some(v => langOf(v) === LANG_PREF)) : ROOTS;
+  return ROOTS.filter(r =>
+    (!LANG_PREF || variantsOf(r).some(v => langOf(v) === LANG_PREF)) &&
+    (!MARKET_PREF || mktOf(r) === MARKET_PREF));
+}
+// Markets that have at least one document here, Global first, then in the standard order.
+function availableMarkets() {
+  const have = new Set(ROOTS.map(mktOf));
+  return ["Global", ...window.MARKETS].filter(m => have.has(m));
 }
 function availableLanguages() {
   const set = new Set(POLICIES.map(langOf));
@@ -1084,6 +1097,23 @@ function renderLangSelector() {
     LANG_PREF = sel.value === "English" ? "" : sel.value;
     try { localStorage.setItem("lang", LANG_PREF); } catch {}
     VARIANT_PICK.clear();
+    renderTypeTabs(); renderChips(); renderStatusFilter(); render();
+  };
+}
+
+// Market selector: only shown when there is more than one market to move between.
+function renderMarketSelector() {
+  const wrap = document.getElementById("marketWrap"), sel = document.getElementById("marketSel");
+  if (!wrap || !sel) return;
+  const markets = availableMarkets();
+  if (MARKET_PREF && !markets.includes(MARKET_PREF)) MARKET_PREF = "";   // e.g. access changed since last visit
+  wrap.hidden = markets.length < 2;
+  const n = m => ROOTS.filter(r => mktOf(r) === m).length;
+  sel.innerHTML = `<option value=""${MARKET_PREF ? "" : " selected"}>All markets (${ROOTS.length})</option>` +
+    markets.map(m => `<option value="${esc(m)}"${m === MARKET_PREF ? " selected" : ""}>${esc(m)} (${n(m)})</option>`).join("");
+  sel.onchange = () => {
+    MARKET_PREF = sel.value;
+    try { localStorage.setItem("market", MARKET_PREF); } catch {}
     renderTypeTabs(); renderChips(); renderStatusFilter(); render();
   };
 }
@@ -1542,6 +1572,7 @@ async function init() {
     buildRoots();
     document.getElementById("meta").textContent =
       `${ROOTS.length} policies · ${availableLanguages().length} language${availableLanguages().length === 1 ? "" : "s"} · Last update: ${data.updated || ""}`;
+    renderMarketSelector();
     renderLangSelector();
     renderTypeTabs();
     renderChips();

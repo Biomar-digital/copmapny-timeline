@@ -760,20 +760,18 @@ async function handleRequests(request, env, user) {
   if (kind === "new" && !title) return json({ error: "A title for the new policy is required." }, 400);
 
   // Market. A new document is filed under the market the requester picks (a limited
-  // account must pick one of its own; others default to Global). A change or
+  // account must pick one of its own; anyone else may pick any, Global included). A change or
   // translation targets an existing document, so the requester must have access to
   // it, and the record carries that document's market for whoever applies it.
   let market = GLOBAL_MARKET;
   if (kind === "new") {
     const rawMarket = String(form.get("market") || "").trim();
     const picked = cleanMarkets([rawMarket]).markets[0];
-    if (isRestricted(user)) {
-      if (!picked || !canAccessMarket(user, picked)) return json({ error: "Choose one of your markets for the new document." }, 400);
-      market = picked;
-    } else if (rawMarket) {
-      if (!picked) return json({ error: "Unknown market." }, 400);
-      market = picked;
-    }
+    // Everyone has to say which market a new document is for — there is no silent default.
+    if (!rawMarket) return json({ error: "Choose the market this document is for." }, 400);
+    if (!picked) return json({ error: "Unknown market." }, 400);
+    if (isRestricted(user) && !canAccessMarket(user, picked)) return json({ error: "Choose one of your markets for the new document." }, 400);
+    market = picked;
   } else {
     if (isRestricted(user) && !policy) return json({ error: "Choose the document the request is about." }, 400);
     if (policy) {

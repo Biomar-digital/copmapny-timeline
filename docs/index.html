@@ -33,6 +33,10 @@
     <div id="typetabs" class="typetabs"></div>
     <div class="toolbar">
       <input id="search" type="search" placeholder="Search policies…" autocomplete="off" />
+      <label class="fdrop marketsel" id="marketWrap" hidden title="Show the documents of one market, or all of yours">
+        <span class="fdrop-label">Market</span>
+        <select id="marketSel" class="fselect"></select>
+      </label>
       <label class="fdrop langsel" id="langWrap" hidden title="Show every policy in this language where a translation exists">
         <span class="fdrop-label">Language</span>
         <select id="langSel" class="fselect"></select>
@@ -131,7 +135,7 @@
           <span class="rq-hint">A guideline (e.g. brand voice, style guide) isn't a legal/governance document — it publishes with its own ocean-blue cover.</span>
         </div>
         <div class="rq-field" id="reqMarketField">
-          <label for="reqMarket">Market</label>
+          <label for="reqMarket">Which market is it for? *</label>
           <select id="reqMarket"></select>
           <span class="rq-hint" id="reqMarketHint">The new document is filed under this market; only people with access to it will see it.</span>
         </div>
