@@ -127,6 +127,11 @@ const SCHEMA = [
 const MIGRATIONS = [
   "ALTER TABLE pending_change ADD COLUMN status TEXT NOT NULL DEFAULT 'change_pending'",
   "ALTER TABLE pending_change ADD COLUMN updated_at INTEGER",
+  // Market access: `markets` is NULL for full access (every existing account) or a
+  // JSON array of the markets the account may see/request; `markets_requested`
+  // is what the person asked for at sign-up, for the approver to review.
+  "ALTER TABLE users ADD COLUMN markets TEXT",
+  "ALTER TABLE users ADD COLUMN markets_requested TEXT",
 ];
 
 let schemaPromise = null;
@@ -155,12 +160,14 @@ async function resolveUser(request, env) {
   const token = getCookie(request, "sid");
   if (!token) return null;
   const row = await env.DB.prepare(
-    `SELECT u.id, u.email, u.name, u.role, u.status, s.expires
+    `SELECT u.id, u.email, u.name, u.role, u.status, u.markets, s.expires
        FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ?`).bind(token).first();
   if (!row) return null;
   if (row.expires < Date.now()) { await env.DB.prepare("DELETE FROM sessions WHERE token=?").bind(token).run(); return null; }
   if (row.status !== "approved") return null;
-  return { id: row.id, email: row.email, name: row.name, role: row.role };
+  // markets: null = full access; an array = limited to those markets. Admins are never limited.
+  return { id: row.id, email: row.email, name: row.name, role: row.role,
+           markets: row.role === "admin" ? null : parseMarkets(row.markets) };
 }
 
 async function recordEvent(env, type, summary, ref, actor) {
@@ -310,6 +317,108 @@ function emailHtml(heading, intro, rows, cta) {
 
 function missingEnv(env) { return ["GH_TOKEN", "GH_OWNER", "GH_REPO", "GH_BRANCH"].filter(k => !env[k]); }
 function safePolicyId(id) { return typeof id === "string" && /^[a-z0-9-]{1,80}$/.test(id) ? id : null; }
+
+// ================================================================== markets
+// An account is either unrestricted (markets === null: every account that existed
+// before markets, and admins) or limited to a list of markets. A document belongs
+// to exactly one market ("Global" unless the registry says otherwise); a limited
+// account only sees, downloads and requests changes for documents of its markets.
+const GLOBAL_MARKET = "Global";
+const ALL_MARKETS = "*";                // sign-up token: "full access" (the approver decides)
+const MARKETS = ["Australia", "Chile", "China", "Costa Rica", "Denmark", "Ecuador", "Spain",
+  "Greece", "Iceland", "Norway", "United Kingdom (Scotland)", "Turkey", "Vietnam"];
+
+// DB value -> null (unrestricted) | string[]. A stored value that can't be read
+// fails CLOSED (no markets) rather than silently granting everything.
+function parseMarkets(raw) {
+  if (raw == null || raw === "") return null;
+  try { const a = JSON.parse(raw); return Array.isArray(a) ? a.filter(m => typeof m === "string") : []; }
+  catch { return []; }
+}
+// Keep only known market names (plus "Global"), de-duplicated, in a stable order.
+function cleanMarkets(list, allowAll = false) {
+  const seen = new Set(); let all = false;
+  for (const m of Array.isArray(list) ? list : []) {
+    if (m === ALL_MARKETS && allowAll) all = true;
+    else if (m === GLOBAL_MARKET || MARKETS.includes(m)) seen.add(m);
+  }
+  const ordered = [GLOBAL_MARKET, ...MARKETS].filter(m => seen.has(m));
+  return { all, markets: ordered };
+}
+function canAccessMarket(user, market) {
+  if (!user || user.markets == null) return true;
+  return user.markets.includes(market || GLOBAL_MARKET);
+}
+function isRestricted(user) { return !!user && user.markets != null; }
+function marketsLabel(m) { return m == null ? "All markets (full access)" : (m.length ? m.join(", ") : "No markets"); }
+
+// The deployed library (policy -> market, file -> policy), read from the static
+// assets and cached briefly per isolate. Everything market-related that is
+// checked here is decided from this, so the filter holds for direct URLs too.
+let libIndex = null;
+async function loadLibrary(env, request) {
+  if (libIndex && Date.now() - libIndex.at < 30000) return libIndex;
+  const res = await env.ASSETS.fetch(new Request(new URL("/library.json", request.url).toString()));
+  if (!res.ok) return null;
+  const lib = await res.json().catch(() => null);
+  if (!lib || !Array.isArray(lib.policies)) return null;
+  const market = new Map(), fileOwner = new Map();
+  for (const pol of lib.policies) {
+    market.set(pol.id, pol.market || GLOBAL_MARKET);
+    for (const ed of pol.editions || []) for (const d of ed.documents || [])
+      for (const f of Object.values(d.files || {})) if (typeof f === "string") fileOwner.set(f, pol.id);
+  }
+  libIndex = { at: Date.now(), lib, market, fileOwner };
+  return libIndex;
+}
+// Market of a policy id. A translation that is still being worked on
+// ("<root>--spanish") isn't in the library yet, so it follows its original.
+function marketOf(idx, id) {
+  if (idx.market.has(id)) return idx.market.get(id);
+  const root = String(id).split("--")[0];
+  return idx.market.has(root) ? idx.market.get(root) : undefined;
+}
+function policyVisible(idx, user, id) {
+  if (!isRestricted(user)) return true;
+  const m = marketOf(idx, id);
+  return m !== undefined && canAccessMarket(user, m);
+}
+// null = allowed; otherwise the response to send. Unrestricted accounts skip the lookup.
+async function guardPolicy(env, request, user, id) {
+  if (!isRestricted(user)) return null;
+  const idx = await loadLibrary(env, request);
+  if (!idx) return json({ error: "Could not check your access right now." }, 503);
+  return policyVisible(idx, user, id) ? null : json({ error: "You don't have access to this document." }, 403);
+}
+const NO_STORE = { "Content-Type": "application/json", "Cache-Control": "no-cache, must-revalidate" };
+// Static files that expose documents: a limited account gets a filtered library and
+// can only download files that belong to a document of its markets. null = serve as usual.
+async function gateAssetForMarkets(request, env, user, path) {
+  if (!isRestricted(user)) return null;
+  const isFile = path.startsWith("/files/");
+  if (!isFile && path !== "/library.json" && path !== "/library-data.js" && path !== "/diffs.json") return null;
+  if (request.method !== "GET" && request.method !== "HEAD") return null;
+  const idx = await loadLibrary(env, request);
+  if (!idx) return new Response("Could not check your access right now.", { status: 503 });
+  if (isFile) {
+    let rel; try { rel = decodeURIComponent(path.slice(1)); } catch { return new Response("Not found.", { status: 404 }); }
+    // Version-comparison page images live under files/cmp/<policy id>/…, not in the library's file map.
+    const cmp = rel.match(/^files\/cmp\/([a-z0-9-]+)\//);
+    const owner = cmp ? cmp[1] : idx.fileOwner.get(rel);
+    if (owner && policyVisible(idx, user, owner)) return null;
+    return new Response("You don't have access to this document.", { status: 403 });
+  }
+  if (path === "/diffs.json") {
+    const dres = await env.ASSETS.fetch(new Request(new URL("/diffs.json", request.url).toString()));
+    const all = dres.ok ? await dres.json().catch(() => ({})) : {};
+    const out = {}; for (const k of Object.keys(all)) if (policyVisible(idx, user, k)) out[k] = all[k];
+    return new Response(JSON.stringify(out), { headers: NO_STORE });
+  }
+  const filtered = { ...idx.lib, policies: idx.lib.policies.filter(pol => policyVisible(idx, user, pol.id)) };
+  if (path === "/library.json") return new Response(JSON.stringify(filtered), { headers: NO_STORE });
+  return new Response("window.LIBRARY = " + JSON.stringify(filtered) + ";\n",
+    { headers: { "Content-Type": "application/javascript", "Cache-Control": "no-cache, must-revalidate" } });
+}
 function safeFile(f) { return typeof f === "string" && /^files\/[A-Za-z0-9._-]+\.pdf$/.test(f) ? f : null; }
 function safeUploadName(name) {
   const base = String(name || "upload").split(/[\\/]/).pop().slice(-120).replace(/[^A-Za-z0-9._-]/g, "_");
@@ -334,7 +443,7 @@ async function handleAuth(request, env, path) {
 
   if (path === "/api/auth/me" && request.method === "GET") {
     const user = await resolveUser(request, env);
-    return json({ user: user ? { name: user.name, email: user.email, role: user.role } : null });
+    return json({ user: user ? { name: user.name, email: user.email, role: user.role, markets: user.markets } : null });
   }
 
   if (path === "/api/auth/register" && request.method === "POST") {
@@ -345,16 +454,21 @@ async function handleAuth(request, env, path) {
     if (!EMAIL_RE.test(email)) return json({ error: "Enter a valid email." }, 400);
     if (!name) return json({ error: "Enter your name." }, 400);
     if (password.length < 8) return json({ error: "Password must be at least 8 characters." }, 400);
+    // The markets the person asks for (the approver reviews and may change them).
+    const want = cleanMarkets(p.markets, true);
+    if (!want.all && !want.markets.length) return json({ error: "Choose at least one market." }, 400);
+    const requested = want.all ? [ALL_MARKETS] : want.markets;
     const exists = await env.DB.prepare("SELECT id FROM users WHERE email=?").bind(email).first();
     if (exists) return json({ error: "An account with that email already exists." }, 409);
     const salt = randomHex(16);
     const hash = await pbkdf2(password, salt);
-    await env.DB.prepare("INSERT INTO users (id,email,name,pw_hash,pw_salt,role,status,created_at) VALUES (?,?,?,?,?,?,?,?)")
-      .bind(crypto.randomUUID(), email, name, hash, salt, "visitor", "pending", Date.now()).run();
-    await recordEvent(env, "account_request", `${name} requested an account`, email, name);
+    await env.DB.prepare("INSERT INTO users (id,email,name,pw_hash,pw_salt,role,status,created_at,markets_requested) VALUES (?,?,?,?,?,?,?,?,?)")
+      .bind(crypto.randomUUID(), email, name, hash, salt, "visitor", "pending", Date.now(), JSON.stringify(requested)).run();
+    const reqLabel = marketsLabel(want.all ? null : want.markets);
+    await recordEvent(env, "account_request", `${name} requested an account (${reqLabel})`, email, name);
     await sendEmail(env, `[BioMar Policy Library] New access request — ${name}`,
       emailHtml("New access request", `${name} requested access to the policy library and is awaiting approval.`,
-        [["Name", escapeHtml(name)], ["Email", escapeHtml(email)]])).catch(() => {});
+        [["Name", escapeHtml(name)], ["Email", escapeHtml(email)], ["Markets requested", escapeHtml(reqLabel)]])).catch(() => {});
     return json({ ok: true, pending: true });
   }
 
@@ -371,7 +485,8 @@ async function handleAuth(request, env, path) {
     const token = randomHex(32);
     await env.DB.prepare("INSERT INTO sessions (token,user_id,expires) VALUES (?,?,?)")
       .bind(token, u.id, Date.now() + SESSION_MS).run();
-    return json({ ok: true, user: { name: u.name, email: u.email, role: u.role } }, 200, { "Set-Cookie": sessionCookie(token) });
+    return json({ ok: true, user: { name: u.name, email: u.email, role: u.role,
+      markets: u.role === "admin" ? null : parseMarkets(u.markets) } }, 200, { "Set-Cookie": sessionCookie(token) });
   }
 
   if (path === "/api/auth/forgot-password" && request.method === "POST") {
@@ -431,22 +546,58 @@ async function handleAuth(request, env, path) {
 async function handleAdmin(request, env, path, user) {
   if (path === "/api/admin/users" && request.method === "GET") {
     const status = new URL(request.url).searchParams.get("status");
+    const cols = "id,email,name,role,status,created_at,markets,markets_requested";
     const q = status
-      ? env.DB.prepare("SELECT id,email,name,role,status,created_at FROM users WHERE status=? ORDER BY created_at DESC").bind(status)
-      : env.DB.prepare("SELECT id,email,name,role,status,created_at FROM users ORDER BY created_at DESC");
+      ? env.DB.prepare(`SELECT ${cols} FROM users WHERE status=? ORDER BY created_at DESC`).bind(status)
+      : env.DB.prepare(`SELECT ${cols} FROM users ORDER BY created_at DESC`);
     const { results } = await q.all();
-    return json({ users: results || [] });
+    // markets: null = full access, else the list; markets_requested: what was asked for at sign-up.
+    return json({ users: (results || []).map(u => ({
+      ...u,
+      markets: u.role === "admin" ? null : parseMarkets(u.markets),
+      markets_requested: u.markets_requested ? parseMarkets(u.markets_requested) : null,
+    })) });
   }
 
   if ((path === "/api/admin/users/approve" || path === "/api/admin/users/reject") && request.method === "POST") {
     let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
     const id = String(p.id || "");
     const status = path.endsWith("approve") ? "approved" : "rejected";
+    const u = await env.DB.prepare("SELECT name,email,markets_requested FROM users WHERE id=?").bind(id).first();
+    if (!u) return json({ error: "User not found." }, 404);
+    let marketsValue = null, label = "";
+    if (status === "approved") {
+      // The approver's choice wins; without one, what the person asked for. An
+      // account that never asked for markets (created before they existed) keeps full access.
+      let sel;
+      if (p.all === true) sel = { all: true, markets: [] };
+      else if (Array.isArray(p.markets)) sel = cleanMarkets(p.markets);
+      else {
+        const req = u.markets_requested ? parseMarkets(u.markets_requested) : null;
+        sel = req == null ? { all: true, markets: [] } : req.includes(ALL_MARKETS) ? { all: true, markets: [] } : cleanMarkets(req);
+      }
+      if (!sel.all && !sel.markets.length) return json({ error: "Choose at least one market, or full access." }, 400);
+      marketsValue = sel.all ? null : JSON.stringify(sel.markets);
+      label = ` (${marketsLabel(sel.all ? null : sel.markets)})`;
+    }
+    await env.DB.prepare("UPDATE users SET status=?, markets=? WHERE id=?")
+      .bind(status, status === "approved" ? marketsValue : null, id).run();
+    await recordEvent(env, "account_" + status, `${u.name} ${status}${label}`, u.email, user.name);
+    return json({ ok: true });
+  }
+
+  // Change which markets an existing account can see and request (or give it full access).
+  if (path === "/api/admin/users/markets" && request.method === "POST") {
+    let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
+    const id = String(p.id || "");
     const u = await env.DB.prepare("SELECT name,email FROM users WHERE id=?").bind(id).first();
     if (!u) return json({ error: "User not found." }, 404);
-    await env.DB.prepare("UPDATE users SET status=? WHERE id=?").bind(status, id).run();
-    await recordEvent(env, "account_" + status, `${u.name} ${status}`, u.email, user.name);
-    return json({ ok: true });
+    const sel = p.all === true ? { all: true, markets: [] } : cleanMarkets(p.markets);
+    if (!sel.all && !sel.markets.length) return json({ error: "Choose at least one market, or full access." }, 400);
+    await env.DB.prepare("UPDATE users SET markets=? WHERE id=?")
+      .bind(sel.all ? null : JSON.stringify(sel.markets), id).run();
+    await recordEvent(env, "account_markets", `${u.name}: ${marketsLabel(sel.all ? null : sel.markets)}`, u.email, user.name);
+    return json({ ok: true, markets: sel.all ? null : sel.markets });
   }
 
   // Full change/new-policy requests with their details + current status, for
@@ -515,12 +666,14 @@ async function handleComments(request, env, user) {
   if (request.method === "GET") {
     const id = safePolicyId(url.searchParams.get("policy"));
     if (!id) return json({ error: "Invalid policy id." }, 400);
+    const denied = await guardPolicy(env, request, user, id); if (denied) return denied;
     const { list } = await ghGetList(env, `${COMMENTS_DIR}/${id}.json`);
     return json({ comments: list });
   }
   if (request.method === "POST") {
     let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
     const id = safePolicyId(p.policy); if (!id) return json({ error: "Invalid policy id." }, 400);
+    const denied = await guardPolicy(env, request, user, id); if (denied) return denied;
     const edition = String(p.edition || "").slice(0, 200);
     const text = String(p.text || "").trim().slice(0, MAX_TEXT);
     const author = String(p.author || user.name || "Anonymous").trim().slice(0, MAX_AUTHOR) || "Anonymous";
@@ -541,6 +694,7 @@ async function handleAnnotations(request, env, user) {
   if (request.method === "GET") {
     const id = safePolicyId(url.searchParams.get("policy"));
     if (!id) return json({ error: "Invalid policy id." }, 400);
+    const denied = await guardPolicy(env, request, user, id); if (denied) return denied;
     const { list } = await ghGetList(env, `${ANNOTATIONS_DIR}/${id}.json`);
     const file = url.searchParams.get("file");
     return json({ annotations: file ? list.filter(a => a.file === file) : list });
@@ -548,6 +702,7 @@ async function handleAnnotations(request, env, user) {
   if (request.method === "POST") {
     let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
     const id = safePolicyId(p.policy); if (!id) return json({ error: "Invalid policy id." }, 400);
+    const denied = await guardPolicy(env, request, user, id); if (denied) return denied;
     const file = safeFile(p.file); if (!file) return json({ error: "Invalid file." }, 400);
     const page = parseInt(p.page, 10); if (!(page >= 1 && page <= 5000)) return json({ error: "Invalid page." }, 400);
     const quote = String(p.quote || "").trim().slice(0, MAX_QUOTE);
@@ -604,6 +759,30 @@ async function handleRequests(request, env, user) {
   } else if (!details) return json({ error: "Please describe your request." }, 400);
   if (kind === "new" && !title) return json({ error: "A title for the new policy is required." }, 400);
 
+  // Market. A new document is filed under the market the requester picks (a limited
+  // account must pick one of its own; others default to Global). A change or
+  // translation targets an existing document, so the requester must have access to
+  // it, and the record carries that document's market for whoever applies it.
+  let market = GLOBAL_MARKET;
+  if (kind === "new") {
+    const rawMarket = String(form.get("market") || "").trim();
+    const picked = cleanMarkets([rawMarket]).markets[0];
+    if (isRestricted(user)) {
+      if (!picked || !canAccessMarket(user, picked)) return json({ error: "Choose one of your markets for the new document." }, 400);
+      market = picked;
+    } else if (rawMarket) {
+      if (!picked) return json({ error: "Unknown market." }, 400);
+      market = picked;
+    }
+  } else {
+    if (isRestricted(user) && !policy) return json({ error: "Choose the document the request is about." }, 400);
+    if (policy) {
+      const denied = await guardPolicy(env, request, user, policy); if (denied) return denied;
+      const idx = await loadLibrary(env, request).catch(() => null);
+      market = (idx && marketOf(idx, policy)) || GLOBAL_MARKET;
+    }
+  }
+
   const id = crypto.randomUUID();
   const warnings = [];
   let uploadPath = null;
@@ -619,7 +798,7 @@ async function handleRequests(request, env, user) {
     if (!r.ok) return json({ error: `Could not store the uploaded file (${r.status}).` }, 502);
   }
 
-  const record = { id, kind, status: "open", title: kind === "new" ? title : (policy || title), policy, edition, variant, versions, category: kind === "new" ? category : undefined,
+  const record = { id, kind, status: "open", title: kind === "new" ? title : (policy || title), policy, edition, variant, versions, category: kind === "new" ? category : undefined, market,
     target_language: kind === "translation" ? targetLanguage : undefined, method: kind === "translation" ? method : undefined, translation_id: translationId || undefined,
     author, email, details, upload: uploadPath, created_at: new Date().toISOString() };
   const heading = kind === "new" ? "New policy request" : kind === "translation" ? "Translation request" : "Policy change request";
@@ -628,6 +807,7 @@ async function handleRequests(request, env, user) {
   const issueBody =
     `**${heading}**\n\n- **Requested by:** ${author}${email ? ` (${email})` : ""}\n` +
     (kind === "new" ? `- **Type:** ${category}\n` : "") +
+    (market !== GLOBAL_MARKET || kind === "new" ? `- **Market:** ${market}${kind === "new" ? " (file the new document under this market in the registry)" : ""}\n` : "") +
     (kind === "new" ? `- **Proposed title:** ${title}\n` : `- **Policy:** ${policy || "—"}\n`) +
     (kind === "new" ? `- **Versions:** ${versions}\n` : "") +
     (kind === "translation" ? `- **Translate into:** ${targetLanguage}\n- **Method:** ${method === "attached" ? "requester attached a translated Word file (restyle + verify against the English)" : "AI translation (translate the Word source)"}\n- **Publish as policy id:** \`${translationId}\`\n` : "") +
@@ -645,6 +825,7 @@ async function handleRequests(request, env, user) {
     emailHtml(heading, `${author} submitted a ${kind === "new" ? "new " + category.toLowerCase() : "change"} request.`, [
       ["Requested by", escapeHtml(author) + (email ? ` (${escapeHtml(email)})` : "")],
       kind === "new" ? ["Type", escapeHtml(category)] : null,
+      market !== GLOBAL_MARKET || kind === "new" ? ["Market", escapeHtml(market)] : null,
       kind === "new" ? ["Proposed title", escapeHtml(title)] : ["Policy", escapeHtml(policy || "—")],
       kind === "new" ? ["Versions", escapeHtml(versions)] : null,
       kind === "translation" ? ["Translate into", escapeHtml(targetLanguage)] : null,
@@ -700,12 +881,14 @@ async function handleSignatures(request, env, user) {
   if (request.method === "GET") {
     const id = safePolicyId(url.searchParams.get("policy"));
     if (!id) return json({ error: "Invalid policy id." }, 400);
+    const denied = await guardPolicy(env, request, user, id); if (denied) return denied;
     const { list } = await ghGetList(env, `${SIGNATURES_DIR}/${id}.json`);
     return json({ signatures: list });
   }
   if (request.method === "POST") {
     let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
     const id = safePolicyId(p.policy); if (!id) return json({ error: "Invalid policy id." }, 400);
+    const denied = await guardPolicy(env, request, user, id); if (denied) return denied;
     const edition = String(p.edition || "").slice(0, 200);
     const label = String(p.label || "").trim().slice(0, 200);
     if (!label) return json({ error: "Add the name / title for this signature line." }, 400);
@@ -768,7 +951,12 @@ async function readPending(env) {
 
 async function handlePending(request, env, user) {
   if (request.method === "GET") {
-    const list = await readPending(env);
+    let list = await readPending(env);
+    if (isRestricted(user)) {             // a limited account only sees its markets' documents
+      const idx = await loadLibrary(env, request);
+      if (!idx) return json({ error: "Could not check your access right now." }, 503);
+      list = list.filter(it => it && it.policy && policyVisible(idx, user, it.policy));
+    }
     const byp = {};                       // change_pending wins over pending_review
     for (const it of list) {
       if (!it || !it.policy || it.status === "approved") continue;
@@ -790,6 +978,7 @@ async function handlePending(request, env, user) {
     const action = String(p.action || "");
     if (!policy) return json({ error: "Invalid policy." }, 400);
     if (action === "review" && user.role !== "admin") return json({ error: "Forbidden." }, 403);
+    const denied = await guardPolicy(env, request, user, policy); if (denied) return denied;
     const target = action === "review" ? "pending_review"
       : action === "reopen" ? "change_pending"
       : action === "approve" ? null : undefined;
@@ -874,6 +1063,7 @@ async function handleNotifyDeploy(request, env, user) {
   let p; try { p = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400); }
   const policyId = safePolicyId(p.policy);
   if (!policyId) return json({ error: "Invalid policy." }, 400);
+  const denied = await guardPolicy(env, request, user, policyId); if (denied) return denied;
 
   const libRes = await env.ASSETS.fetch(new Request(new URL("library.json", new URL(request.url).origin + "/").toString()));
   if (!libRes.ok) return json({ error: "Could not load the library." }, 502);
@@ -908,7 +1098,7 @@ async function handleNotifyDeploy(request, env, user) {
 
 // ==================================================================== gate
 
-const PUBLIC_ASSETS = new Set(["/login", "/login.html", "/login.js", "/login.css",
+const PUBLIC_ASSETS = new Set(["/login", "/login.html", "/login.js", "/login.css", "/markets.js",
   "/reset-password", "/reset-password.html", "/reset-password.js", "/styles.css", "/favicon.png", "/favicon.ico"]);
 function isPublicAsset(path) { return PUBLIC_ASSETS.has(path) || path.startsWith("/assets/"); }
 
@@ -962,6 +1152,8 @@ export default {
       if (request.method === "GET") return Response.redirect(new URL("/login", request.url).toString(), 302);
       return json({ error: "Not authenticated." }, 401);
     }
+    const gated = await gateAssetForMarkets(request, env, user, path);
+    if (gated) return gated;
     return serveAsset(request, env);
   },
 

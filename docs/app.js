@@ -220,6 +220,7 @@ function card(root) {
       <h2 class="title"><button type="button" class="title-link view" title="Preview document">${esc(p.title)}</button>${statusBadge(p.id)}${recentBadge(ed)}</h2>
       <div class="tags">
         <span class="tag lang">${esc(p.language || "English")}</span>
+        ${p.market && p.market !== "Global" ? `<span class="tag mk" title="Market">${esc(p.market)}</span>` : ""}
         ${p.translation_of && p.translation_method === "auto" ? '<span class="tag auto" title="AI translation of the English original, not separately reviewed by a translator. The English version is the official one.">AI translation</span>' : ""}
         ${translationStale(p, root) ? '<span class="tag stale" title="The English original has been updated since this translation was made.">Translation out of date</span>' : ""}
         ${pendingTranslations(root).map(t => `<span class="tag" title="A translation has been requested">${esc(t.lang)} translation ${t.st === "pending_review" ? "ready for review" : "requested"}</span>`).join("")}
@@ -560,6 +561,18 @@ function openRequest(mode, policy, lang) {
   document.getElementById("reqMethodField").style.display = isTr ? "" : "none";
   if (isTr) setupTranslationForm(policy, lang);
   document.getElementById("reqTypeField").style.display = isNew ? "" : "none";
+  const mkField = document.getElementById("reqMarketField");
+  mkField.style.display = isNew ? "" : "none";
+  if (isNew) {
+    // A limited account files under one of its own markets; everyone else may pick any (Global by default).
+    const opts = ME_MARKETS ? ME_MARKETS : [window.GLOBAL_MARKET, ...window.MARKETS];
+    const sel = document.getElementById("reqMarket");
+    sel.innerHTML = opts.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("");
+    sel.value = opts[0];
+    document.getElementById("reqMarketHint").textContent = ME_MARKETS
+      ? "The new document is filed under this market, visible to people with access to it."
+      : "Global = group-wide. A market limits who can see the new document.";
+  }
   document.getElementById("reqTitleField").style.display = isNew ? "" : "none";
   document.getElementById("reqVariantsField").style.display = isNew ? "" : "none";
   setReqType("Policy");
@@ -635,6 +648,7 @@ async function submitRequest() {
     const versions = [wantSigned && "Signed", wantUnsigned && "Unsigned"].filter(Boolean).join(" + ") || "Signed";
     fd.set("versions", versions);
     fd.set("category", document.getElementById("reqTypeSeg")?.dataset.value || "Policy");
+    fd.set("market", document.getElementById("reqMarket").value);
   }
   else { fd.set("policy", dlg.dataset.policy || ""); fd.set("title", dlg.dataset.title || ""); }
   if (fileEl.files && fileEl.files[0]) fd.set("file", fileEl.files[0]);
@@ -973,6 +987,7 @@ let OWNER_FILTER = "";    // "" = all
 let APPROVER_FILTER = ""; // "" = all
 let PENDING = new Map(); // policy id -> "change_pending" | "pending_review"
 let IS_ADMIN = false;
+let ME_MARKETS = null;      // null = full access, else the markets this account is limited to
 let STATUS_FILTER = null; // null = all; else "change_pending" | "pending_review" | "approved"
 let TYPE_FILTER = "Policy"; // "Policy" | "Guideline" — top-level shelf tab
 
@@ -1206,8 +1221,9 @@ function render() {
   });
   const inTabTotal = visibleRoots().filter(p => policyType(p) === TYPE_FILTER).length;
   document.getElementById("empty").hidden = shown.length > 0;
-  document.getElementById("empty").textContent = TYPE_FILTER === "Guideline"
-    ? "No guidelines match your search." : "No policies match your search.";
+  document.getElementById("empty").textContent = ME_MARKETS && !POLICIES.length
+    ? "There are no documents for your markets yet. Use “+ Request new” to ask for one."
+    : TYPE_FILTER === "Guideline" ? "No guidelines match your search." : "No policies match your search.";
   document.getElementById("count").textContent =
     `${shown.length} of ${inTabTotal} ${TYPE_FILTER === "Guideline" ? "guidelines" : "policies"}`;
 }
@@ -1269,7 +1285,7 @@ async function loadOpenRequestCount() {
 
 const EVENT_LABEL = {
   account_request: "Account request", account_approved: "Account approved",
-  account_rejected: "Account rejected", comment: "New comment", annotation: "New annotation",
+  account_rejected: "Account rejected", account_markets: "Access changed", comment: "New comment", annotation: "New annotation",
   request_new: "New policy request", request_change: "Change request", request_translation: "Translation request",
 };
 
@@ -1278,6 +1294,13 @@ async function setupAccount() {
   try { me = (await (await fetch("api/auth/me", { cache: "no-store" })).json()).user; } catch {}
   if (!me) return;
   IS_ADMIN = me.role === "admin";
+  ME_MARKETS = IS_ADMIN || !Array.isArray(me.markets) ? null : me.markets;
+  const mkNote = document.getElementById("marketNote");
+  if (mkNote && ME_MARKETS) {
+    mkNote.hidden = false;
+    mkNote.textContent = `Your access: ${ME_MARKETS.join(", ") || "no markets"}`;
+    mkNote.title = "You can see and request documents for these markets only.";
+  }
   const reqLink = document.getElementById("requestsLink");
   if (reqLink) reqLink.hidden = !IS_ADMIN;
   if (IS_ADMIN) loadOpenRequestCount();
@@ -1347,6 +1370,8 @@ async function setupAdmin() {
     document.querySelectorAll(".ad-tab").forEach(x => x.classList.toggle("active", x === t));
     document.getElementById("adNotifs").hidden = t.dataset.tab !== "notifs";
     document.getElementById("adPending").hidden = t.dataset.tab !== "pending";
+    document.getElementById("adUsers").hidden = t.dataset.tab !== "users";
+    if (t.dataset.tab === "users") loadUsers();
   }));
   await refreshBadges();
 }
@@ -1383,6 +1408,30 @@ async function openAdmin() {
   await loadPending();
 }
 
+// ---- market access (admin) ----
+// One checkbox per market plus "Global" and "Full access". `sel` is null for full
+// access, or the list of markets that start ticked. Full access greys out the rest.
+function marketPicker(sel) {
+  const all = sel === null, set = new Set(sel || []);
+  const box = (v, label, on, cls = "") =>
+    `<label class="mk-box ${cls}"><input type="checkbox" value="${esc(v)}" ${on ? "checked" : ""}${all && v !== window.ALL_MARKETS ? " disabled" : ""} /> <span>${label}</span></label>`;
+  return `<div class="mk-picker">` +
+    box(window.ALL_MARKETS, "Full access <em>(all markets and Global)</em>", all, "mk-all") +
+    box(window.GLOBAL_MARKET, "Global <em>(group-wide)</em>", set.has(window.GLOBAL_MARKET)) +
+    window.MARKETS.map(m => box(m, esc(m), set.has(m))).join("") + `</div>`;
+}
+function wireMarketPicker(root) {
+  root.addEventListener("change", () => {
+    const all = root.querySelector(`input[value="${window.ALL_MARKETS}"]`).checked;
+    root.querySelectorAll("input").forEach(i => { if (i.value !== window.ALL_MARKETS) i.disabled = all; });
+  });
+}
+function readMarketPicker(root) {
+  const on = [...root.querySelectorAll("input:checked")].map(i => i.value);
+  return on.includes(window.ALL_MARKETS) ? { all: true, markets: [] } : { all: false, markets: on };
+}
+const marketsText = (m) => m === null ? "Full access" : m.length ? m.join(", ") : "No markets";
+
 async function loadPending() {
   const el = document.getElementById("adPending");
   el.innerHTML = '<p class="ad-empty">Loading…</p>';
@@ -1390,16 +1439,25 @@ async function loadPending() {
     const d = await (await fetch("api/admin/users?status=pending", { cache: "no-store" })).json();
     const users = d.users || [];
     if (!users.length) { el.innerHTML = '<p class="ad-empty">No pending accounts.</p>'; return; }
-    el.innerHTML = users.map(u => `
+    el.innerHTML = users.map(u => {
+      // What they asked for; an account that never chose (created before markets existed) starts as full access.
+      const asked = u.markets_requested;
+      const start = !asked || asked.includes(window.ALL_MARKETS) ? null : asked;
+      return `
       <div class="ad-item" data-id="${esc(u.id)}">
         <div class="ad-h"><b>${esc(u.name)}</b> · ${esc(u.email)}</div>
+        <div class="ad-s">Requested: ${esc(asked ? (asked.includes(window.ALL_MARKETS) ? "full access" : asked.join(", ")) : "—")}</div>
+        <div class="mk-wrap">${marketPicker(start)}</div>
         <div class="ad-actions">
           <button type="button" class="btn vh-cadd ad-approve">Approve</button>
           <button type="button" class="btn ghost ad-reject">Reject</button>
         </div>
-      </div>`).join("");
+        <p class="ad-err" hidden></p>
+      </div>`;
+    }).join("");
     el.querySelectorAll(".ad-item").forEach(item => {
       const id = item.dataset.id;
+      wireMarketPicker(item.querySelector(".mk-picker"));
       item.querySelector(".ad-approve").addEventListener("click", () => decideUser(id, "approve", item));
       item.querySelector(".ad-reject").addEventListener("click", () => decideUser(id, "reject", item));
     });
@@ -1407,14 +1465,69 @@ async function loadPending() {
 }
 
 async function decideUser(id, action, item) {
+  const err = item.querySelector(".ad-err");
+  err.hidden = true;
+  const body = { id };
+  if (action === "approve") {
+    const sel = readMarketPicker(item.querySelector(".mk-picker"));
+    if (!sel.all && !sel.markets.length) { err.textContent = "Choose at least one market, or full access."; err.hidden = false; return; }
+    body.all = sel.all; body.markets = sel.markets;
+  }
   try {
     const r = await fetch(`api/admin/users/${action}`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }),
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
     });
-    if (!r.ok) throw new Error("HTTP " + r.status);
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || "HTTP " + r.status);
     item.remove();
     await refreshBadges();
-  } catch (e) { alert("Could not update: " + e.message); }
+  } catch (e) { err.textContent = "Could not update: " + e.message; err.hidden = false; }
+}
+
+// Approved accounts and their market access, editable one by one.
+async function loadUsers() {
+  const el = document.getElementById("adUsers");
+  el.innerHTML = '<p class="ad-empty">Loading…</p>';
+  try {
+    const d = await (await fetch("api/admin/users?status=approved", { cache: "no-store" })).json();
+    const users = (d.users || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+    if (!users.length) { el.innerHTML = '<p class="ad-empty">No approved accounts.</p>'; return; }
+    el.innerHTML = users.map(u => u.role === "admin" ? `
+      <div class="ad-item" data-id="${esc(u.id)}">
+        <div class="ad-h"><b>${esc(u.name)}</b> · ${esc(u.email)} <span class="tag cat">Admin</span></div>
+        <div class="ad-s">Full access (administrators are never limited)</div>
+      </div>` : `
+      <details class="ad-item ad-user" data-id="${esc(u.id)}">
+        <summary><span class="ad-h"><b>${esc(u.name)}</b> · ${esc(u.email)}</span>
+          <span class="ad-s ad-mk">${esc(marketsText(u.markets))}</span></summary>
+        <div class="mk-wrap">${marketPicker(u.markets)}</div>
+        <div class="ad-actions"><button type="button" class="btn vh-cadd ad-save">Save access</button></div>
+        <p class="ad-err" hidden></p>
+      </details>`).join("");
+    el.querySelectorAll(".ad-user").forEach(item => {
+      wireMarketPicker(item.querySelector(".mk-picker"));
+      item.querySelector(".ad-save").addEventListener("click", () => saveUserMarkets(item));
+    });
+  } catch (e) { el.innerHTML = `<p class="ad-empty">Could not load (${esc(e.message)}).</p>`; }
+}
+
+async function saveUserMarkets(item) {
+  const err = item.querySelector(".ad-err"), btn = item.querySelector(".ad-save");
+  err.hidden = true;
+  const sel = readMarketPicker(item.querySelector(".mk-picker"));
+  if (!sel.all && !sel.markets.length) { err.textContent = "Choose at least one market, or full access."; err.hidden = false; return; }
+  btn.disabled = true;
+  try {
+    const r = await fetch("api/admin/users/markets", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: item.dataset.id, all: sel.all, markets: sel.markets }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || "HTTP " + r.status);
+    item.querySelector(".ad-mk").textContent = marketsText(d.markets);
+    btn.textContent = "Saved ✓"; setTimeout(() => { btn.textContent = "Save access"; }, 1500);
+  } catch (e) { err.textContent = "Could not save: " + e.message; err.hidden = false; }
+  finally { btn.disabled = false; }
 }
 
 async function init() {

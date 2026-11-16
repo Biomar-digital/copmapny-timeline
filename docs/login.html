@@ -38,6 +38,11 @@
       <label>Full name<input id="rgName" type="text" autocomplete="name" required /></label>
       <label>Email<input id="rgEmail" type="email" autocomplete="email" required /></label>
       <label>Password <span class="lg-hint">(min. 8 characters)</span><input id="rgPass" type="password" autocomplete="new-password" required /></label>
+      <fieldset class="lg-markets" id="rgMarkets">
+        <legend>Markets you need access to</legend>
+        <p class="lg-note">You'll see and be able to request documents for the markets you choose. An administrator confirms them before you can sign in.</p>
+        <div class="lg-mgrid" id="rgMarketList"></div>
+      </fieldset>
       <p class="lg-note lg-warn">For your security, please don't reuse your BioMar network/email password here — choose a different one just for the Policy Library.</p>
       <button type="submit" class="btn primary">Request access</button>
       <p class="lg-status" id="rgStatus"></p>
@@ -53,6 +58,7 @@
     </form>
   </div>
 
+  <script src="markets.js"></script>
   <script src="login.js"></script>
 </body>
 </html>

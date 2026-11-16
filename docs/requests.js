@@ -118,7 +118,7 @@ function requestCard(r) {
       </div>
       <div class="req-when">${esc(fmtTime(r.created_at))}</div>
     </div>
-    <div class="req-meta">Requested by <b>${esc(r.author || "—")}</b>${r.email ? ` · ${esc(r.email)}` : ""}${editionDate(r.edition) ? ` · ${esc(editionDate(r.edition))}` : ""}${r.kind === "new" && r.versions ? ` · Versions: <b>${esc(r.versions)}</b>` : ""}${r.issue ? ` · issue #${esc(r.issue)}` : ""}</div>
+    <div class="req-meta">Requested by <b>${esc(r.author || "—")}</b>${r.email ? ` · ${esc(r.email)}` : ""}${editionDate(r.edition) ? ` · ${esc(editionDate(r.edition))}` : ""}${r.kind === "new" && r.versions ? ` · Versions: <b>${esc(r.versions)}</b>` : ""}${r.market && (r.market !== "Global" || r.kind === "new") ? ` · Market: <b>${esc(r.market)}</b>` : ""}${r.issue ? ` · issue #${esc(r.issue)}` : ""}</div>
     ${comment ? `<div class="req-comment"><div class="req-sec">Comment</div><p>${esc(comment)}</p></div>` : ""}
     ${hl}
     ${sr}

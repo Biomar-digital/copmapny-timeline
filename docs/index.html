@@ -18,6 +18,7 @@
     </div>
     <div class="topbar-right">
       <div class="meta" id="meta"></div>
+      <div class="market-note" id="marketNote" hidden></div>
       <div class="acct">
         <button id="bellBtn" class="acct-bell" type="button" hidden aria-label="Notifications">
           🔔<span class="bell-badge" id="bellBadge" hidden>0</span>
@@ -129,6 +130,11 @@
           </div>
           <span class="rq-hint">A guideline (e.g. brand voice, style guide) isn't a legal/governance document — it publishes with its own ocean-blue cover.</span>
         </div>
+        <div class="rq-field" id="reqMarketField">
+          <label for="reqMarket">Market</label>
+          <select id="reqMarket"></select>
+          <span class="rq-hint" id="reqMarketHint">The new document is filed under this market; only people with access to it will see it.</span>
+        </div>
         <div class="rq-field" id="reqTitleField">
           <label id="reqTitleLabel">Policy title</label>
           <input id="reqDocTitle" type="text" placeholder="e.g. Travel &amp; Expenses Policy" />
@@ -239,7 +245,7 @@ codex</code></pre>
       <header class="vh-bar">
         <div>
           <h2 class="vh-title">Admin</h2>
-          <p class="vh-sub" id="adminSub">Notifications &amp; account approvals</p>
+          <p class="vh-sub" id="adminSub">Notifications, account approvals &amp; market access</p>
         </div>
         <button type="button" class="vh-close" id="adminClose" aria-label="Close">×</button>
       </header>
@@ -248,10 +254,12 @@ codex</code></pre>
         <button type="button" class="ad-tab" data-tab="pending">
           Pending accounts <span id="pendBadge" class="badge" hidden>0</span>
         </button>
+        <button type="button" class="ad-tab" data-tab="users">Users &amp; access</button>
       </div>
       <div class="cn-body">
         <div id="adNotifs" class="ad-list"></div>
         <div id="adPending" class="ad-list" hidden></div>
+        <div id="adUsers" class="ad-list" hidden></div>
       </div>
     </div>
   </dialog>
@@ -305,6 +313,7 @@ codex</code></pre>
 
   <div id="toasts" class="toasts" aria-live="polite"></div>
 
+  <script src="markets.js"></script>
   <script src="library-data.js"></script>
   <script src="app.js"></script>
 </body>

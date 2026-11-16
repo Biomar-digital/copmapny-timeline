@@ -36,6 +36,26 @@ FILES = os.path.join(REPO, "docs", "files")
 LIBRARY = os.path.join(REPO, "docs", "library.json")
 
 
+# Markets a document can belong to. Keep in sync with MARKETS in worker/index.js,
+# which uses the library's `market` to limit what a market-restricted account can
+# see, download and request. A document with no `market` is Global.
+GLOBAL_MARKET = "Global"
+MARKETS = ["Australia", "Chile", "China", "Costa Rica", "Denmark", "Ecuador", "Spain",
+           "Greece", "Iceland", "Norway", "United Kingdom (Scotland)", "Turkey", "Vietnam"]
+
+
+def _market(p, by_id):
+    """A policy's market: its own `market`, else (for a translation) its original's,
+    else Global. Unknown names fail the build rather than silently becoming public."""
+    m = p.get("market")
+    if not m and p.get("translation_of") and p["translation_of"] in by_id:
+        m = by_id[p["translation_of"]].get("market")
+    m = m or GLOBAL_MARKET
+    if m != GLOBAL_MARKET and m not in MARKETS:
+        raise ValueError(f"{p['id']}: unknown market {m!r} (expected Global or one of {MARKETS})")
+    return m
+
+
 def _slug(s):
     return re.sub(r"[^A-Za-z0-9]+", "_", s).strip("_")
 
@@ -86,6 +106,7 @@ def main():
     reg = json.load(open(REGISTRY, encoding="utf-8"))
     today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     out_policies = []
+    by_id = {x["id"]: x for x in reg["policies"]}
 
     for p in reg["policies"]:
         # Cover title: the clean document title (doc_title) when set, else the
@@ -198,6 +219,7 @@ def main():
             "id": p["id"], "title": p["title"],
             "category": p.get("category", "Policy"),
             "language": p.get("language", "English"),
+            "market": _market(p, by_id),
             "owner": p.get("owner", ""), "approver": p.get("approver", ""),
             "editions": eds_out,
         }

@@ -67,10 +67,31 @@ document.getElementById("forgotForm").addEventListener("submit", async (e) => {
   }
 });
 
+// Markets picker: the markets, "Global" (group-wide documents) and "Full access".
+// Choosing full access greys out the individual markets — it already covers them.
+const mList = document.getElementById("rgMarketList");
+function mBox(value, label, cls) {
+  return `<label class="lg-mbox ${cls || ""}"><input type="checkbox" value="${value}" /> <span>${label}</span></label>`;
+}
+mList.innerHTML = mBox(window.ALL_MARKETS, "Full access <em>(all markets and Global)</em>", "lg-mall") +
+  mBox(window.GLOBAL_MARKET, "Global <em>(group-wide documents)</em>") +
+  window.MARKETS.map(m => mBox(m, m)).join("");
+function syncAll() {
+  const all = mList.querySelector(`input[value="${window.ALL_MARKETS}"]`).checked;
+  mList.querySelectorAll("input").forEach(i => { if (i.value !== window.ALL_MARKETS) i.disabled = all; });
+}
+mList.addEventListener("change", syncAll);
+const pickedMarkets = () => {
+  const on = [...mList.querySelectorAll("input:checked")].map(i => i.value);
+  return on.includes(window.ALL_MARKETS) ? [window.ALL_MARKETS] : on;
+};
+
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const status = document.getElementById("rgStatus");
   const btn = e.target.querySelector("button");
+  const markets = pickedMarkets();
+  if (!markets.length) { setStatus(status, "Choose at least one market."); return; }
   setStatus(status, "Sending…");
   btn.disabled = true;
   try {
@@ -80,12 +101,14 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
         name: document.getElementById("rgName").value.trim(),
         email: document.getElementById("rgEmail").value.trim(),
         password: document.getElementById("rgPass").value,
+        markets,
       }),
     });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
     setStatus(status, "Request sent ✓ — an administrator will review it. You'll be able to sign in once approved.", true);
     e.target.reset();
+    syncAll();
   } catch (err) {
     setStatus(status, err.message);
     btn.disabled = false;

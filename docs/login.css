@@ -43,3 +43,14 @@ body.login {
 .btn.primary:disabled { opacity: .6; cursor: default; }
 .lg-status { margin: 2px 0 0; font-size: 12.5px; min-height: 16px; color: #b4233a; }
 .lg-status.ok { color: #1d7a4d; }
+
+/* Markets picker in the register form */
+.lg-markets { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 12px; margin: 0; }
+.lg-markets legend { font-size: 12px; font-weight: 600; color: var(--navy); padding: 0 6px; }
+.lg-mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin-top: 8px; }
+.lg-form .lg-mbox { flex-direction: row; align-items: center; gap: 7px; font-weight: 500; font-size: 12.5px; color: var(--ink); cursor: pointer; }
+.lg-mbox input { width: 15px; height: 15px; padding: 0; margin: 0; accent-color: var(--navy); flex: none; }
+.lg-mbox em { font-style: normal; font-weight: 400; color: #7c95b1; }
+.lg-mbox:has(input:disabled) { opacity: .45; cursor: default; }
+.lg-mall, .lg-mgrid .lg-mbox:nth-child(2) { grid-column: 1 / -1; }
+@media (max-width: 420px) { .lg-mgrid { grid-template-columns: 1fr; } }

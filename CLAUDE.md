@@ -240,6 +240,31 @@ Cyrillic, Vietnamese or CJK glyphs, so those need a font added in `brand.py` fir
 Position statements served as original PDFs are linked the same way (`translation_of`) but
 skip all of the above.
 
+## Markets (access by market)
+
+Accounts and documents carry a **market**. A document's `market` in `registry.json`
+is `Global` unless set (everything that existed before markets is Global); a
+translation inherits its original's market. publish.py writes it to `library.json`,
+and the Worker uses that to decide what an account may see, download and request:
+
+- An account is unrestricted (`users.markets` NULL — every account created before
+  markets, and all admins) or limited to a list of markets. A limited account sees
+  **only** documents of its markets (not Global unless "Global" is one of them): the
+  Worker filters `library.json` / `library-data.js` / `diffs.json`, blocks `/files/*`
+  of other documents on direct URLs, and refuses comments, annotations, signatures,
+  requests, pending changes and notify-deploy on them. A value it cannot read fails
+  closed (no access).
+- At sign-up the person picks markets (or "Full access"); the admin reviews and edits
+  them when approving, and can change any account later in Admin → *Users & access*.
+- The 13 markets are listed in three places that must match — `MARKETS` in
+  `worker/index.js`, in `policy-formatter/tools/publish.py` and `docs/markets.js`.
+  publish.py fails the build on an unknown market name.
+- **New-policy requests carry `market`** (in `request.json`; a limited requester can
+  only pick one of their own). When you build the new policy, set `"market": "<that
+  market>"` on its registry entry — that is how it ends up visible only to that
+  market. Change and translation requests carry the target document's market for
+  reference; no registry change is needed for them.
+
 ## Review workflow
 
 - Change requests, annotations, comments, uploads and signatures are committed

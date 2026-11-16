@@ -730,3 +730,21 @@ main { max-width: 900px; margin: 0 auto; padding: 22px; }
 .tag.stale { background: #fde8e8; color: #8a1f1f; border: 1px solid #f1b5b5; }
 #reqLangOther { margin-top: 6px; }
 #reqLangHint { display: block; margin-top: 6px; font-size: 11.5px; line-height: 1.4; color: #6b87a4; }
+
+/* ---- markets ---- */
+.tag.mk { background: #e6f3fb; color: #0b5a85; border: 1px solid #b9dbef; }
+.market-note { font-size: 12px; color: #0b5a85; background: #e6f3fb; border: 1px solid #b9dbef; border-radius: 999px; padding: 3px 11px; max-width: 360px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mk-wrap { margin-top: 8px; }
+.mk-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; }
+.mk-box { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink); cursor: pointer; }
+.mk-box input { width: 15px; height: 15px; margin: 0; accent-color: var(--navy); flex: none; }
+.mk-box em { font-style: normal; color: #7c95b1; }
+.mk-box:has(input:disabled) { opacity: .45; cursor: default; }
+.mk-all { grid-column: 1 / -1; }
+.mk-picker .mk-box:nth-child(2) { grid-column: 1 / -1; }
+.ad-err { margin: 8px 0 0; font-size: 12.5px; color: #b4233a; }
+.ad-user > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.ad-user > summary::-webkit-details-marker { display: none; }
+.ad-user .ad-mk { margin: 0; }
+#reqMarket { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px; font-family: inherit; font-size: 14px; background: #fff; }
+@media (max-width: 520px) { .mk-picker { grid-template-columns: 1fr; } }
