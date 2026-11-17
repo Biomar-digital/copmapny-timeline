@@ -20,6 +20,14 @@
     </div>
   </header>
 
+  <div class="rv-banner" id="rvBanner" role="note" hidden>
+    <span class="rv-banner-ico" aria-hidden="true">✎</span>
+    <p><b>Commenting on a specific part?</b> Highlight the text in the document with your mouse, then click <b>Add note</b>.
+       Your highlights travel with your request, so we know exactly which passage each comment is about.
+       For a general comment, use the box on the right.</p>
+    <button type="button" class="rv-banner-x" id="rvBannerX" aria-label="Hide this tip" title="Hide this tip">×</button>
+  </div>
+
   <div class="rv-wrap">
     <main id="viewer" class="rv-viewer" aria-label="Document"></main>
     <aside class="rv-side">
@@ -28,7 +36,7 @@
         <span id="annCount" class="count"></span>
       </div>
       <div id="annList" class="rv-annlist"></div>
-      <p id="annEmpty" class="rv-empty">No annotations yet. Select a line in the document and click <b>Add note</b>.</p>
+      <p id="annEmpty" class="rv-empty">No annotations yet. <b>Highlight text in the document</b> and click <b>Add note</b> to comment on that exact part.</p>
 
       <div class="rv-submit">
         <h3>Send these edits</h3>

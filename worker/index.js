@@ -1013,17 +1013,19 @@ async function handlePending(request, env, user) {
       list = list.filter(it => it && it.policy && policyVisible(idx, user, it.policy));
     }
     const byp = {};                       // change_pending wins over pending_review
+    const reqIds = {};                    // the open requests behind each document (to find their notes)
     for (const it of list) {
       if (!it || !it.policy || it.status === "approved") continue;
       const st = it.status || "change_pending";
       if (!(it.policy in byp) || st === "change_pending") byp[it.policy] = st;
+      if (it.request_id) (reqIds[it.policy] = reqIds[it.policy] || []).push(it.request_id);
     }
     // Admins also get the full per-request list for the review queue (it carries
     // requester name/email/title, which non-admins should not see).
     const queue = user && user.role === "admin"
       ? list.filter(it => it && it.policy && it.status !== "approved")
       : undefined;
-    return json({ pending: Object.entries(byp).map(([policy, status]) => ({ policy, status })), queue });
+    return json({ pending: Object.entries(byp).map(([policy, status]) => ({ policy, status, request_ids: reqIds[policy] || [] })), queue });
   }
   // Status transitions, persisted to the repo so the AI and the dashboard share
   // one source of truth. 'review' (changes shipped) is admin-only.
@@ -1054,7 +1056,7 @@ async function handlePending(request, env, user) {
             if (!it.email) continue;
             await sendEmail(env, `[BioMar Policy Library] Ready for your review — ${it.title || policy}`,
               emailHtml("Your change is ready for review",
-                `The change you requested on "${it.title || policy}" has been made and is ready for your review. Check the document and either approve it or request another round.`,
+                `The change you requested on "${it.title || policy}" has been made and is ready for your review. Check the document and either approve it or request a change or edit.`,
                 [["Document", escapeHtml(it.title || policy)]]), it.email).catch(() => {});
           }
         } else if (action === "approve") {
@@ -1245,7 +1247,7 @@ async function notifyReadyForReview(env) {
     for (const it of pending) {
       const r = await sendEmail(env, `[BioMar Policy Library] Ready for your review — ${it.title || it.policy}`,
         emailHtml("Your change is ready for review",
-          `The change you requested on "${it.title || it.policy}" has been made and is ready for your review. Check the document and either approve it or request another round.`,
+          `The change you requested on "${it.title || it.policy}" has been made and is ready for your review. Check the document and either approve it or request a change or edit.`,
           [["Document", escapeHtml(it.title || it.policy)]]), it.email).catch(() => ({ ok: false }));
       if (r && r.ok) { it.notified = true; sentAny = true; }
     }

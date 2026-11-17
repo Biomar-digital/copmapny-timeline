@@ -236,8 +236,10 @@ function focusAnn(id, fromDoc) {
 function isSent(a) { return !!(a.included_in && a.included_in.length); }
 
 function renderSidebar() {
+  // Every note, by page; within a page from top to bottom, then in the order they were written.
+  const topOf = a => (Array.isArray(a.rects) && a.rects[0] ? a.rects[0].y : 0);
   const sorted = annotations.slice().sort(
-    (a, b) => (a.page - b.page) || (a.created_at < b.created_at ? -1 : 1));
+    (a, b) => (a.page - b.page) || (topOf(a) - topOf(b)) || (a.created_at < b.created_at ? -1 : 1));
   annListEl.innerHTML = sorted.map(a => `
     <div class="rv-ann${isSent(a) ? " sent" : ""}" data-id="${esc(a.id)}">
       <div class="pg">Page ${esc(a.page)}${isSent(a) ? '<span class="rv-sent-badge">Already sent</span>' : ""}</div>
@@ -335,6 +337,18 @@ async function init() {
     const tip = document.getElementById("rvWordTip");
     const link = document.getElementById("rvWordLink");
     if (tip && link) { link.href = WORD; tip.hidden = false; }
+  }
+
+  // The "highlight text to comment on a specific part" tip: shown until the person hides it.
+  const banner = document.getElementById("rvBanner");
+  if (banner) {
+    let hidden = false;
+    try { hidden = localStorage.getItem("rvTipHidden") === "1"; } catch {}
+    banner.hidden = hidden;
+    document.getElementById("rvBannerX").addEventListener("click", () => {
+      banner.hidden = true;
+      try { localStorage.setItem("rvTipHidden", "1"); } catch {}
+    });
   }
 
   selBtn.addEventListener("click", openComposer);

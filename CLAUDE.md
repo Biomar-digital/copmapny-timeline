@@ -281,6 +281,15 @@ and the Worker uses that to decide what an account may see, download and request
   entry to `pending_review`; a Cloudflare cron (`worker/index.js` `scheduled`,
   every 2 min) emails the requester from Cloudflare (whose egress IS authorised
   in Brevo — CI runners are not) and flags `notified`. Never send these from CI.
+- **Approving always goes through the review window** (*Review & approve* on a card, and
+  *Approve* in the admin review queue — there is no other path in the page): previous and new
+  version side by side, every note of the open request listed at the side by page (then top to
+  bottom), and the Approve button stays disabled until the reviewer ticks "I have reviewed the
+  previous and the new version", then a final confirmation. With no pre-rendered comparison it
+  shows the real PDFs; for a first version, the document itself. A reviewer who wants more
+  changes uses **Request change or edit** (same editor as the ⋯ menu — highlight the passages,
+  comment, attach a file); there is no separate "another round" button. The `approve` call in
+  the Worker is not itself gated on having opened the window — the gate is in the page.
 - **Annotations/comments are never deleted.** They carry an `edition` field and
   stay tied to the version they were made on, so each version keeps its own
   comments and highlights (shown per-version in the dashboard History modal). A

@@ -319,8 +319,10 @@ function openEditChooser(p) {
 // diff_pending.py straight off the pre-change source recovered from git,
 // against the already-published PDF — over the last approved edition's diff,
 // and only fall back to a plain confirm if neither is available.
+// Approving always goes through the review window: the previous and the new version side by
+// side, with every note of the request listed by page, and an explicit "I have reviewed both"
+// before the Approve button works. There is no other way to approve from the page.
 async function approveWithReview(p) {
-  const eds = p.editions || [];
   const doApprove = () => {
     const d = document.getElementById("compare"); if (d && d.close) d.close();
     pendingAction(p.id, "approve");
@@ -329,15 +331,29 @@ async function approveWithReview(p) {
     `Approve the changes to "${p.title}"? This clears the request.`, { ok: "Approve" }
   ).then(ok => { if (ok) doApprove(); });
   await loadDiffs();
+  const notes = await loadReviewNotes(p);
+  const eds = p.editions || [];
   const hasPending = !!(DIFFS[p.id] || {}).pending;
-  if (hasPending) {
-    openCompare(p.id, "pending", { onApprove: confirmThenApprove });
-  } else if (eds.length >= 2) {
-    const key = `${eds[eds.length - 1].version}__${eds[eds.length - 2].version}`;
-    openCompare(p.id, key, { onApprove: confirmThenApprove });
-  } else {
-    confirmThenApprove();
-  }
+  const key = hasPending ? "pending"
+    : eds.length >= 2 ? `${eds[eds.length - 1].version}__${eds[eds.length - 2].version}` : null;
+  openCompare(p.id, key, { onApprove: confirmThenApprove, notes });
+}
+
+// The notes (highlights + comments) behind the request being reviewed: those folded into the
+// requests still open on this document; if none can be matched, every note on it so nothing hides.
+function sortNotes(list) {
+  const top = a => (Array.isArray(a.rects) && a.rects[0] ? a.rects[0].y : 0);
+  return list.slice().sort((a, b) => (a.page - b.page) || (top(a) - top(b)) || (a.created_at < b.created_at ? -1 : 1));
+}
+async function loadReviewNotes(p) {
+  let all = [];
+  try {
+    const d = await (await fetch(`api/annotations?policy=${encodeURIComponent(p.id)}`, { cache: "no-store" })).json();
+    all = Array.isArray(d.annotations) ? d.annotations : [];
+  } catch { /* no notes is fine */ }
+  const open = new Set(PENDING_REQS.get(p.id) || []);
+  const mine = all.filter(a => (a.included_in || []).some(id => open.has(id)));
+  return { list: sortNotes(mine.length ? mine : all), all: !mine.length && all.length > 0 };
 }
 
 // ---- change-request status badge + actions -------------------------------
@@ -362,17 +378,17 @@ function wireStatusActions(el, p) {
     b.addEventListener("click", () => pendingAction(p.id, "review"));
     actions.appendChild(b);
   }
-  // Anyone reviewing can approve or ask for another round once changes are done.
+  // Anyone reviewing can approve, or ask for a further change or edit, once changes are done.
+  // "Request change or edit" opens the same editor as the ⋯ menu, where the person says
+  // exactly what to change (highlights, a comment, a file) — that request is what sends the
+  // document back for another round.
   if (st === "pending_review") {
     const ap = document.createElement("button");
     ap.type = "button"; ap.className = "btn primary"; ap.textContent = "Review & approve";
     ap.addEventListener("click", () => approveWithReview(p));
     const re = document.createElement("button");
-    re.type = "button"; re.className = "btn ghost"; re.textContent = "Request another round";
-    re.addEventListener("click", async () => {
-      if (!await confirmDialog(`Send "${p.title}" back for another round of changes? The requester will need to review it again.`, { ok: "Request another round" })) return;
-      pendingAction(p.id, "reopen");
-    });
+    re.type = "button"; re.className = "btn ghost"; re.textContent = "Request change or edit";
+    re.addEventListener("click", () => openEditChooser(p));
     actions.appendChild(ap); actions.appendChild(re);
   }
   if (badge && IS_ADMIN) {
@@ -912,8 +928,19 @@ function pageCol(pages, side) {
   }).join("");
 }
 
-function docsView(diff) {
-  if (!diff || !diff.pages_new) return `<div class="cmp-empty">Rendered pages not available for these versions.</div>`;
+// No pre-rendered pages for these versions: show the real PDFs of the previous and current edition.
+const pdfOfEdition = ed => { const f = ((ed && ed.documents) || [])[0]; const fl = (f && f.files) || {}; return fl.non_approval || fl.approval || ""; };
+function docsFromFiles(p) {
+  const eds = (p && p.editions) || [];
+  const cur = eds[eds.length - 1], prev = eds.length > 1 ? eds[eds.length - 2] : null;
+  const cell = (ed, id, side, none) => pdfOfEdition(ed)
+    ? `<div class="cmp-doccell ${side}" id="${id}"><iframe class="cmp-iframe" src="${esc(pdfOfEdition(ed))}" title="${side === "l" ? "Previous" : "Current"} version"></iframe></div>`
+    : `<div class="cmp-doccell ${side}" id="${id}"><p class="cmp-empty">${none}</p></div>`;
+  return `<div class="cmp-docrow">${cell(prev, "cmpScrollL", "l", "This is the first version — there is no previous version to compare with.")}${cell(cur, "cmpScrollR", "r", "Document not available.")}</div>`;
+}
+
+function docsView(diff, p) {
+  if (!diff || !diff.pages_new) return docsFromFiles(p);
   return `<div class="cmp-docrow">
     <div class="cmp-doccell l" id="cmpScrollL">${pageCol(diff.pages_old, "old")}</div>
     <div class="cmp-doccell r" id="cmpScrollR">${pageCol(diff.pages_new, "new")}</div>
@@ -942,43 +969,91 @@ async function openCompare(policyId, key, opts = {}) {
   const body = document.getElementById("cmpBody");
   const footer = document.getElementById("cmpFooter");
   const appBtn = document.getElementById("cmpApprove");
-  if (opts.onApprove) { footer.hidden = false; appBtn.onclick = opts.onApprove; }
-  else footer.hidden = true;
+  const ack = document.getElementById("cmpAck");
+  const notesBox = document.getElementById("cmpNotes");
+  // Approving from here: the button stays off until the reviewer says they looked at both versions.
+  if (opts.onApprove) {
+    footer.hidden = false; appBtn.onclick = opts.onApprove;
+    ack.checked = false; appBtn.disabled = true;
+    ack.onchange = () => { appBtn.disabled = !ack.checked; };
+  } else footer.hidden = true;
   body.innerHTML = `<p class="cmp-empty">Loading…</p>`;
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
   await loadDiffs();
-  const diff = (DIFFS[policyId] || {})[key];
+  const diff = key ? (DIFFS[policyId] || {})[key] : null;
   const p = POLICIES.find(x => x.id === policyId);
-  const [newVer, oldVer] = key.split("__");
-  document.getElementById("cmpTitle").textContent = `${p ? p.title : policyId} — what changed`;
-  document.getElementById("cmpSub").textContent = diff
-    ? (diff.source_unchanged
-        ? `${diff.old} → ${diff.new} · layout/formatting only, wording unchanged`
-        : `${diff.old} → ${diff.new} · ${diff.changed} change${diff.changed !== 1 ? "s" : ""}`)
-    : `${oldVer} → ${newVer}`;
-  document.getElementById("cmpOldHead").textContent = diff ? diff.old : oldVer;
-  document.getElementById("cmpNewHead").textContent = diff ? diff.new : newVer;
+  const [newVer, oldVer] = (key || "").split("__");
+  const curVer = latest(p || { editions: [] }) ? latest(p).version : newVer;
+  document.getElementById("cmpTitle").textContent = `${p ? p.title : policyId} — ${opts.onApprove ? "review before approving" : "what changed"}`;
+  document.getElementById("cmpSub").textContent = !key
+    ? "First version — there is no previous version to compare with"
+    : diff
+      ? (diff.source_unchanged
+          ? `${diff.old} → ${diff.new} · layout/formatting only, wording unchanged`
+          : `${diff.old} → ${diff.new} · ${diff.changed} change${diff.changed !== 1 ? "s" : ""}`)
+      : `${oldVer} → ${newVer}`;
+  document.getElementById("cmpOldHead").textContent = !key ? "Previous — none (first version)" : (diff ? diff.old : oldVer);
+  document.getElementById("cmpNewHead").textContent = !key ? curVer : (diff ? diff.new : newVer);
+
+  // Notes of the request, by page, at the side.
+  const notes = (opts.notes && opts.notes.list) || [];
+  notesBox.hidden = !notes.length;
+  document.getElementById("cmpNotesTitle").firstChild.textContent = opts.notes && opts.notes.all ? "Notes on this document " : "Notes in this request ";
+  document.getElementById("cmpNotesCount").textContent = notes.length ? `(${notes.length})` : "";
+  document.getElementById("cmpNotesList").innerHTML = notes.map(a => `
+    <button type="button" class="cmp-note" data-id="${esc(a.id)}" data-page="${esc(a.page)}">
+      <span class="cmp-note-pg">Page ${esc(a.page)}</span>
+      ${a.quote ? `<span class="cmp-note-q">“${esc(a.quote.slice(0, 160))}”</span>` : ""}
+      <span class="cmp-note-tx">${esc(a.text)}</span>
+      <span class="cmp-note-by">${esc(a.author || "Anonymous")} · ${fmtTime(a.created_at)}</span>
+    </button>`).join("");
 
   const only = document.getElementById("cmpOnlyChanges");
   const onlyWrap = document.getElementById("cmpOnlyWrap");
   const bChanges = document.getElementById("cmpModeChanges");
   const bDocs = document.getElementById("cmpModeDocs");
   let mode = "changes";
+  // Draw each note's highlight on the page it was made on (previous version).
+  const markNotes = () => {
+    const L = document.getElementById("cmpScrollL"); if (!L) return;
+    const pagesEl = L.querySelectorAll(".cmp-page");
+    notes.forEach(a => {
+      const pg = pagesEl[a.page - 1]; if (!pg || !Array.isArray(a.rects)) return;
+      a.rects.forEach(r => {
+        const h = document.createElement("div"); h.className = "cmp-hl note"; h.dataset.id = a.id;
+        h.style.cssText = `left:${(r.x * 100).toFixed(2)}%;top:${(r.y * 100).toFixed(2)}%;width:${(r.w * 100).toFixed(2)}%;height:${(r.h * 100).toFixed(2)}%`;
+        pg.appendChild(h);
+      });
+    });
+  };
   const draw = () => {
     bChanges.classList.toggle("active", mode === "changes");
     bDocs.classList.toggle("active", mode === "docs");
     onlyWrap.style.display = mode === "changes" ? "" : "none";
     dlg.classList.toggle("cmp-docsmode", mode === "docs");
-    if (mode === "docs") { body.innerHTML = docsView(diff); wireSyncScroll(); }
+    if (mode === "docs") { body.innerHTML = docsView(diff, p); wireSyncScroll(); markNotes(); }
     else body.innerHTML = diff ? renderDiff(diff, only.checked)
       : `<p class="cmp-empty">No text diff yet — switch to Documents to see both PDFs.</p>`;
   };
   only.onchange = draw;
   bChanges.onclick = () => { mode = "changes"; draw(); };
   bDocs.onclick = () => { mode = "docs"; draw(); };
-  // A layout-only fix reflows nearly every line, so the word-level text diff
-  // is mostly wrapping noise — lead with the actual pages instead.
-  mode = diff && !diff.source_unchanged ? "changes" : "docs";
+  // Click a note: go to its page in the previous version (the other column follows).
+  document.getElementById("cmpNotesList").onclick = e => {
+    const b = e.target.closest(".cmp-note"); if (!b) return;
+    if (mode !== "docs") { mode = "docs"; draw(); }
+    document.querySelectorAll(".cmp-note.active").forEach(x => x.classList.remove("active")); b.classList.add("active");
+    const L = document.getElementById("cmpScrollL"); if (!L) return;
+    const pg = L.querySelectorAll(".cmp-page")[Number(b.dataset.page) - 1];
+    // Jump straight there (a smooth scroll fights the two columns' scroll sync); position measured
+    // against the column itself, not offsetParent.
+    if (pg) L.scrollTop = pg.getBoundingClientRect().top - L.getBoundingClientRect().top + L.scrollTop - 8;
+    else { const f = L.querySelector("iframe"); if (f) f.src = `${pdfOfEdition(((p && p.editions) || []).slice(-2)[0])}#page=${b.dataset.page}`; }
+  };
+  // A layout-only fix reflows nearly every line, so the word-level text diff is mostly wrapping
+  // noise — lead with the actual pages. When reviewing to approve, always lead with the two
+  // versions side by side.
+  mode = opts.onApprove ? "docs" : (diff && !diff.source_unchanged ? "changes" : "docs");
   draw();
 }
 
@@ -988,6 +1063,7 @@ let SEARCH = "";
 let OWNER_FILTER = "";    // "" = all
 let APPROVER_FILTER = ""; // "" = all
 let PENDING = new Map(); // policy id -> "change_pending" | "pending_review"
+let PENDING_REQS = new Map(); // policy id -> ids of the requests still open on it (to find their notes)
 let IS_ADMIN = false;
 let ME_MARKETS = null;      // null = full access, else the markets this account is limited to
 let STATUS_FILTER = null; // null = all; else "change_pending" | "pending_review" | "approved"
@@ -1124,6 +1200,7 @@ async function loadPendingChanges() {
   try {
     const d = await (await fetch("api/pending", { cache: "no-store" })).json();
     PENDING = new Map((d.pending || []).map(x => [x.policy, x.status || "change_pending"]));
+    PENDING_REQS = new Map((d.pending || []).map(x => [x.policy, x.request_ids || []]));
     QUEUE = d.queue || [];
   } catch { PENDING = new Map(); QUEUE = []; }
   renderStatusFilter();
@@ -1176,11 +1253,10 @@ function renderQueue() {
         <div class="queue-meta">Requested by ${who}${when ? " · " + esc(when) : ""}</div>
       </div>
       <div class="queue-actions">
-        <button type="button" class="btn ghost" data-act="edit" data-i="${i}">Open editor</button>
+        <button type="button" class="btn ghost" data-act="edit" data-i="${i}">Request change or edit</button>
         ${it.status === "change_pending"
           ? `<button type="button" class="btn primary" data-act="review" data-i="${i}">Mark done → review</button>`
-          : `<button type="button" class="btn primary" data-act="approve" data-i="${i}">Approve</button>
-             <button type="button" class="btn ghost" data-act="reopen" data-i="${i}">Another round</button>`}
+          : `<button type="button" class="btn primary" data-act="approve" data-i="${i}">Approve</button>`}
       </div>
     </div>`;
   }).join("");
@@ -1190,8 +1266,7 @@ function renderQueue() {
     const act = btn.dataset.act;
     if (act === "edit") { if (p) openEditChooser(p); return; }
     const label = p ? p.title : it.policy;
-    if (act === "approve" && !await confirmDialog(`Approve the changes to "${label}"? This clears the request.`, { ok: "Approve" })) return;
-    if (act === "reopen" && !await confirmDialog(`Send "${label}" back for another round of changes? The requester will need to review it again.`, { ok: "Request another round" })) return;
+    if (act === "approve") { if (p) approveWithReview(p); return; }   // never without the review window
     btn.disabled = true;
     await pendingAction(it.policy, act);   // reloads pending + re-renders the queue
   }));
