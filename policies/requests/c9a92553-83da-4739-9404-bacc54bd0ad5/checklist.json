@@ -133,5 +133,38 @@
    "SECTION 2",
    "TOOL BOX TALK ATTENDEES"
   ]
+ },
+ {
+  "id": "address-cover",
+  "label": "The cover carries BioMar UK's address (Grangemouth), not the head office in Aarhus",
+  "page": 1,
+  "present": [
+   "BioMar UK",
+   "North Shore Road",
+   "Grangemouth Docks",
+   "Grangemouth FK3 8UL",
+   "Scotland"
+  ],
+  "absent": [
+   "Aarhus",
+   "Kalkværksvej",
+   "Denmark"
+  ]
+ },
+ {
+  "id": "address-footer",
+  "label": "Every content page's header and footer carry BioMar UK and its Grangemouth address and phone — nothing of the head office's address",
+  "page": 2,
+  "present": [
+   "BioMar UK",
+   "North Shore Road",
+   "Grangemouth FK3 8UL",
+   "Tel +44 1324 665585"
+  ],
+  "absent": [
+   "Aarhus",
+   "Kalkværksvej",
+   "+45 86 20 49 70"
+  ]
  }
 ]

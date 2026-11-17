@@ -175,6 +175,8 @@ def main():
                     meta_args += ["--toc"]
                 if p.get("form_tables"):
                     meta_args += ["--form-tables"]
+                if p.get("address"):
+                    meta_args += ["--address", json.dumps(p["address"], ensure_ascii=False)]
                 if ed.get("approval_date"):
                     meta_args += ["--approval-date", ed["approval_date"]]
                 if ed.get("version"):

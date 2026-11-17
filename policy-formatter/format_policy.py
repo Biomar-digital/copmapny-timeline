@@ -10,6 +10,7 @@ If --title / --year are omitted they are inferred from the document
 (title = text before the first heading; year = current year).
 """
 import argparse
+import json
 import os
 import sys
 
@@ -59,6 +60,9 @@ def main(argv=None):
                          "localises the template's own labels — see i18n.py")
     ap.add_argument("--subhead-gap", dest="subhead_gap", type=float, default=0,
                     help="Extra points above a short numbered sub-heading that directly follows a list or table")
+    ap.add_argument("--address", dest="address", default="",
+                    help="JSON {name, lines, phone}: this document's own address (cover, header, footer) "
+                         "instead of the head office's")
     ap.add_argument("--form-tables", dest="form_tables", action="store_true",
                     help="Keep the blank rows of fill-in tables (e.g. an attendees sign-in sheet) and "
                          "leave room to write in them")
@@ -82,7 +86,8 @@ def main(argv=None):
                         head_scale=args.head_scale, hanging_indent=args.hanging_indent,
                         footer_note=args.footer_note, version_date=args.version_date,
                         has_signed=args.has_signed, category=args.category, toc=args.toc, subhead_gap=args.subhead_gap,
-                        language=args.language, form_tables=args.form_tables)
+                        language=args.language, form_tables=args.form_tables,
+                        address=json.loads(args.address) if args.address else None)
 
     # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
     import datetime

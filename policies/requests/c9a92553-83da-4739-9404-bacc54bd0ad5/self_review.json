@@ -1,9 +1,9 @@
 {
   "request_id": "c9a92553-83da-4739-9404-bacc54bd0ad5",
   "policy": "noise-toolbox-talk",
-  "generated_at": "2026-11-17 15:15 UTC",
+  "generated_at": "2026-11-17 15:22 UTC",
   "overall": "attention",
-  "summary": "16 passed, 1 to review",
+  "summary": "18 passed, 1 to review",
   "checks": [
     {
       "id": "outputs",
@@ -104,6 +104,18 @@
     {
       "id": "assert:no-leftovers",
       "label": "Nothing of the old form's furniture leaks into the body (no upper-case section bands, no blank-form title)",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:address-cover",
+      "label": "The cover carries BioMar UK's address (Grangemouth), not the head office in Aarhus",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "assert:address-footer",
+      "label": "Every content page's header and footer carry BioMar UK and its Grangemouth address and phone — nothing of the head office's address",
       "status": "pass",
       "detail": ""
     }

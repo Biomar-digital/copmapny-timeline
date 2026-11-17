@@ -586,7 +586,8 @@ def _content_furniture(section, policy):
     h = section.header.paragraphs[0]
     h.alignment = WD_ALIGN_PARAGRAPH.LEFT
     h.paragraph_format.space_after = Pt(0)
-    _run(h, "BioMar Group", size=8, color=NAVY)
+    company_name, _addr_lines, footer_text = B.address_for(policy)
+    _run(h, company_name, size=8, color=NAVY)
     h.add_run().add_break()
     _run(h, policy.title, size=8, color=NAVY)
     # Big logo, page-anchored top-right at the PDF's coordinates (136x130pt,
@@ -602,7 +603,7 @@ def _content_furniture(section, policy):
     top.set(qn("w:val"), "single"); top.set(qn("w:sz"), "4")
     top.set(qn("w:space"), "6"); top.set(qn("w:color"), "C3E4EF")
     pbdr.append(top); pPr.append(pbdr)
-    _run(f, FOOTER, size=8, color=NAVY)
+    _run(f, footer_text, size=8 if len(footer_text) < 110 else 7, color=NAVY)
     # The optional small disclaimer line under the address — the PDF draws it too.
     note = getattr(policy, "footer_note", "")
     if note:

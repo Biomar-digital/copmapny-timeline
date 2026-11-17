@@ -78,6 +78,19 @@ FOOTER = ("BioMar Group A/S · Kalkværksvej 16, 15. · 8000 Aarhus C · "
           "Denmark · Tel +45 86 20 49 70 · www.biomar.com")
 TAGLINE = ["Powered by Partnership", "Driven by Innovation"]
 
+
+def address_for(policy):
+    """(name, cover address lines, one-line footer) for a document. A document may carry its
+    own address (registry `address`: name, lines, phone) — e.g. a BioMar UK document shows the
+    Grangemouth office instead of the head office in Aarhus (request c9a92553)."""
+    a = getattr(policy, "address", None) or {}
+    if not a:
+        return COMPANY, ADDRESS_LINES, FOOTER
+    name = a.get("name") or COMPANY
+    lines = list(a.get("lines") or [])
+    parts = [name] + lines + ([f"Tel {a['phone']}"] if a.get("phone") else []) + [WEBSITE]
+    return name, [name] + lines, " · ".join(parts)
+
 # Board of Directors - signatures page (penultimate). Chair signs centred on
 # top, the remaining members in a two-column grid below.
 BOARD_CHAIR = "Jens Bjerg Sørensen"

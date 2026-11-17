@@ -127,6 +127,7 @@ class Policy:
     subhead_gap: float = 0    # extra points above a short numbered sub-heading that directly follows a list or table (request 1ce50c34)
     toc: bool = False         # insert an auto-paginated table of contents after the cover (request a2f179f7)
     language: str = "English" # language the document is written in (drives the template's own fixed strings — see i18n.py)
+    address: dict = None      # own address for this document {name, lines, phone}; default = the head office (request c9a92553)
     form_tables: bool = False # keep blank rows of fill-in tables (e.g. an attendees sign-in sheet) and leave room to write in them (request c9a92553)
 
 

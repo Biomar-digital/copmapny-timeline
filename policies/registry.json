@@ -1221,7 +1221,12 @@
       "approver": "",
       "category": "Guideline",
       "form_tables": true,
-      "footer_note": "BioMar UK · IMS Document: Blank Toolbox Talk Form · No. TEMP.11.022 · Ver: 22/01/24 · Paper Copy Issue: N/A",
+      "address": {
+        "name": "BioMar UK",
+        "lines": ["North Shore Road", "Grangemouth Docks", "Grangemouth FK3 8UL", "Scotland"],
+        "phone": "+44 1324 665585"
+      },
+      "footer_note": "IMS Document: Blank Toolbox Talk Form · No. TEMP.11.022 · Ver: 22/01/24 · Paper Copy Issue: N/A",
       "editions": [
         {
           "version": "Version 1",

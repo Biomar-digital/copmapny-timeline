@@ -35,7 +35,9 @@
   (fill-in / sign-in documents such as a toolbox talk: keeps the blank rows of a table
   and leaves room to write in them, keeps a Date/Time/Location-style details box in the
   flow instead of on a page of its own, keeps a bold lead-in line with its short list and
-  a sign-in sheet on one page), and on a document
+  a sign-in sheet on one page), `address` (`{name, lines, phone}`: the document's own
+  address on its cover, running header and footer instead of the head office's in Aarhus —
+  e.g. BioMar UK in Grangemouth), and on a document
   `board_approval: true` (renders BOTH an approval and a non-approval variant).
 - Design-heavy pieces (position statements, Responsible Sourcing) are served as
   the original PDF via `tools/use_original.py`.

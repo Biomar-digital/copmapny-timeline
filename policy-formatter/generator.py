@@ -1167,10 +1167,11 @@ def _draw_cover(c, doc):
     # Address block (bottom-left, below the rule)
     c.setFillColor(B.COVER_ADDR)
     ay = 205
+    _name, addr_lines, _footer = B.address_for(policy)
     c.setFont(B.F_BOLD, 10)
-    c.drawString(B.MARGIN_L, ay, B.ADDRESS_LINES[0])
+    c.drawString(B.MARGIN_L, ay, addr_lines[0])
     c.setFont(B.F_REGULAR, 10)
-    for ln in B.ADDRESS_LINES[1:]:
+    for ln in addr_lines[1:]:
         ay -= 18
         c.drawString(B.MARGIN_L, ay, ln)
     c.drawString(B.MARGIN_L, ay - 36, B.WEBSITE)
@@ -1209,12 +1210,18 @@ def _draw_content_furniture(c, doc):
     # Running header (top-left) - line gap 13 pt to match the template
     c.setFillColor(B.BIOMAR_BLUE)
     c.setFont(B.F_REGULAR, 8)
-    c.drawString(B.MARGIN_L, B.PAGE_H - 47, B.COMPANY)
+    company, _lines, footer_text = B.address_for(policy)
+    c.drawString(B.MARGIN_L, B.PAGE_H - 47, company)
     c.drawString(B.MARGIN_L, B.PAGE_H - 47 - 13, policy.title)
     _draw_logo(c)
-    # Footer (centred), with an optional small disclaimer line beneath it.
-    c.setFont(B.F_REGULAR, 8)
-    c.drawCentredString(B.PAGE_W / 2.0, 25, B.FOOTER)
+    # Footer (centred), with an optional small disclaimer line beneath it. A longer
+    # address (a document with its own) is set a little smaller rather than overflowing.
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    fsize = 8
+    while fsize > 6.5 and stringWidth(footer_text, B.F_REGULAR, fsize) > B.PAGE_W - 2 * B.MARGIN_L:
+        fsize -= 0.25
+    c.setFont(B.F_REGULAR, fsize)
+    c.drawCentredString(B.PAGE_W / 2.0, 25, footer_text)
     _reserve_footnotes(c, doc)
     note = getattr(policy, "footer_note", "")
     if note:
