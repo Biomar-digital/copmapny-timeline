@@ -342,6 +342,13 @@ and the Worker uses that to decide what an account may see, download and request
   fix), or the user is looking at a stale browser cache / the wrong dashboard
   tab (Policies vs Guidelines are separate tabs, and a policy only shows under
   the tab matching its `category`).
+- **"The library is temporarily unavailable" (503) / a page that never loads** means the
+  Worker could not reach its D1 account store at start-up (it used to say "Account store
+  unavailable." in plain text). The Worker retries once, gives up after 8 s, never caches
+  a failure and logs the real D1 error — look for `ensureSchema attempt … failed` /
+  `account store unavailable` in Cloudflare → Workers & Pages → globa-policies → Logs, and
+  check the D1 database `policy-users` (and Cloudflare's status page). It is not a code or
+  permissions problem and affects every visitor who reaches that Cloudflare location.
 - **`policies/pending.json` gets a near-guaranteed push conflict.** A
   Cloudflare cron runs every 2 minutes and flips `notified: false → true` on
   whatever pending entries it just emailed, committing straight to

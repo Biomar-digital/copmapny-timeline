@@ -135,25 +135,75 @@ const MIGRATIONS = [
 ];
 
 let schemaPromise = null;
+const SCHEMA_TABLES = ["users", "sessions", "events", "inbox_state", "wallet", "pending_change", "password_resets"];
+
+// One cheap query tells whether this database already has every table and column, so a
+// cold start does not re-run a dozen statements — each one a chance to hit a D1 hiccup.
+async function schemaUpToDate(env) {
+  const { results } = await env.DB.prepare("SELECT name, sql FROM sqlite_master WHERE type='table'").all();
+  const sqlOf = new Map((results || []).map(r => [r.name, r.sql || ""]));
+  return SCHEMA_TABLES.every(t => sqlOf.has(t))
+    && /markets_requested/.test(sqlOf.get("users")) && /updated_at/.test(sqlOf.get("pending_change"))
+    && /\bstatus\b/.test(sqlOf.get("pending_change"));
+}
+
+async function initSchema(env) {
+  if (!(await schemaUpToDate(env).catch(() => false))) {
+    for (const stmt of SCHEMA) await env.DB.prepare(stmt).run();
+    for (const m of MIGRATIONS) { try { await env.DB.prepare(m).run(); } catch { /* column exists */ } }
+  }
+  if (env.AUTH_USER && env.AUTH_PASS) {
+    const admin = await env.DB.prepare("SELECT id FROM users WHERE role='admin' LIMIT 1").first();
+    if (!admin) {
+      const salt = randomHex(16);
+      const hash = await pbkdf2(env.AUTH_PASS, salt);
+      await env.DB.prepare(
+        "INSERT INTO users (id,email,name,pw_hash,pw_salt,role,status,created_at) VALUES (?,?,?,?,?,?,?,?)")
+        .bind(crypto.randomUUID(), String(env.AUTH_USER).toLowerCase(), "Administrator",
+          hash, salt, "admin", "approved", Date.now()).run();
+    }
+  }
+}
+
+// A transient D1 failure is retried once before it reaches the visitor, and the real error is
+// logged (Workers logs) instead of being swallowed. A failure is never cached: the next request tries again.
 function ensureSchema(env) {
   if (!schemaPromise) {
     schemaPromise = (async () => {
-      for (const stmt of SCHEMA) await env.DB.prepare(stmt).run();
-      for (const m of MIGRATIONS) { try { await env.DB.prepare(m).run(); } catch { /* column exists */ } }
-      if (env.AUTH_USER && env.AUTH_PASS) {
-        const admin = await env.DB.prepare("SELECT id FROM users WHERE role='admin' LIMIT 1").first();
-        if (!admin) {
-          const salt = randomHex(16);
-          const hash = await pbkdf2(env.AUTH_PASS, salt);
-          await env.DB.prepare(
-            "INSERT INTO users (id,email,name,pw_hash,pw_salt,role,status,created_at) VALUES (?,?,?,?,?,?,?,?)")
-            .bind(crypto.randomUUID(), String(env.AUTH_USER).toLowerCase(), "Administrator",
-              hash, salt, "admin", "approved", Date.now()).run();
+      let last;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try { await initSchema(env); return; }
+        catch (e) {
+          last = e; console.error(`ensureSchema attempt ${attempt} failed:`, e && e.message);
+          if (attempt < 2) await new Promise(r => setTimeout(r, 400));
         }
       }
+      throw last;
     })().catch(e => { schemaPromise = null; throw e; });
   }
   return schemaPromise;
+}
+
+// Never leave a visitor on an endless spinner: give the account store a bounded time to answer.
+function withTimeout(promise, ms) {
+  let timer;
+  const t = new Promise((_, rej) => { timer = setTimeout(() => rej(new Error("account store timeout")), ms); });
+  return Promise.race([promise, t]).finally(() => clearTimeout(timer));
+}
+// 503 for when the account store cannot be reached: a page that reloads itself (the problem is
+// usually over within a minute), or JSON for the app's own API calls.
+function storeUnavailable(request, why) {
+  const isApi = new URL(request.url).pathname.startsWith("/api/");
+  const headers = { "Cache-Control": "no-store", "Retry-After": "15" };
+  if (isApi) return json({ error: "The library is temporarily unavailable. Please try again in a moment.", code: why }, 503, headers);
+  const page = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="15"><title>BioMar · Policy Library</title>
+<style>body{font-family:system-ui,sans-serif;background:#1c4076;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:24px}
+.c{max-width:420px;background:#fff;color:#1c4076;border-radius:14px;padding:26px 28px}h1{font-size:19px;margin:0 0 10px}p{font-size:14px;line-height:1.55;margin:8px 0}small{color:#5a7898}</style></head>
+<body><div class="c"><h1>The library is temporarily unavailable</h1>
+<p>The accounts service is not responding right now. This page will try again by itself in a few seconds — or reload it in a minute.</p>
+<p><small>If it keeps happening, let the Policy Library administrators know (reference: ${why}).</small></p></div></body></html>`;
+  return new Response(page, { status: 503, headers: { ...headers, "Content-Type": "text/html; charset=utf-8" } });
 }
 
 async function resolveUser(request, env) {
@@ -1120,7 +1170,11 @@ export default {
     const path = url.pathname;
 
     if (!env.DB) return new Response("Accounts database not configured.", { status: 503 });
-    try { await ensureSchema(env); } catch { return new Response("Account store unavailable.", { status: 503 }); }
+    try { await withTimeout(ensureSchema(env), Number(env.SCHEMA_TIMEOUT_MS) || 8000); }
+    catch (e) {
+      console.error("account store unavailable:", e && e.message);
+      return storeUnavailable(request, /timeout/.test((e && e.message) || "") ? "timeout" : "database");
+    }
 
     // public auth endpoints
     if (path.startsWith("/api/auth/")) return handleAuth(request, env, path);
