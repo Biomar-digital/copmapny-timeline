@@ -15,7 +15,7 @@ import tempfile
 from docx import Document
 from docx.shared import Pt, RGBColor, Emu, Mm, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
-from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ROW_HEIGHT_RULE
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ROW_HEIGHT_RULE, WD_ALIGN_VERTICAL
 from docx.enum.section import WD_SECTION
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn, nsdecls
@@ -332,8 +332,11 @@ def _table(doc, blk):
             cell = cells[ci]
             cell.paragraphs[0].text = ""
             header = blk.header and ri == 0 and not plain_box
+            dd = getattr(blk, "kind", "") == "dos_donts"      # Do's / Don'ts: one colour per column
             if header:
-                _set_cell_bg(cell, "1C4076")
+                _set_cell_bg(cell, ("0471AD", "DD6928")[ci] if dd and ci < 2 else "1C4076")
+            elif dd and ci < 2:
+                _set_cell_bg(cell, ("E6F1F7", "FBEBE2")[ci])
             _run(cell.paragraphs[0], txt, bold=header, size=8.5,
                  color=WHITE if header else NAVY)
 
@@ -395,6 +398,25 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
                 doc.add_picture(BytesIO(blk.data), width=w)
             except Exception:
                 pass
+            prev_subhead = False
+            nested_num_indent = False
+        elif isinstance(blk, M.ImageText):
+            # Picture left, its paragraphs right, in a borderless two-column table (request c9a92553).
+            pic_w = min(blk.image.width or 230, 215)
+            t = doc.add_table(rows=1, cols=2)
+            t.autofit = False
+            _no_table_borders(t)
+            left, right = t.rows[0].cells
+            left.width, right.width = Pt(pic_w + 14), Pt(450 - pic_w - 14)
+            right.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+            try:
+                left.paragraphs[0].add_run().add_picture(BytesIO(blk.image.data), width=Pt(pic_w))
+            except Exception:
+                pass
+            for ti, tb in enumerate(blk.body):
+                para = right.paragraphs[0] if ti == 0 else right.add_paragraph()
+                para.paragraph_format.space_after = Pt(6)
+                _run(para, tb.text, size=size)
             prev_subhead = False
             nested_num_indent = False
         elif isinstance(blk, M.Columns):

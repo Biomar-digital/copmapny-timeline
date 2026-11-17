@@ -20,7 +20,7 @@ import re
 
 import brand as B
 import i18n
-from model import Heading, Body, Bullet, TableBlock, ImageBlock, Columns, ROMAN_SPLIT, is_roman_item
+from model import Heading, Body, Bullet, TableBlock, ImageBlock, ImageText, Columns, ROMAN_SPLIT, is_roman_item
 from reportlab.platypus import Image as RLImage
 from io import BytesIO
 
@@ -409,10 +409,13 @@ def _body_cells(r, ncols):
 
 
 FORM_ROW_H = 28      # points: height of a blank row in a fill-in form / sign-in sheet
+# Do's / Don'ts table (request c9a92553): header colour and a pale tint of it per column.
+_DOS_DONTS = [(B.OCEAN_BLUE, colors.Color(0.90, 0.946, 0.969)),
+              (B.SHRIMP_ORANGE, colors.Color(0.984, 0.922, 0.886))]
 
 
 def _assemble(head_data, head_style, body_rows, colw, ncols, repeat,
-              span_cols=frozenset(), form=False):
+              span_cols=frozenset(), form=False, col_colors=None):
     """Build one Table from the header + a set of body rows, with bands, zebra
     striping and a grid. Column separators are drawn continuously (top to
     bottom, through the full-width section bands too) so the column structure
@@ -449,6 +452,11 @@ def _assemble(head_data, head_style, body_rows, colw, ncols, repeat,
         style.append(("LINEBELOW", (c, 0), (c + 1, 0), 0.5, B.TABLE_GRID))
     style += [("LINEBELOW", (0, hdr - 1), (-1, -1), 0.5, B.TABLE_GRID),
               ("BOX", (0, 0), (-1, -1), 0.7, B.TABLE_GRID)]
+    if col_colors:                                   # one colour per column, header + tinted body
+        for c, (head_c, tint_c) in enumerate(col_colors[:ncols]):
+            if hdr:
+                style.append(("BACKGROUND", (c, 0), (c, hdr - 1), head_c))
+            style.append(("BACKGROUND", (c, hdr), (c, -1), tint_c))
     t = Table(data, colWidths=colw, repeatRows=hdr if repeat else 0,
               rowHeights=heights if any(h for h in heights) else None)
     t.setStyle(TableStyle(style))
@@ -582,7 +590,8 @@ def _table_flowables(block, reserve=0, lead=0):
 
     if len(body) <= 12:                                # fits a page -> one table
         return [_assemble(head_data, head_style, body, colw, ncols, block.header,
-                          span_cols, form=block.form)]
+                          span_cols, form=block.form,
+                          col_colors=_DOS_DONTS if block.kind == "dos_donts" else None)]
 
     # Manual pagination on its own pages.
     head_h = _row_height([c if c else "" for c in (head_data[0] if head_data else [])],
@@ -609,7 +618,8 @@ def _table_flowables(block, reserve=0, lead=0):
     flow = [] if lead else [PageBreak()]
     for ci, ch in enumerate(chunks):
         flow.append(_assemble(head_data, head_style, [body[j] for j in ch],
-                              colw, ncols, block.header, span_cols, form=block.form))
+                              colw, ncols, block.header, span_cols, form=block.form,
+                              col_colors=_DOS_DONTS if block.kind == "dos_donts" else None))
         if ci < len(chunks) - 1:
             flow.append(PageBreak())
     return flow
@@ -637,6 +647,25 @@ def _image_flowables(b):
     img.drawHeight = h
     img.hAlign = "CENTER"
     return [Spacer(1, 5), img, Spacer(1, 7)]
+
+
+def _image_text_flowables(b):
+    """A picture on the left with its paragraphs beside it (request c9a92553): the picture
+    takes at most under half the width, the text fills the rest, centred on the picture."""
+    try:
+        img = RLImage(BytesIO(b.image.data))
+    except Exception:
+        return []
+    iw, ih = float(img.imageWidth or 1), float(img.imageHeight or 1)
+    gutter = 18
+    w = min(b.image.width or iw, _CONTENT_W * 0.46)
+    img.drawWidth, img.drawHeight = w, ih * (w / iw)
+    paras = [Paragraph(_fmt(t.text), BODY_LEFT) for t in b.body]
+    t = Table([[img, paras]], colWidths=[w + gutter, _CONTENT_W - w - gutter])
+    t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                           ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                           ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0)]))
+    return [Spacer(1, 6), KeepTogether([t]), Spacer(1, 10)]
 
 
 def _col_flowables(blocks):
@@ -1067,6 +1096,10 @@ def _story(policy):
             prev_subhead = False
             nested_num_indent = False
             flow.extend(_image_flowables(b))
+        elif isinstance(b, ImageText):
+            prev_subhead = False
+            nested_num_indent = False
+            flow.extend(_image_text_flowables(b))
         elif isinstance(b, Columns):
             prev_subhead = False
             nested_num_indent = False

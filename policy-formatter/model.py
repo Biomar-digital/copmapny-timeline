@@ -50,6 +50,7 @@ class TableBlock:
     rows: List[List[str]]
     header: bool = True
     form: bool = False       # a fill-in form / sign-in sheet: blank rows are kept and given room to write (request c9a92553)
+    kind: str = ""           # "dos_donts": a Do's / Don'ts table, colour-coded per column (request c9a92553)
 
 
 # A roman-numeral sub-item ("(i) ...", "(ii) ...", "(iii) ...") — the third level
@@ -80,6 +81,14 @@ def is_roman_item(blocks, i):
         return True
     pm = _LETTER_SPLIT.match(prev.text.strip())
     return bool(pm) and pm.group(1) not in ("h", "u", "w")
+
+@dataclass
+class ImageText:
+    """A picture with text beside it (picture left, paragraphs right) — the source
+    keeps it as a borderless one-row, two-column table (request c9a92553)."""
+    image: "ImageBlock"
+    body: list = field(default_factory=list)       # Body blocks
+
 
 @dataclass
 class ImageBlock:
@@ -412,6 +421,15 @@ def parse_docx(path: str, title: Optional[str] = None,
             # two-column text layout (e.g. a definitions / references page).
             style_name = item.style.name if item.style else ""
             if "Grid" not in (style_name or "") and len(item.columns) == 2 and len(item.rows) == 1:
+                # A picture in the left cell and text in the right one: keep them side by side.
+                c0, c1 = item.rows[0].cells
+                pics = [im for para in c0.paragraphs for im in _para_images(para) if not _is_brand_artwork(im[0])]
+                texts = [_clean(para.text) for para in c1.paragraphs if _clean(para.text)]
+                if pics and texts:
+                    data, iw, ih = pics[0]
+                    blocks.append(ImageText(image=ImageBlock(data=data, width=iw, height=ih),
+                                            body=[Body(text=t) for t in texts]))
+                    continue
                 cols = []
                 for ci in range(2):
                     sub = []
@@ -451,7 +469,12 @@ def parse_docx(path: str, title: Optional[str] = None,
             elif non_empty:
                 rows = non_empty
             if rows:
-                blocks.append(TableBlock(rows=rows, header=not _glossary_table(item), form=is_form))
+                kind = ""
+                if len(rows[0]) == 2 and len(rows) > 1:
+                    h = [re.sub(r"[’'`´]", "", c).strip().lower() for c in rows[0]]
+                    if h[0] in ("dos", "do") and h[1] in ("donts", "dont"):
+                        kind = "dos_donts"
+                blocks.append(TableBlock(rows=rows, header=not _glossary_table(item), form=is_form, kind=kind))
             # Footnotes attached to a table cell (e.g. a merged band row,
             # which python-docx reports once per spanned cell) render as
             # small notes right after the table itself, not as extra rows

@@ -1,29 +1,137 @@
 [
- {"id": "details-form", "label": "Section 1 – Details: the five fill-in fields of the original (Date, Time, Location, Name of Person Issuing Tool Box Talk, Position) as the BioMar form box, with room to write", "page": 2,
-  "present": ["Section 1 – Details", "Date:", "Time:", "Location:", "Name of Person Issuing Tool Box Talk:", "Position:"]},
- {"id": "talk-headings", "label": "The talk's section headings (the orange ones in the original) are real headings: Introduction, What the Law requires, Effects of Noise", "page": 2,
-  "present": ["Introduction", "What the Law requires"]},
- {"id": "talk-text-p2", "label": "Introduction and What the Law requires: all paragraphs and both bullet lists, verbatim", "page": 2,
-  "present": ["Failure to control noise at work and reduce your exposure to noise could result in hearing loss or tinnitus (constant ringing in the ear).",
-              "Hearing loss is caused by the cumulative exposure to noise.", "As your employer, we are required to:", "Assess the risk from noise;",
-              "Reduce this level if required or possible;", "Over certain levels, provide protection.", "Wearing hearing protection (eg. whilst using chop saw);",
-              "Noise conditions on sites may change during the day"]},
- {"id": "what-should-you-do", "label": "'What should you do?' and its five grey tiles of the original (Stop Work … Work Elsewhere) as one list kept together under the question", "page": 3,
-  "present": ["What should you do?", "Stop Work", "Seek Advice", "Obtain Hearing Protection", "Wear Hearing Protection", "Work Elsewhere", "If you are to work for longer periods, seek advice from your supervisor."]},
- {"id": "effects-of-noise", "label": "Effects of Noise: the definition, the three exposure levels (80 d B(A), 85 d B(A)., 140 Pascals — plain, not half-bold) and the explanatory paragraphs", "page": 3,
-  "present": ["Effects of Noise", "There are three important exposure levels you need to be aware of!", "80 d B(A)", "85 d B(A).", "140 Pascals",
-              "The 3rd action level was measured in Pascals", "i.e. Explosion.", "approximately 2m", "approximately 1m", "In this instance we are required to try and reduce the noise level"]},
- {"id": "hearing-protection", "label": "'For hearing protection to work, what must we do?' with its three tiles as a list", "page": 3,
-  "present": ["For hearing protection to work, what must we do?", "Wear it properly", "Do not interfere with it"]},
- {"id": "photo-and-text", "label": "The photo of the original and the three paragraphs that sit beside it", "page": 4,
-  "present": ["Earmuffs must be worn fully over both ears.", "Ear plugs must be fitted following the directions provided.", "You must take good care of equipment which is not disposable"]},
- {"id": "dos-donts", "label": "The Do’s / Don’ts table with its header row and all four rows (the last Don’t cell is empty in the original)", "page": 4,
-  "present": ["Do’s", "Don’ts", "Be aware of noise levels.", "Operate noisy equipment without hearing protection.", "If you are concerned about noise levels, seek advice.",
-              "Work in noisy environments without hearing protection.", "If in doubt, wear hearing protection.", "Don’t misuse hearing equipment.", "Wear you hearing protection properly."]},
- {"id": "attendees", "label": "Section 2 – Tool Box Talk Attendees: the sign-in sheet with NAME / SIGNATURE twice and 12 blank rows, on a page of its own", "page": 5,
-  "present": ["Section 2 – Tool Box Talk Attendees", "NAME", "SIGNATURE"]},
- {"id": "ims-control", "label": "The IMS document-control data of the original header (BioMar UK, Blank Toolbox Talk Form, TEMP.11.022, Ver 22/01/24, Paper Copy Issue N/A) kept in the page footer", "page": 2,
-  "present": ["BioMar UK", "Blank Toolbox Talk Form", "TEMP.11.022", "22/01/24", "Paper Copy Issue: N/A"]},
- {"id": "no-leftovers", "label": "Nothing of the old form's furniture leaks into the body (no upper-case section bands, no blank-form title)", 
-  "absent": ["SECTION 1", "SECTION 2", "TOOL BOX TALK ATTENDEES"]}
+ {
+  "id": "details-form",
+  "label": "Section 1 – Details: the five fill-in fields of the original (Date, Time, Location, Name of Person Issuing Tool Box Talk, Position) as the BioMar form box, with room to write",
+  "page": 2,
+  "present": [
+   "Section 1 – Details",
+   "Date:",
+   "Time:",
+   "Location:",
+   "Name of Person Issuing Tool Box Talk:",
+   "Position:"
+  ]
+ },
+ {
+  "id": "talk-headings",
+  "label": "The talk's section headings (the orange ones in the original) are real headings: Introduction, What the Law requires, Effects of Noise",
+  "page": 2,
+  "present": [
+   "Introduction",
+   "What the Law requires"
+  ]
+ },
+ {
+  "id": "talk-text-p2",
+  "label": "Introduction and What the Law requires: all paragraphs and both bullet lists, verbatim",
+  "page": 2,
+  "present": [
+   "Failure to control noise at work and reduce your exposure to noise could result in hearing loss or tinnitus (constant ringing in the ear).",
+   "Hearing loss is caused by the cumulative exposure to noise.",
+   "As your employer, we are required to:",
+   "Assess the risk from noise;",
+   "Reduce this level if required or possible;",
+   "Over certain levels, provide protection.",
+   "Wearing hearing protection (eg. whilst using chop saw);",
+   "Noise conditions on sites may change during the day"
+  ]
+ },
+ {
+  "id": "what-should-you-do",
+  "label": "'What should you do?' and its five grey tiles of the original (Stop Work … Work Elsewhere) as one list kept together under the question",
+  "page": 3,
+  "present": [
+   "What should you do?",
+   "Stop Work",
+   "Seek Advice",
+   "Obtain Hearing Protection",
+   "Wear Hearing Protection",
+   "Work Elsewhere",
+   "If you are to work for longer periods, seek advice from your supervisor."
+  ]
+ },
+ {
+  "id": "effects-of-noise",
+  "label": "Effects of Noise: the definition, the three exposure levels (80 d B(A), 85 d B(A)., 140 Pascals — plain, not half-bold) and the explanatory paragraphs",
+  "page": 3,
+  "present": [
+   "Effects of Noise",
+   "There are three important exposure levels you need to be aware of!",
+   "80 d B(A)",
+   "85 d B(A).",
+   "140 Pascals",
+   "The 3rd action level was measured in Pascals",
+   "i.e. Explosion.",
+   "approximately 2m",
+   "approximately 1m",
+   "In this instance we are required to try and reduce the noise level"
+  ]
+ },
+ {
+  "id": "hearing-protection",
+  "label": "'For hearing protection to work, what must we do?' with its three tiles as a list",
+  "page": 3,
+  "present": [
+   "For hearing protection to work, what must we do?",
+   "Wear it properly",
+   "Do not interfere with it"
+  ]
+ },
+ {
+  "id": "photo-and-text",
+  "label": "The photo of the original on the left with the three paragraphs beside it (picture left, text right — checked on the rendered page and in the Word copy)",
+  "page": 4,
+  "present": [
+   "Earmuffs must be worn fully over both ears.",
+   "Ear plugs must be fitted following the directions provided.",
+   "You must take good care of equipment which is not disposable"
+  ]
+ },
+ {
+  "id": "dos-donts",
+  "label": "The Do’s / Don’ts table with its header row and all four rows (the last Don’t cell is empty in the original), colour-coded as in the original: Do’s blue, Don’ts orange, each with a pale tint of its colour",
+  "page": 4,
+  "present": [
+   "Do’s",
+   "Don’ts",
+   "Be aware of noise levels.",
+   "Operate noisy equipment without hearing protection.",
+   "If you are concerned about noise levels, seek advice.",
+   "Work in noisy environments without hearing protection.",
+   "If in doubt, wear hearing protection.",
+   "Don’t misuse hearing equipment.",
+   "Wear you hearing protection properly."
+  ]
+ },
+ {
+  "id": "attendees",
+  "label": "Section 2 – Tool Box Talk Attendees: the sign-in sheet with NAME / SIGNATURE twice and 12 blank rows, on a page of its own",
+  "page": 5,
+  "present": [
+   "Section 2 – Tool Box Talk Attendees",
+   "NAME",
+   "SIGNATURE"
+  ]
+ },
+ {
+  "id": "ims-control",
+  "label": "The IMS document-control data of the original header (BioMar UK, Blank Toolbox Talk Form, TEMP.11.022, Ver 22/01/24, Paper Copy Issue N/A) kept in the page footer",
+  "page": 2,
+  "present": [
+   "BioMar UK",
+   "Blank Toolbox Talk Form",
+   "TEMP.11.022",
+   "22/01/24",
+   "Paper Copy Issue: N/A"
+  ]
+ },
+ {
+  "id": "no-leftovers",
+  "label": "Nothing of the old form's furniture leaks into the body (no upper-case section bands, no blank-form title)",
+  "absent": [
+   "SECTION 1",
+   "SECTION 2",
+   "TOOL BOX TALK ATTENDEES"
+  ]
+ }
 ]
