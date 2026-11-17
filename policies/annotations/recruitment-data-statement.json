@@ -79,5 +79,24 @@
       "4ddf2ad7-88b2-47ec-8e75-de55ea5833aa"
     ],
     "created_at": "2026-07-29T11:11:54.612Z"
+  },
+  {
+    "id": "3435c7ad-15f2-4c6f-a08e-5e2e0fdeaf9e",
+    "file": "files/Recruitment_Data_Statement__Policy_2026-07_non-approval.pdf",
+    "page": 3,
+    "quote": "Contact information",
+    "rects": [
+      {
+        "x": 0.07139597777868244,
+        "y": 0.7845600045023864,
+        "w": 0.18409669238252116,
+        "h": 0.015485438238363984
+      }
+    ],
+    "edition": "Version 1__2026-07",
+    "author": "Administrator",
+    "text": "Wrong",
+    "included_in": [],
+    "created_at": "2026-11-17T15:55:51.291Z"
   }
 ]
