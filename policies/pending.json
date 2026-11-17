@@ -527,6 +527,7 @@
     "author": "Hamish Graham",
     "email": "hamgr@biomar.com",
     "created_at": 1794927783184,
-    "updated_at": 1794927783184
+    "updated_at": 1794927783184,
+    "notified": true
   }
 ]
