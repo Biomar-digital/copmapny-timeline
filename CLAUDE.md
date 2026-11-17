@@ -348,7 +348,10 @@ and the Worker uses that to decide what an account may see, download and request
   a failure and logs the real D1 error — look for `ensureSchema attempt … failed` /
   `account store unavailable` in Cloudflare → Workers & Pages → globa-policies → Logs, and
   check the D1 database `policy-users` (and Cloudflare's status page). It is not a code or
-  permissions problem and affects every visitor who reaches that Cloudflare location.
+  permissions problem and affects every visitor who reaches that Cloudflare location. The page
+  itself shows the real D1 error and the Cloudflare location (a screenshot is enough to
+  diagnose), and `/api/health` (public, no login) answers `{ok, db_ms, error, colo}` — have the
+  affected person open it to tell a database problem from a network one.
 - **`policies/pending.json` gets a near-guaranteed push conflict.** A
   Cloudflare cron runs every 2 minutes and flips `notified: false → true` on
   whatever pending entries it just emailed, committing straight to

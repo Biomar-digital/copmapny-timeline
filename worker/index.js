@@ -192,17 +192,24 @@ function withTimeout(promise, ms) {
 }
 // 503 for when the account store cannot be reached: a page that reloads itself (the problem is
 // usually over within a minute), or JSON for the app's own API calls.
-function storeUnavailable(request, why) {
+// A short, printable excerpt of an error — enough to tell "network connection lost" from
+// "overloaded" from "no such table" when someone sends a screenshot, nothing more.
+function briefError(e) {
+  return String((e && e.message) || e || "").replace(/\s+/g, " ").replace(/[^\x20-\x7E]/g, "?").slice(0, 160);
+}
+const coloOf = (request) => (request.cf && request.cf.colo) || "";
+
+function storeUnavailable(request, why, detail = "") {
   const isApi = new URL(request.url).pathname.startsWith("/api/");
   const headers = { "Cache-Control": "no-store", "Retry-After": "15" };
-  if (isApi) return json({ error: "The library is temporarily unavailable. Please try again in a moment.", code: why }, 503, headers);
+  if (isApi) return json({ error: "The library is temporarily unavailable. Please try again in a moment.", code: why, detail: detail || undefined }, 503, headers);
   const page = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="refresh" content="15"><title>BioMar · Policy Library</title>
 <style>body{font-family:system-ui,sans-serif;background:#1c4076;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:24px}
 .c{max-width:420px;background:#fff;color:#1c4076;border-radius:14px;padding:26px 28px}h1{font-size:19px;margin:0 0 10px}p{font-size:14px;line-height:1.55;margin:8px 0}small{color:#5a7898}</style></head>
 <body><div class="c"><h1>The library is temporarily unavailable</h1>
 <p>The accounts service is not responding right now. This page will try again by itself in a few seconds — or reload it in a minute.</p>
-<p><small>If it keeps happening, let the Policy Library administrators know (reference: ${why}).</small></p></div></body></html>`;
+<p><small>If it keeps happening, let the Policy Library administrators know and send them this reference:<br>${escapeHtml(why)}${coloOf(request) ? " · " + escapeHtml(coloOf(request)) : ""}${detail ? "<br>" + escapeHtml(detail) : ""}</small></p></div></body></html>`;
   return new Response(page, { status: 503, headers: { ...headers, "Content-Type": "text/html; charset=utf-8" } });
 }
 
@@ -1170,10 +1177,19 @@ export default {
     const path = url.pathname;
 
     if (!env.DB) return new Response("Accounts database not configured.", { status: 503 });
+    // Public health probe, answered before anything that can fail: can this Worker reach D1, how
+    // fast, and from which Cloudflare location. Open /api/health to tell a database problem from a network one.
+    if (path === "/api/health") {
+      const t0 = Date.now(); let error = "";
+      try { await withTimeout(env.DB.prepare("SELECT 1 AS ok").first(), Number(env.SCHEMA_TIMEOUT_MS) || 5000); }
+      catch (e) { error = briefError(e); }
+      return json({ ok: !error, db_ms: Date.now() - t0, error: error || undefined,
+        colo: coloOf(request) || undefined, country: (request.cf && request.cf.country) || undefined }, error ? 503 : 200);
+    }
     try { await withTimeout(ensureSchema(env), Number(env.SCHEMA_TIMEOUT_MS) || 8000); }
     catch (e) {
       console.error("account store unavailable:", e && e.message);
-      return storeUnavailable(request, /timeout/.test((e && e.message) || "") ? "timeout" : "database");
+      return storeUnavailable(request, /timeout/.test((e && e.message) || "") ? "timeout" : "database", briefError(e));
     }
 
     // public auth endpoints
