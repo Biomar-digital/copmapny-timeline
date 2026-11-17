@@ -49,6 +49,7 @@ class Bullet:
 class TableBlock:
     rows: List[List[str]]
     header: bool = True
+    form: bool = False       # a fill-in form / sign-in sheet: blank rows are kept and given room to write (request c9a92553)
 
 
 # A roman-numeral sub-item ("(i) ...", "(ii) ...", "(iii) ...") — the third level
@@ -117,6 +118,7 @@ class Policy:
     subhead_gap: float = 0    # extra points above a short numbered sub-heading that directly follows a list or table (request 1ce50c34)
     toc: bool = False         # insert an auto-paginated table of contents after the cover (request a2f179f7)
     language: str = "English" # language the document is written in (drives the template's own fixed strings — see i18n.py)
+    form_tables: bool = False # keep blank rows of fill-in tables (e.g. an attendees sign-in sheet) and leave room to write in them (request c9a92553)
 
 
 def _para_images(item):
@@ -437,10 +439,19 @@ def parse_docx(path: str, title: Optional[str] = None,
             # complete, Schedule 3's notification template, request 3d497671)
             # must still render as a visible empty box, not vanish outright.
             non_empty = [r for r in rows if any(r)]
-            if non_empty:
+            # A fill-in form (registry `form_tables`): blank rows ARE the content —
+            # the lines people write on — so keep them, and mark the table so the
+            # generators leave room to write.
+            is_form = False
+            if meta.get("form_tables"):
+                blank_rows = len(non_empty) < len(rows)
+                labels = [r[0].strip() for r in rows if r and r[0].strip()]
+                label_form = 2 <= len(rows) <= 8 and bool(labels) and all(l.endswith(":") for l in labels)
+                is_form = blank_rows or label_form
+            elif non_empty:
                 rows = non_empty
             if rows:
-                blocks.append(TableBlock(rows=rows, header=not _glossary_table(item)))
+                blocks.append(TableBlock(rows=rows, header=not _glossary_table(item), form=is_form))
             # Footnotes attached to a table cell (e.g. a merged band row,
             # which python-docx reports once per spanned cell) render as
             # small notes right after the table itself, not as extra rows

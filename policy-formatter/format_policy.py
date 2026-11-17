@@ -59,6 +59,9 @@ def main(argv=None):
                          "localises the template's own labels — see i18n.py")
     ap.add_argument("--subhead-gap", dest="subhead_gap", type=float, default=0,
                     help="Extra points above a short numbered sub-heading that directly follows a list or table")
+    ap.add_argument("--form-tables", dest="form_tables", action="store_true",
+                    help="Keep the blank rows of fill-in tables (e.g. an attendees sign-in sheet) and "
+                         "leave room to write in them")
     ap.add_argument("--toc", dest="toc", action="store_true",
                     help="Insert an auto-paginated table of contents (top-level headings only) "
                          "right after the cover")
@@ -79,7 +82,7 @@ def main(argv=None):
                         head_scale=args.head_scale, hanging_indent=args.hanging_indent,
                         footer_note=args.footer_note, version_date=args.version_date,
                         has_signed=args.has_signed, category=args.category, toc=args.toc, subhead_gap=args.subhead_gap,
-                        language=args.language)
+                        language=args.language, form_tables=args.form_tables)
 
     # Default file name: "<Title>_<YYYY-MM>_<approval|non-approval>.pdf".
     import datetime

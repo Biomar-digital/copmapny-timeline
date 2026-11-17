@@ -1211,6 +1211,27 @@
           "requested_by": "Marianne Niviaq Thomsen"
         }
       ]
+    },
+    {
+      "id": "noise-toolbox-talk",
+      "title": "Noise Toolbox Talk",
+      "language": "English",
+      "market": "United Kingdom (Scotland)",
+      "owner": "",
+      "approver": "",
+      "category": "Guideline",
+      "form_tables": true,
+      "footer_note": "BioMar UK · IMS Document: Blank Toolbox Talk Form · No. TEMP.11.022 · Ver: 22/01/24 · Paper Copy Issue: N/A",
+      "editions": [
+        {
+          "version": "Version 1",
+          "date": "2026-11",
+          "approval_date": "",
+          "source": "Noise_Toolbox_Talk.docx",
+          "notes": "Initial publication: local toolbox talk on noise (United Kingdom), restyled to the current BioMar template with the same content — details form, the talk, and the attendees sign-in sheet.",
+          "requested_by": "Hamish Graham"
+        }
+      ]
     }
   ]
 }

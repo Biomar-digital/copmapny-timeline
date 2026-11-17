@@ -173,6 +173,8 @@ def main():
                     meta_args += ["--subhead-gap", str(p["subhead_gap"])]
                 if p.get("toc"):
                     meta_args += ["--toc"]
+                if p.get("form_tables"):
+                    meta_args += ["--form-tables"]
                 if ed.get("approval_date"):
                     meta_args += ["--approval-date", ed["approval_date"]]
                 if ed.get("version"):

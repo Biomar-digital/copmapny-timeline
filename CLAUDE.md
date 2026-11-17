@@ -31,7 +31,11 @@
 - Per-policy switches in `registry.json`: `pdf` (serve the original verbatim),
   `cover_year` (default OFF — covers carry no year; opt in with `true`),
   `lead_title`, `body_size`, `footer_note`, `version_date`, `toc` (auto-paginated
-  table of contents after the cover; Word gets a native TOC field), and on a document
+  table of contents after the cover; Word gets a native TOC field), `form_tables`
+  (fill-in / sign-in documents such as a toolbox talk: keeps the blank rows of a table
+  and leaves room to write in them, keeps a Date/Time/Location-style details box in the
+  flow instead of on a page of its own, keeps a bold lead-in line with its short list and
+  a sign-in sheet on one page), and on a document
   `board_approval: true` (renders BOTH an approval and a non-approval variant).
 - Design-heavy pieces (position statements, Responsible Sourcing) are served as
   the original PDF via `tools/use_original.py`.

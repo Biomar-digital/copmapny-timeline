@@ -15,7 +15,7 @@ import tempfile
 from docx import Document
 from docx.shared import Pt, RGBColor, Emu, Mm, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ROW_HEIGHT_RULE
 from docx.enum.section import WD_SECTION
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn, nsdecls
@@ -321,7 +321,12 @@ def _table(doc, blk):
     except KeyError:
         pass
     for ri, row in enumerate(rows):
-        cells = t.add_row().cells
+        new_row = t.add_row()
+        cells = new_row.cells
+        # A fill-in form / sign-in sheet: leave room to write (request c9a92553).
+        if getattr(blk, "form", False) and not (blk.header and ri == 0):
+            new_row.height = Pt(28)
+            new_row.height_rule = WD_ROW_HEIGHT_RULE.AT_LEAST
         for ci in range(ncol):
             txt = row[ci] if ci < len(row) else ""
             cell = cells[ci]
@@ -576,6 +581,13 @@ def _content_furniture(section, policy):
     top.set(qn("w:space"), "6"); top.set(qn("w:color"), "C3E4EF")
     pbdr.append(top); pPr.append(pbdr)
     _run(f, FOOTER, size=8, color=NAVY)
+    # The optional small disclaimer line under the address — the PDF draws it too.
+    note = getattr(policy, "footer_note", "")
+    if note:
+        n = section.footer.add_paragraph()
+        n.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        n.paragraph_format.space_before = Pt(0)
+        _run(n, note, size=6.5, color=RGBColor(0x93, 0x95, 0x98))
 
 
 def _version_card(doc, policy):

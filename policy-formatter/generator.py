@@ -201,6 +201,11 @@ def _fmt(text, number=True, widow=True, lstrip=True, rstrip=True):
     return _supers(escape(t))
 
 
+# "80 d B(A)", "140 Pascals": a quantity at the start of a bullet, not a clause number
+# (those carry a dot — "1." / "1.1") — so it is not set in bold like one.
+_BARE_QUANTITY = re.compile(r"^\d+\s+\S")
+
+
 def _body_markup(b, strip_number=False, skip_len=None):
     """Markup for a Body/Bullet block, wrapping any run-in bold/italic segment
     in the brand's Demi/Italic face. Uses explicit <font name="Brand-Demi"/
@@ -229,7 +234,8 @@ def _body_markup(b, strip_number=False, skip_len=None):
             # caller already extracted into bulletText, same as the old
             # `_fmt(lm.group(2), number=False)` call this replaced.
             return _fmt(b.text.strip()[skip_len:], number=False)
-        return _fmt(b.text, number=not strip_number)
+        number = not strip_number and not (isinstance(b, Bullet) and _BARE_QUANTITY.match(b.text.strip()))
+        return _fmt(b.text, number=number)
     skip = None
     if strip_number:
         # The clause number + following whitespace can land entirely inside
@@ -402,8 +408,11 @@ def _body_cells(r, ncols):
     return cells, False
 
 
+FORM_ROW_H = 28      # points: height of a blank row in a fill-in form / sign-in sheet
+
+
 def _assemble(head_data, head_style, body_rows, colw, ncols, repeat,
-              span_cols=frozenset()):
+              span_cols=frozenset(), form=False):
     """Build one Table from the header + a set of body rows, with bands, zebra
     striping and a grid. Column separators are drawn continuously (top to
     bottom, through the full-width section bands too) so the column structure
@@ -412,10 +421,15 @@ def _assemble(head_data, head_style, body_rows, colw, ncols, repeat,
     style = list(_BASE_TSTYLE) + list(head_style)
     hdr = len(head_data)
     zebra = 0
+    heights = [None] * hdr
     for r in body_rows:
         i = len(data)
         cells, band = _body_cells(r, ncols)
         data.append(cells)
+        # A blank row of a form is a line to write on: give it room, and no striping.
+        heights.append(FORM_ROW_H if form and not any((c or "").strip() for c in r) else None)
+        if form:
+            continue
         if band:
             style += [("SPAN", (0, i), (-1, i)),
                       ("BACKGROUND", (0, i), (-1, i), B.OCEAN_BLUE)]
@@ -435,7 +449,8 @@ def _assemble(head_data, head_style, body_rows, colw, ncols, repeat,
         style.append(("LINEBELOW", (c, 0), (c + 1, 0), 0.5, B.TABLE_GRID))
     style += [("LINEBELOW", (0, hdr - 1), (-1, -1), 0.5, B.TABLE_GRID),
               ("BOX", (0, 0), (-1, -1), 0.7, B.TABLE_GRID)]
-    t = Table(data, colWidths=colw, repeatRows=hdr if repeat else 0)
+    t = Table(data, colWidths=colw, repeatRows=hdr if repeat else 0,
+              rowHeights=heights if any(h for h in heights) else None)
     t.setStyle(TableStyle(style))
     return t
 
@@ -446,7 +461,7 @@ def _row_height(cells, colw):
     return t.wrap(sum(colw), 100000)[1]
 
 
-_SIG_LABELS = ("company", "name", "position", "date", "place", "signature")
+_SIG_LABELS = ("company", "name", "position", "date", "place", "signature", "location")
 
 
 def _is_signature_form(block):
@@ -554,6 +569,8 @@ def _table_flowables(block, reserve=0, lead=0):
                  or any(rows[0][c] and rows[0][c] == rows[1][c] for c in range(ncols)))):
             hdr = 2
     colw = _column_widths(rows, ncols, hdr)
+    if block.form:                                   # a sign-in sheet: equal columns to write in
+        colw = [sum(colw) / ncols] * ncols
     head_data, head_style = _header_rows(rows, ncols, hdr)
     # Column boundaries that sit under a row-0 horizontal span (e.g. Why|How
     # under "Explains"): their vertical separator must start below the span.
@@ -565,7 +582,7 @@ def _table_flowables(block, reserve=0, lead=0):
 
     if len(body) <= 12:                                # fits a page -> one table
         return [_assemble(head_data, head_style, body, colw, ncols, block.header,
-                          span_cols)]
+                          span_cols, form=block.form)]
 
     # Manual pagination on its own pages.
     head_h = _row_height([c if c else "" for c in (head_data[0] if head_data else [])],
@@ -592,7 +609,7 @@ def _table_flowables(block, reserve=0, lead=0):
     flow = [] if lead else [PageBreak()]
     for ci, ch in enumerate(chunks):
         flow.append(_assemble(head_data, head_style, [body[j] for j in ch],
-                              colw, ncols, block.header, span_cols))
+                              colw, ncols, block.header, span_cols, form=block.form))
         if ci < len(chunks) - 1:
             flow.append(PageBreak())
     return flow
@@ -765,6 +782,10 @@ def _story(policy):
     sig_i = next((i for i, b in enumerate(blocks)
                   if isinstance(b, TableBlock) and _is_signature_form(b)), None)
     dec_i = None
+    if getattr(policy, "form_tables", False):
+        # A fill-in form inside a document (e.g. a toolbox talk's details box) stays
+        # in the flow; only a supplier declaration gets a page of its own (request c9a92553).
+        sig_i = None
     if sig_i is not None:
         j = sig_i - 1
         while j >= 0 and isinstance(blocks[j], Body):
@@ -1029,7 +1050,18 @@ def _story(policy):
                 if i > 0 and isinstance(blocks[i - 1], Heading) and flow and not isinstance(flow[-1], PageBreak):
                     hflow = flow[-2] if isinstance(flow[-1], Spacer) else flow[-1]
                     lead = _flow_height(hflow, _CONTENT_W) + 6
-                flow.extend(_table_flowables(b, fn_reserve, lead))
+                tf = _table_flowables(b, fn_reserve, lead)
+                # A fill-in form / sign-in sheet stays on one page (request c9a92553).
+                if b.form and len(tf) == 1:
+                    grp = list(tf)
+                    # ...and its heading travels with it, so the title is never left alone at a page foot
+                    if (i > 0 and isinstance(blocks[i - 1], Heading) and not getattr(policy, "toc", False)
+                            and len(flow) >= 2 and isinstance(flow[-1], Spacer) and isinstance(flow[-2], Paragraph)):
+                        sp, hd = flow.pop(), flow.pop()
+                        grp = [hd, sp] + grp
+                    flow.append(KeepTogether(grp))
+                else:
+                    flow.extend(tf)
                 flow.append(Spacer(1, 8))
         elif isinstance(b, ImageBlock):
             prev_subhead = False
@@ -1041,7 +1073,28 @@ def _story(policy):
             flow.extend(_columns_flowables(b))
         if i == sig_i:
             flow.append(PageBreak())     # definitions/refs start on the next page
+    if getattr(policy, "form_tables", False):
+        flow = _keep_leadins(flow)
     return flow
+
+
+def _keep_leadins(flow, max_items=8):
+    """A bold lead-in line ("What should you do?") stays on the page with the short
+    bullet list under it, instead of leaving its first item stranded at the foot of
+    one page and the rest on the next (request c9a92553)."""
+    is_bullet = lambda f: isinstance(f, Paragraph) and f.style.name.startswith("Bullet")
+    out, i = [], 0
+    while i < len(flow):
+        f = flow[i]
+        if isinstance(f, Paragraph) and f.style.name == "BodyBold" and i + 1 < len(flow) and is_bullet(flow[i + 1]):
+            j = i + 1
+            while j < len(flow) and is_bullet(flow[j]):
+                j += 1
+            if j - i - 1 <= max_items:
+                out.append(KeepTogether(flow[i:j])); i = j
+                continue
+        out.append(f); i += 1
+    return out
 
 
 # --------------------------------------------------------------------------
