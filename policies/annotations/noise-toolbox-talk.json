@@ -1,0 +1,27 @@
+[
+  {
+    "id": "1d71c36e-e0ae-43ae-9620-678144322713",
+    "file": "files/Noise_Toolbox_Talk__Policy_2026-11_non-approval.pdf",
+    "page": 2,
+    "quote": "Name of Person Issuing Tool Box Talk:",
+    "rects": [
+      {
+        "x": 0.09659481710368997,
+        "y": 0.33342191116529096,
+        "w": 0.3522464569341618,
+        "h": 0.015837517654703537
+      },
+      {
+        "x": 0.42419015773609564,
+        "y": 0.33342191116529096,
+        "w": 0.005534912977876601,
+        "h": 0.015837517654703537
+      }
+    ],
+    "edition": "Version 1__2026-11",
+    "author": "Hamish Graham",
+    "text": "Please add a line below to allow a name to be inserted.",
+    "included_in": [],
+    "created_at": "2026-11-17T15:56:25.306Z"
+  }
+]
