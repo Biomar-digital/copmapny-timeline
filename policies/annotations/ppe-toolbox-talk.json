@@ -36,5 +36,24 @@
     "text": "Please remove.",
     "included_in": [],
     "created_at": "2026-11-18T16:01:59.589Z"
+  },
+  {
+    "id": "fdd7638c-c4c8-47e6-90f3-1f2b7c661664",
+    "file": "files/PPE_Toolbox_Talk__Policy_2026-11_non-approval.pdf",
+    "page": 3,
+    "quote": "Cutting cable tray with c",
+    "rects": [
+      {
+        "x": 0.3267917149397156,
+        "y": 0.759220172277685,
+        "w": 0.21803695035750792,
+        "h": 0.015837517654703537
+      }
+    ],
+    "edition": "Version 1__2026-11",
+    "author": "Hamish Graham",
+    "text": "Please replace with \"Nobody will notice if I quickly nip into a noisy or dusty area\"",
+    "included_in": [],
+    "created_at": "2026-11-18T16:05:15.194Z"
   }
 ]
