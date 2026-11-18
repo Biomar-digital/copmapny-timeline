@@ -17,5 +17,24 @@
     "text": "Please remove this name.",
     "included_in": [],
     "created_at": "2026-11-18T16:01:41.287Z"
+  },
+  {
+    "id": "9de02767-ed34-4b1e-b16b-92de5eb99cea",
+    "file": "files/PPE_Toolbox_Talk__Policy_2026-11_non-approval.pdf",
+    "page": 2,
+    "quote": "HSE Manage",
+    "rects": [
+      {
+        "x": 0.5680972495792707,
+        "y": 0.31322174173383954,
+        "w": 0.11736054791499163,
+        "h": 0.015837517654703537
+      }
+    ],
+    "edition": "Version 1__2026-11",
+    "author": "Hamish Graham",
+    "text": "Please remove.",
+    "included_in": [],
+    "created_at": "2026-11-18T16:01:59.589Z"
   }
 ]
