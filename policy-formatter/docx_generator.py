@@ -646,7 +646,7 @@ def _version_card(doc, policy):
     _run(op, policy.owner or "—", size=9)
     rp = body[1].add_paragraph()
     _run(rp, i18n.t(policy, "approver") + " ", bold=True, size=9)
-    _run(rp, policy.approver or "Executive Committee", size=9)
+    _run(rp, policy.approver or "—", size=9)
 
 
 def _insert_toc_field(doc, policy):

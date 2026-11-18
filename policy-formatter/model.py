@@ -289,7 +289,7 @@ def _cell_text(cell, footnotes=None, notes_out=None) -> str:
     return "\n".join(out)
 
 
-def _glossary_table(item) -> bool:
+def _glossary_table(item, bold_header: bool = False) -> bool:
     """A table where every row is an equal "term: definition" entry has no
     real header row — the generator's default TableBlock(header=True) would
     otherwise band the first definition as a column header, which is wrong
@@ -305,6 +305,12 @@ def _glossary_table(item) -> bool:
         return bool(runs) and all(r.bold for r in runs)
     rows = item.rows
     if len(rows) < 2:
+        return False
+    # In a fill-in form document (registry `form_tables`): a first row that is bold throughout (two or
+    # more filled cells) while the rows under it are not is a real header row ("Hazards | PPE",
+    # request 3514e5ff), not a term / definition table.
+    head = [c for c in rows[0].cells if c.text.strip()]
+    if bold_header and len(head) >= 2 and all(cell_bold(c) for c in head) and not all(cell_bold(row.cells[0]) for row in rows[1:]):
         return False
     if all(cell_bold(row.cells[0]) for row in rows) and not any(
             cell_bold(c) for row in rows for c in row.cells[1:]):
@@ -483,7 +489,7 @@ def parse_docx(path: str, title: Optional[str] = None,
             if meta.get("form_tables"):
                 blank_rows = len(non_empty) < len(rows)
                 labels = [r[0].strip() for r in rows if r and r[0].strip()]
-                label_form = 2 <= len(rows) <= 8 and bool(labels) and all(l.endswith(":") for l in labels)
+                label_form = 2 <= len(rows) <= 8 and bool(labels) and all(l.split(":", 1)[0].strip() and ":" in l[:61] for l in labels)
                 is_form = blank_rows or label_form
             elif non_empty:
                 rows = non_empty
@@ -493,7 +499,7 @@ def parse_docx(path: str, title: Optional[str] = None,
                     h = [re.sub(r"[’'`´]", "", c).strip().lower() for c in rows[0]]
                     if h[0] in ("dos", "do") and h[1] in ("donts", "dont"):
                         kind = "dos_donts"
-                blocks.append(TableBlock(rows=rows, header=not _glossary_table(item), form=is_form, kind=kind))
+                blocks.append(TableBlock(rows=rows, header=not _glossary_table(item, bold_header=bool(meta.get("form_tables"))), form=is_form, kind=kind))
             # Footnotes attached to a table cell (e.g. a merged band row,
             # which python-docx reports once per spanned cell) render as
             # small notes right after the table itself, not as extra rows
@@ -527,7 +533,8 @@ def parse_docx(path: str, title: Optional[str] = None,
             continue
         if title and text.strip().lower() == title.strip().lower():
             continue
-        if len(text) < 4 and not text[0].isdigit():   # stray fragments ("Com")
+        # stray fragments ("Com") — but a list item or an acronym ("CEO") is real content
+        if len(text) < 4 and not text[0].isdigit() and "list" not in (style or "").lower() and not text.isupper():
             continue
 
         kind, level = _classify(text, style)

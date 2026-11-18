@@ -1,0 +1,129 @@
+[
+ {
+  "id": "details-form",
+  "label": "Section 1 – Details form with the original's filled-in issuer (Hamish Graham) and position (HSE Manager)",
+  "page": 2,
+  "present": [
+   "Section 1 – Details",
+   "Date:",
+   "Time:",
+   "Location:",
+   "Name of Person Issuing Tool Box Talk:",
+   "Hamish Graham",
+   "Position:",
+   "HSE Manager"
+  ],
+  "absent": []
+ },
+ {
+  "id": "headings",
+  "label": "Title and headings: Personal Protective Equipment (PPE), Introduction, What the Law requires, Summary",
+  "page": 2,
+  "present": [
+   "Personal Protective Equipment (PPE)",
+   "Introduction",
+   "What the Law requires"
+  ],
+  "absent": []
+ },
+ {
+  "id": "hierarchy",
+  "label": "The hierarchy of control measures, numbered 1 to 4",
+  "page": 2,
+  "present": [
+   "Can you remember these?",
+   "Removal of substances;",
+   "Substitution (find a safer alternative);",
+   "Mechanical (ventilation);",
+   "Personal Protective Equipment."
+  ],
+  "absent": []
+ },
+ {
+  "id": "mandatory",
+  "label": "Mandatory (must wear) with its three items",
+  "page": 3,
+  "present": [
+   "Mandatory (must wear):",
+   "What are these?",
+   "Hard Hats",
+   "Safety Footwear",
+   "Hi Vis Jackets."
+  ],
+  "absent": []
+ },
+ {
+  "id": "hazards-table",
+  "label": "Hazards / PPE table with its header row and five rows",
+  "page": 3,
+  "present": [
+   "Hazards",
+   "Noise",
+   "Ear Muffs or plugs",
+   "Flying Particles",
+   "Falls from height",
+   "Cuts to hand",
+   "Contamination of clothing",
+   "Overalls"
+  ],
+  "absent": []
+ },
+ {
+  "id": "reasons",
+  "label": "Common reasons table: four reason / example pairs, the wrapped line joined into one sentence",
+  "page": 3,
+  "present": [
+   "Common reasons:",
+   "Job will only take a second",
+   "Cutting cable tray with chop saw",
+   "Can’t be bothered walking to the van",
+   "It will take years for exposure to the substance to have any effect.",
+   "To put a harness on or to hook on"
+  ],
+  "absent": []
+ },
+ {
+  "id": "dos-donts",
+  "label": "Summary: Do's / Don'ts table with all rows, colour-coded",
+  "page": 4,
+  "present": [
+   "Wear PPE where required.",
+   "Wear PPE that is badly damaged.",
+   "Report damaged equipment.",
+   "Don’t continue working if you believe you need PPE."
+  ],
+  "absent": []
+ },
+ {
+  "id": "sign-in",
+  "label": "Section 2 – Tool Box Talk Attendees: NAME / SIGNATURE sheet (12 blank rows)",
+  "page": 5,
+  "present": [
+   "Section 2 – Tool Box Talk Attendees",
+   "NAME",
+   "SIGNATURE"
+  ],
+  "absent": []
+ },
+ {
+  "id": "footer-ims",
+  "label": "IMS document details of the original header kept in the footer",
+  "page": 2,
+  "present": [
+   "TEMP.11.022",
+   "22/01/24"
+  ],
+  "absent": []
+ },
+ {
+  "id": "uk-address",
+  "label": "BioMar UK (Grangemouth) address in the footer, not the head office",
+  "page": 1,
+  "present": [
+   "Grangemouth"
+  ],
+  "absent": [
+   "Aarhus"
+  ]
+ }
+]

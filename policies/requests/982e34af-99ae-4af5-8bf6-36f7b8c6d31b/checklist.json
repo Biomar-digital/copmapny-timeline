@@ -1,0 +1,133 @@
+[
+ {
+  "id": "details-form",
+  "label": "Section 1 – Details: Date, Time, Location, Name of Person Issuing Tool Box Talk, Position as the BioMar form box, with a line to write the name in",
+  "page": 2,
+  "present": [
+   "Section 1 – Details",
+   "Date:",
+   "Time:",
+   "Location:",
+   "Name of Person Issuing Tool Box Talk:",
+   "Position:"
+  ],
+  "absent": []
+ },
+ {
+  "id": "headings",
+  "label": "The talk's headings: Health and Safety Responsibilities, Responsibilities, Legislation, Summary",
+  "page": 2,
+  "present": [
+   "Health and Safety Responsibilities",
+   "Responsibilities",
+   "Legislation"
+  ],
+  "absent": []
+ },
+ {
+  "id": "common-law",
+  "label": "The three Common Law / Statutory Law paragraphs under Responsibilities",
+  "page": 2,
+  "present": [
+   "we all owe each other a duty of care under Common Law",
+   "Common Law has evolved over thousands of years",
+   "Failure to meet these responsibilities can lead to prosecution"
+  ],
+  "absent": []
+ },
+ {
+  "id": "who-tiles",
+  "label": "Who do you think is responsible: all six tiles (Employer, Team Leader, Employee, Site Manager, Other (anyone), CEO)",
+  "page": 3,
+  "present": [
+   "Who do you think is responsible for health and safety?",
+   "Team Leader",
+   "Site Manager",
+   "Other (anyone)",
+   "CEO"
+  ],
+  "absent": []
+ },
+ {
+  "id": "employers",
+  "label": "Employers' six responsibilities",
+  "page": 3,
+  "present": [
+   "Employers have very clear responsibilities:",
+   "Provide and maintain safe plant and systems",
+   "Provide suitable welfare facilities;",
+   "Have a written health and safety policy."
+  ],
+  "absent": []
+ },
+ {
+  "id": "employees",
+  "label": "Employees (workers) responsibilities, both items",
+  "page": 3,
+  "present": [
+   "Employees (workers) are responsible for:",
+   "Having a duty to take care of their own health and safety",
+   "talk to your employer, manager/supervisor or a health and safety representative."
+  ],
+  "absent": []
+ },
+ {
+  "id": "groups",
+  "label": "What other groups are covered: the four tiles and the closing paragraph about omissions",
+  "page": 3,
+  "present": [
+   "What other groups of people are covered by these responsibilities?",
+   "Other contractors",
+   "Members of the public",
+   "Visitors",
+   "Clients’ employees",
+   "not fire stopping the hole"
+  ],
+  "absent": []
+ },
+ {
+  "id": "dos-donts",
+  "label": "Summary: Do's / Don'ts table, colour-coded",
+  "page": 4,
+  "present": [
+   "Summary",
+   "Do’s",
+   "Don’ts",
+   "Always consider how others may be affected",
+   "Do not assume that someone else is responsible."
+  ],
+  "absent": []
+ },
+ {
+  "id": "sign-in",
+  "label": "Toolbox Talk Attendees: NAME / SIGNATURE sheet (7 blank rows)",
+  "page": 4,
+  "present": [
+   "Toolbox Talk Attendees",
+   "NAME",
+   "SIGNATURE"
+  ],
+  "absent": []
+ },
+ {
+  "id": "footer-ims",
+  "label": "IMS document details of the original header kept in the footer",
+  "page": 2,
+  "present": [
+   "TBT.11.001",
+   "22/01/24"
+  ],
+  "absent": []
+ },
+ {
+  "id": "uk-address",
+  "label": "BioMar UK (Grangemouth) address in the footer, not the head office",
+  "page": 1,
+  "present": [
+   "Grangemouth"
+  ],
+  "absent": [
+   "Aarhus"
+  ]
+ }
+]

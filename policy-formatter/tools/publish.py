@@ -113,13 +113,21 @@ def main():
         # card title (which may carry family/variant text not meant for the cover).
         cover_title = p.get("doc_title", p["title"])
         eds_out = []
+        seen_dates = set()
         for ed in _editions(p):
             date = ed["date"]
+            # A second edition in the same month (a change approved the month the document was
+            # published) must not overwrite the earlier edition's files: it gets its version in the
+            # file name, the first one keeps the original name (annotations point at it).
+            same_month = date in seen_dates
+            seen_dates.add(date)
             year = date.split("-")[0]
             docs_out = []
             for doc in _documents(ed):
                 label = doc.get("label", "Policy")
                 name_base = f"{_slug(p['title'])}__{_slug(label)}"
+                if same_month:
+                    name_base += "_v" + _slug(ed.get("version", "")).replace("Version_", "")
 
                 # A document can ship the original PDF as-is (e.g. design-heavy
                 # pieces whose exact layout/images must be preserved verbatim).

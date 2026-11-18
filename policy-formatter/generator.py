@@ -481,7 +481,8 @@ def _is_signature_form(block):
     if not (2 <= len(rows) <= 8):
         return False
     labels = [(_first(r) or "").strip().lower() for r in rows]
-    if not all(l.endswith(":") for l in labels if l):
+    # a label may already carry its filled-in value ("Position: HSE Manager", request 3514e5ff)
+    if not all(_split_label(l)[0].endswith(":") for l in labels if l):
         return False
     hits = sum(any(k in l for k in _SIG_LABELS) for l in labels)
     return hits >= 3
@@ -489,6 +490,15 @@ def _is_signature_form(block):
 
 def _first(row):
     return row[0] if row else ""
+
+
+def _split_label(text):
+    """("Position: HSE Manager") -> ("Position:", "HSE Manager"); a bare label has no value."""
+    text = (text or "").strip()
+    i = text.find(":")
+    if 0 < i <= 60:
+        return text[:i + 1], text[i + 1:].strip()
+    return text, ""
 
 
 _SIG_TEAL = colors.Color(0.729, 0.898, 0.957)   # #bae5f3 bands / cell borders
@@ -536,11 +546,18 @@ class SignatureBox(Flowable):
         # labels: navy, bottom-left of each cell, writing space above
         c.setFillColor(B.BIOMAR_BLUE)
         c.setFont(B.F_DEMI, 11)
+        def put(x, y, text):
+            label, value = _split_label(text)
+            c.setFont(B.F_DEMI, 11)
+            c.drawString(x, y, label)
+            if value:                                  # filled in: the value sits above its label
+                c.setFont(B.F_REGULAR, 11)
+                c.drawString(x, y + 17, value)
         for i, (l, rt) in enumerate(self.rows):
             cell_bot = top - (i + 1) * self.row_h
-            c.drawString(15, cell_bot + 12, l)
+            put(15, cell_bot + 12, l)
             if rt:
-                c.drawString(split + 15, cell_bot + 12, rt)
+                put(split + 15, cell_bot + 12, rt)
 
 
 def _signature_card_flowables(block):
@@ -1294,7 +1311,7 @@ def _draw_version_card(c, policy):
     if policy.approval_date:
         rows_l.append((i18n.t(policy, "approval_date"), policy.approval_date))
     rows_r = [(i18n.t(policy, "owner"), policy.owner or "—"),
-              (i18n.t(policy, "approver"), policy.approver or "Executive Committee")]
+              (i18n.t(policy, "approver"), policy.approver or "—")]
     ry = head_y - 27
     for k in range(max(len(rows_l), len(rows_r))):
         c.setFillColor(B.BIOMAR_BLUE)

@@ -246,6 +246,15 @@ Cyrillic, Vietnamese or CJK glyphs, so those need a font added in `brand.py` fir
 Position statements served as original PDFs are linked the same way (`translation_of`) but
 skip all of the above.
 
+- **Toolbox-talk details (form_tables documents):** a details cell may already carry its filled-in
+  value ("Position: HSE Manager") — it is drawn with the label at the bottom and the value above it;
+  a first row that is bold throughout is a real header row (e.g. "Hazards | PPE"); a paragraph that is
+  bold **and red** in the source is kept as a warning (PDF + Word). A blank approver shows "—", never an
+  invented body. Two editions in the **same month** (a change approved the month it was published) get
+  distinct file names: the later one carries `_v<version>` (`…Policy_v1_1_2026-11…`), the first keeps
+  the original name (annotations point at it). The parser keeps short list items / acronyms ("CEO"); it
+  only drops mixed-case fragments under 4 characters.
+
 ## Markets (access by market)
 
 Accounts and documents carry a **market**. A document's `market` in `registry.json`
