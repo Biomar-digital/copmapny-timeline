@@ -416,7 +416,10 @@ def _render_blocks(doc, blocks, size=11, hanging_indent=False, indent=CLAUSE_IND
             for ti, tb in enumerate(blk.body):
                 para = right.paragraphs[0] if ti == 0 else right.add_paragraph()
                 para.paragraph_format.space_after = Pt(6)
-                _run(para, tb.text, size=size)
+                if getattr(tb, "alert", False):
+                    _run(para, tb.text, bold=True, size=size, color=RGBColor(0xC8, 0x10, 0x2E))
+                else:
+                    _run(para, tb.text, size=size)
             prev_subhead = False
             nested_num_indent = False
         elif isinstance(blk, M.Columns):

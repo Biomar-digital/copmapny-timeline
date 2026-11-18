@@ -39,6 +39,7 @@ class Body:
                              # which is:"), which sits flush with the heading's
                              # own number rather than indented like a heading's
                              # lead-in clause text (request 3d497671)
+    alert: bool = False      # a warning set in bold red in the source (request ce4c7f80)
 
 @dataclass
 class Bullet:
@@ -409,6 +410,22 @@ def _body_from_runs(item, text, style=""):
     return Body(text=text, bold=allb, center=center, flush=flush)
 
 
+def _is_alert_para(para) -> bool:
+    """True when every non-blank run of the paragraph is bold and red — a warning line
+    the author wants to stand out (request ce4c7f80)."""
+    runs = [r for r in para.runs if r.text.strip()]
+    if not runs:
+        return False
+    for r in runs:
+        try:
+            rgb = r.font.color.rgb if r.font.color is not None and r.font.color.type is not None else None
+        except Exception:
+            rgb = None
+        if not r.bold or rgb is None or not (rgb[0] >= 0xB0 and rgb[1] <= 0x60 and rgb[2] <= 0x60):
+            return False
+    return True
+
+
 def parse_docx(path: str, title: Optional[str] = None,
                year: Optional[str] = None, **meta) -> Policy:
     doc = docx.Document(path)
@@ -425,11 +442,12 @@ def parse_docx(path: str, title: Optional[str] = None,
                 # A picture in the left cell and text in the right one: keep them side by side.
                 c0, c1 = item.rows[0].cells
                 pics = [im for para in c0.paragraphs for im in _para_images(para) if not _is_brand_artwork(im[0])]
-                texts = [_clean(para.text) for para in c1.paragraphs if _clean(para.text)]
+                paras = [(_clean(para.text), _is_alert_para(para)) for para in c1.paragraphs if _clean(para.text)]
+                texts = [t for t, _ in paras]
                 if pics and texts:
                     data, iw, ih = pics[0]
                     blocks.append(ImageText(image=ImageBlock(data=data, width=iw, height=ih),
-                                            body=[Body(text=t) for t in texts]))
+                                            body=[Body(text=t, bold=a, alert=a) for t, a in paras]))
                     continue
                 cols = []
                 for ci in range(2):

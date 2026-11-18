@@ -44,6 +44,7 @@ SKY_BLUE      = _rgb(146, 206, 232)
 OCEAN_BLUE    = _rgb(4, 113, 173)    # cover blobs / accent boxes
 LEAFY_GREEN   = _rgb(151, 209, 48)
 SHRIMP_ORANGE = _rgb(221, 105, 40)
+ALERT_RED = _rgb(200, 16, 46)        # warning text in bold red (request ce4c7f80)
 WHEAT_YELLOW  = _rgb(234, 179, 24)
 WHITE         = _rgb(255, 255, 255)
 LIGHT_RULE    = _rgb(195, 228, 239)  # thin separators in tables

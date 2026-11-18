@@ -65,6 +65,8 @@ BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=11, leading=16,
                       allowWidows=0, allowOrphans=0)
 BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
 BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
+# A warning in bold red (request ce4c7f80).
+BODY_ALERT = ParagraphStyle("BodyAlert", parent=BODY, fontName=B.F_DEMI, textColor=B.ALERT_RED, alignment=TA_LEFT)
 BODY_ITALIC = ParagraphStyle("BodyItalic", parent=BODY, fontName=B.F_ITALIC, alignment=TA_LEFT)
 # The closing "As adopted at ... / and latest amended ..." line some articles
 # of association end on is centred in the source (request 92742ce5 — Marianne's
@@ -660,7 +662,7 @@ def _image_text_flowables(b):
     gutter = 18
     w = min(b.image.width or iw, _CONTENT_W * 0.46)
     img.drawWidth, img.drawHeight = w, ih * (w / iw)
-    paras = [Paragraph(_fmt(t.text), BODY_LEFT) for t in b.body]
+    paras = [Paragraph(_fmt(t.text), BODY_ALERT if getattr(t, "alert", False) else BODY_LEFT) for t in b.body]
     t = Table([[img, paras]], colWidths=[w + gutter, _CONTENT_W - w - gutter])
     t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                            ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
@@ -1393,7 +1395,7 @@ def _set_body_size(size):
     """Rebuild the body/​bullet/​column paragraph styles for a given point size so
     a policy can match its original's density (e.g. the Code of Conduct is set at
     10pt, the rest at the default 11pt). Spacing and leading scale with the size."""
-    global BODY, BODY_LEFT, BODY_BOLD, BODY_ITALIC, BODY_CENTER, BULLET, COL_BODY, COL_BULLET, COL_BODY_BOLD
+    global BODY, BODY_LEFT, BODY_BOLD, BODY_ALERT, BODY_ITALIC, BODY_CENTER, BULLET, COL_BODY, COL_BULLET, COL_BODY_BOLD
     BODY = ParagraphStyle("Body", fontName=B.F_REGULAR, fontSize=size,
                           leading=size * 16 / 11.0, textColor=B.BIOMAR_BLUE,
                           alignment=TA_JUSTIFY, spaceAfter=size * 11.4 / 11.0,
@@ -1402,6 +1404,7 @@ def _set_body_size(size):
     BODY_LEFT = ParagraphStyle("BodyLeft", parent=BODY, alignment=TA_LEFT)
     BODY_CENTER = ParagraphStyle("BodyCenter", parent=BODY, alignment=TA_CENTER)
     BODY_BOLD = ParagraphStyle("BodyBold", parent=BODY, fontName=B.F_DEMI)
+    BODY_ALERT = ParagraphStyle("BodyAlert", parent=BODY, fontName=B.F_DEMI, textColor=B.ALERT_RED, alignment=TA_LEFT)
     BODY_ITALIC = ParagraphStyle("BodyItalic", parent=BODY, fontName=B.F_ITALIC, alignment=TA_LEFT)
     BULLET = ParagraphStyle("Bullet", parent=BODY, alignment=TA_LEFT,
                             leftIndent=16, bulletIndent=2, spaceAfter=size * 6 / 11.0)

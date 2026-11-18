@@ -1,0 +1,8 @@
+[
+  {"id": "sentence-added", "label": "New sentence about earbuds / personal audio devices added after the final sentence of the hearing-protection box", "page": 4,
+   "present": ["The use of earbuds, earphones, headphones, or any other personal audio devices beneath or in place of hearing protection PPE is strictly prohibited as they may compromise effective hearing protection and situational awareness"], "absent": []},
+  {"id": "sentence-order", "label": "The new sentence comes after 'You must take good care of equipment which is not disposable to ensure it works properly.'", "page": 4,
+   "present": ["to ensure it works properly. The use of earbuds"], "absent": []},
+  {"id": "name-line", "label": "A blank line is added below 'Name of Person Issuing Tool Box Talk:' to write the name in", "page": 2,
+   "present": ["Name of Person Issuing Tool Box Talk:"], "absent": []}
+]

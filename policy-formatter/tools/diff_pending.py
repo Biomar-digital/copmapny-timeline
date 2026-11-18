@@ -93,6 +93,16 @@ def _meta_args(p, ed):
         meta += ["--category", p["category"]]
     if p.get("footer_note"):
         meta += ["--footer-note", p["footer_note"]]
+    # Same per-policy switches as publish.py, or the before/after renders would not look like the
+    # published document (a form without its blank rows, no own address, ...) — request ce4c7f80.
+    if p.get("subhead_gap"):
+        meta += ["--subhead-gap", str(p["subhead_gap"])]
+    if p.get("toc"):
+        meta += ["--toc"]
+    if p.get("form_tables"):
+        meta += ["--form-tables"]
+    if p.get("address"):
+        meta += ["--address", json.dumps(p["address"], ensure_ascii=False)]
     if ed.get("approval_date"):
         meta += ["--approval-date", ed["approval_date"]]
     if ed.get("version"):
