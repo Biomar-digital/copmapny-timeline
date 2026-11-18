@@ -519,18 +519,6 @@
     "notified": true
   },
   {
-    "id": "9ee1d584-7d9c-4f84-8775-f17c5e01e237",
-    "policy": "health-and-safety-responsibilities-toolbox-talk",
-    "request_id": "982e34af-99ae-4af5-8bf6-36f7b8c6d31b",
-    "title": "Health & Safety Responsibilities Toolbox Talk",
-    "status": "pending_review",
-    "author": "Hamish Graham",
-    "email": "hamgr@biomar.com",
-    "created_at": 1795002803008,
-    "updated_at": 1795002803008,
-    "notified": true
-  },
-  {
     "id": "51292b8b-ab8d-424c-82a4-0e3eb9fe2e5e",
     "policy": "ppe-toolbox-talk",
     "request_id": "3514e5ff-af5e-4c8c-ba54-a5e0ed070f5f",
