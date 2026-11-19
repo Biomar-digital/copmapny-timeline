@@ -1,0 +1,8 @@
+[
+ {"id":"name-removed","label":"The name \"Hamish Graham\" is removed from the issuer field (label kept)","page":2,
+  "present":["Name of Person Issuing Tool Box Talk:"],"absent":["Hamish Graham"]},
+ {"id":"position-removed","label":"\"HSE Manager\" is removed from the Position field (label kept)","page":2,
+  "present":["Position:"],"absent":["HSE Manager"]},
+ {"id":"reason-replaced","label":"\"Cutting cable tray with chop saw\" replaced by \"Nobody will notice if I quickly nip into a noisy or dusty area\"","page":3,
+  "present":["Job will only take a second","Nobody will notice if I quickly nip into a noisy or dusty area"],"absent":["Cutting cable tray with chop saw"]}
+]
