@@ -228,6 +228,8 @@ def _body(doc, blk, size=11, indent_mode=None, indent=CLAUSE_INDENT):
     elif indent_mode in ("hang", "hang_deep") and (m := _NUM.match(blk.text.strip())):
         _run(p, f"{m.group(1)}\t", bold=False, size=size)
         _run(p, m.group(3), bold=blk.bold, italic=getattr(blk, "italic", False), size=size)
+    elif getattr(blk, "alert", False):
+        _run(p, blk.text, bold=True, size=size, color=RGBColor(0xC8, 0x10, 0x2E))
     else:
         _run(p, blk.text, bold=blk.bold, italic=getattr(blk, "italic", False), size=size)
     return p

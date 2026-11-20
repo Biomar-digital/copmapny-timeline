@@ -543,7 +543,11 @@ def parse_docx(path: str, title: Optional[str] = None,
         elif kind == "bullet":
             blocks.append(Bullet(text=text, runs=_mixed_runs(item)))
         else:
-            blocks.append(_body_from_runs(item, text, style))
+            blk = _body_from_runs(item, text, style)
+            # fill-in / toolbox-talk documents: a bold red line is a warning that stands out
+            if meta.get("form_tables") and _is_alert_para(item):
+                blk.alert, blk.bold, blk.runs = True, True, None
+            blocks.append(blk)
         # A footnote reference on a regular paragraph (not a table cell —
         # see the TableBlock branch above) renders as a small note right
         # after the block that carries it.

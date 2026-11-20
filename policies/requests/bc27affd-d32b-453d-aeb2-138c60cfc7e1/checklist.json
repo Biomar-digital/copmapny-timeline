@@ -1,0 +1,128 @@
+[
+ {
+  "id": "details-form",
+  "label": "Details form: Date, Time, Location, Name of Person Issuing Tool Box Talk, Position as the BioMar form box (issuer and position left blank)",
+  "page": 2,
+  "present": [
+   "Details",
+   "Date:",
+   "Time:",
+   "Location:",
+   "Name of Person Issuing Tool Box Talk:",
+   "Position:"
+  ],
+  "absent": [
+   "Hamish Graham",
+   "H&S Manager"
+  ]
+ },
+ {
+  "id": "intro",
+  "label": "Introduction: the three paragraphs, the bold call to action and the key aspects list",
+  "page": 2,
+  "present": [
+   "Introduction",
+   "Slips, trips, and falls are often seen as a joke",
+   "Contractors and others in control of work areas",
+   "zero-tolerance approach to poor housekeeping",
+   "Everyone can contribute to reducing slips and trips on site.",
+   "Uneven surfaces",
+   "Obstacles",
+   "Trailing cables",
+   "Wet or slippery surfaces",
+   "Changes in level"
+  ],
+  "absent": []
+ },
+ {
+  "id": "law",
+  "label": "What the Law requires, with the warning in bold red",
+  "page": 3,
+  "present": [
+   "What the Law requires",
+   "The other great contributory factor is that we accept poor conditions.",
+   "Do not accept that “this is the way it’s always been done!” – it can always be improved!"
+  ],
+  "absent": []
+ },
+ {
+  "id": "maintenance",
+  "label": "Maintenance Activities: two paragraphs and the Typical Hazard / Control table with all five rows",
+  "page": 3,
+  "present": [
+   "Maintenance Activities",
+   "Typical Hazard",
+   "Control",
+   "Waste material left lying around.",
+   "Ensure waste is regularly put into bin or skip. If this is on an access route; waste should be removed directly to the skip.",
+   "Cables running across main pedestrian access routes."
+  ],
+  "absent": []
+ },
+ {
+  "id": "fire-fm",
+  "label": "Fire and Facilities Management / Reactive Maintenance sections",
+  "page": 3,
+  "present": [
+   "Fire",
+   "Poor housekeeping practices in workplaces also add to the fire loading",
+   "Facilities Management / Reactive Maintenance"
+  ],
+  "absent": []
+ },
+ {
+  "id": "reactive",
+  "label": "Reactive Maintenance closing paragraph",
+  "page": 4,
+  "present": [
+   "Inadvertently leaving tools, substances or materials lying around"
+  ],
+  "absent": []
+ },
+ {
+  "id": "summary",
+  "label": "Summary: Do's / Don'ts table (four rows, colour-coded) and the closing line in bold red",
+  "page": 4,
+  "present": [
+   "Summary",
+   "Do’s",
+   "Don’ts",
+   "Always think ahead about removing waste.",
+   "Do not hide your waste away.",
+   "A tidy site is a safe site."
+  ],
+  "absent": []
+ },
+ {
+  "id": "sign-in",
+  "label": "Tool Box Talk Attendees: NAME / SIGNATURE sheet (12 blank rows)",
+  "page": 4,
+  "present": [
+   "Tool Box Talk Attendees",
+   "NAME",
+   "SIGNATURE"
+  ],
+  "absent": []
+ },
+ {
+  "id": "footer-ims",
+  "label": "IMS document details of the original header kept in the footer",
+  "page": 2,
+  "present": [
+   "TEMP.11.022",
+   "22/01/24"
+  ],
+  "absent": []
+ },
+ {
+  "id": "uk-address",
+  "label": "BioMar UK (Grangemouth) address, not the head office",
+  "page": 1,
+  "present": [
+   "Grangemouth"
+  ],
+  "absent": [
+   "Aarhus"
+  ]
+ }
+]

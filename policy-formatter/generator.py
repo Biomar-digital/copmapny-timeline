@@ -941,6 +941,10 @@ def _story(policy):
                 flow.append(Paragraph(_fmt(b.text, number=False), BODY_ITALIC))
                 prev_subhead = is_numbered_subhead
                 nested_num_indent = False
+            elif getattr(b, "alert", False):
+                flow.append(Paragraph(_fmt(b.text, number=False), BODY_ALERT))
+                prev_subhead = False
+                nested_num_indent = False
             elif getattr(b, "bold", False):
                 flow.append(Paragraph(_fmt(b.text), BODY_BOLD))
                 prev_subhead = is_numbered_subhead
