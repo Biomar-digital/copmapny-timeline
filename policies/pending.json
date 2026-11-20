@@ -517,29 +517,5 @@
     "created_at": 1794406464362,
     "updated_at": 1794406839194,
     "notified": true
-  },
-  {
-    "id": "51292b8b-ab8d-424c-82a4-0e3eb9fe2e5e",
-    "policy": "ppe-toolbox-talk",
-    "request_id": "3514e5ff-af5e-4c8c-ba54-a5e0ed070f5f",
-    "title": "PPE Toolbox Talk",
-    "status": "pending_review",
-    "author": "Hamish Graham",
-    "email": "hamgr@biomar.com",
-    "created_at": 1795002803008,
-    "updated_at": 1795002803008,
-    "notified": true
-  },
-  {
-    "id": "aabcd15c-9bbb-415a-b325-db63a2d5a920",
-    "policy": "ppe-toolbox-talk",
-    "request_id": "59f2fafe-f4ef-4a0f-b8b9-95c0572c2a5e",
-    "title": "Change: ppe-toolbox-talk",
-    "status": "pending_review",
-    "author": "Hamish Graham",
-    "email": "hamgr@biomar.com",
-    "created_at": 1795017936150,
-    "updated_at": 1795081098517,
-    "notified": true
   }
 ]
